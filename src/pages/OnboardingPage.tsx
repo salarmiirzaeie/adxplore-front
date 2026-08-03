@@ -14,6 +14,7 @@ import {
   influencerProfileSchema,
   type InfluencerProfileFormValues,
 } from '../components/InfluencerProfileForm'
+import { ProfilePhotoEditor } from '../components/ProfilePhotoEditor'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { OptionGrid } from '../components/ui/OptionGrid'
@@ -36,8 +37,10 @@ type InfluencerValues = InfluencerProfileFormValues
 
 function InfluencerOnboarding({
   defaults,
+  photoUrl,
 }: {
   defaults: Partial<InfluencerValues>
+  photoUrl?: string | null
 }) {
   const update = useUpdateProfile()
   const [step, setStep] = useState(0)
@@ -87,7 +90,7 @@ function InfluencerOnboarding({
   const titles = [
     {
       title: 'معرفی شما',
-      subtitle: 'نام نمایشی و آیدی اینستاگرام را وارد کنید.',
+      subtitle: 'نام، اینستاگرام و در صورت تمایل عکس پروفایل را وارد کنید.',
     },
     {
       title: 'نیچ و شهر',
@@ -108,6 +111,12 @@ function InfluencerOnboarding({
       <form onSubmit={onFinalSubmit} className="flex flex-col gap-5">
         {step === 0 ? (
           <>
+            <ProfilePhotoEditor
+              photoUrl={photoUrl}
+              name={defaults.name}
+              optional
+              compact
+            />
             <Input
               label="نام نمایشی"
               autoComplete="name"
@@ -201,8 +210,10 @@ function InfluencerOnboarding({
 
 function BrandOnboarding({
   defaults,
+  photoUrl,
 }: {
   defaults: Partial<BrandValues>
+  photoUrl?: string | null
 }) {
   const update = useUpdateProfile()
   const [step, setStep] = useState(0)
@@ -272,7 +283,10 @@ function BrandOnboarding({
   }
 
   const titles = [
-    { title: 'معرفی برند', subtitle: 'نام برند و آدرس اینستاگرام یا وب‌سایت را وارد کنید.' },
+    {
+      title: 'معرفی برند',
+      subtitle: 'نام برند، لینک و در صورت تمایل لوگو یا عکس پروفایل را وارد کنید.',
+    },
     { title: 'دسته و شهر', subtitle: 'برای پیشنهاد اینفلوئنسرهای مرتبط، دسته و شهر را مشخص کنید.' },
     { title: 'هدف کمپین', subtitle: 'اختیاری — می‌توانید بعداً هم تکمیل کنید.' },
   ]
@@ -286,6 +300,12 @@ function BrandOnboarding({
       <form onSubmit={onFinalSubmit} className="flex flex-col gap-5">
         {step === 0 ? (
           <>
+            <ProfilePhotoEditor
+              photoUrl={photoUrl}
+              name={defaults.name}
+              optional
+              compact
+            />
             <Input
               label="نام برند"
               autoComplete="organization"
@@ -434,6 +454,7 @@ export function OnboardingPage() {
   if (user.role === 'BRAND') {
     return (
       <BrandOnboarding
+        photoUrl={user.photoUrl}
         defaults={{
           name: user.name ?? '',
           website: user.website ?? '',
@@ -448,6 +469,7 @@ export function OnboardingPage() {
 
   return (
     <InfluencerOnboarding
+      photoUrl={user.photoUrl}
       defaults={{
         name: user.name ?? '',
         website: user.website ?? '',

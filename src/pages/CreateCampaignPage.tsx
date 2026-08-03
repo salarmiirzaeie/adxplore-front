@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, Navigate } from 'react-router-dom'
 import { z } from 'zod'
@@ -21,6 +22,8 @@ import type {
   DeliverableType,
   UserProfile,
 } from '../types/api'
+
+const MAX_IMAGES = 8
 
 const schema = z
   .object({
@@ -95,6 +98,19 @@ type FormValues = z.infer<typeof schema>
 
 function CreateCampaignForm({ user }: { user: UserProfile }) {
   const create = useCreateCampaign()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [files, setFiles] = useState<File[]>([])
+
+  const previews = useMemo(
+    () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
+    [files],
+  )
+
+  useEffect(() => {
+    return () => {
+      for (const preview of previews) URL.revokeObjectURL(preview.url)
+    }
+  }, [previews])
 
   const {
     register,
@@ -126,8 +142,10 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
     }
     if (values.budgetMin) body.budgetMin = Number(values.budgetMin)
     if (values.budgetMax) body.budgetMax = Number(values.budgetMax)
-    create.mutate(body)
+    create.mutate({ body, files })
   })
+
+  const remaining = MAX_IMAGES - files.length
 
   return (
     <div className="mx-auto max-w-2xl animate-fade-slide-in">
@@ -159,6 +177,70 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
             error={errors.brief?.message}
             {...register('brief')}
           />
+
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-navy">تصاویر کمپین</p>
+                <p className="mt-1 text-xs text-muted">
+                  اختیاری · تا {MAX_IMAGES} تصویر · JPEG، PNG یا WebP
+                </p>
+              </div>
+              {remaining > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.click()}
+                  className="rounded-xl border border-border bg-white px-3 py-2 text-xs font-bold text-navy transition hover:border-purple/40 hover:bg-surface"
+                >
+                  افزودن تصویر
+                </button>
+              ) : null}
+            </div>
+
+            {previews.length === 0 ? (
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="rounded-xl border border-dashed border-border bg-surface px-4 py-8 text-sm font-semibold text-muted transition hover:border-purple/40 hover:text-navy"
+              >
+                برای افزودن تصویر کلیک کنید
+              </button>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {previews.map(({ file, url }, index) => (
+                  <div
+                    key={`${file.name}-${index}`}
+                    className="group relative overflow-hidden rounded-xl border border-border bg-surface"
+                  >
+                    <img src={url} alt="" className="aspect-square w-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFiles((prev) => prev.filter((_, i) => i !== index))
+                      }
+                      className="absolute left-2 top-2 rounded-lg bg-ink/70 px-2 py-1 text-[10px] font-bold text-white"
+                    >
+                      حذف
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const next = Array.from(e.target.files ?? [])
+                e.target.value = ''
+                if (!next.length) return
+                setFiles((prev) => [...prev, ...next].slice(0, MAX_IMAGES))
+              }}
+            />
+          </div>
 
           <Controller
             name="category"

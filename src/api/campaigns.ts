@@ -27,3 +27,25 @@ export async function updateCampaign(
   const { data } = await api.patch<Campaign>(`/v1/campaigns/${id}`, body)
   return data
 }
+
+export async function uploadCampaignImages(
+  id: string,
+  files: File[],
+): Promise<Campaign> {
+  const form = new FormData()
+  for (const file of files) form.append('files', file)
+  const { data } = await api.post<Campaign>(`/v1/campaigns/${id}/images`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return data
+}
+
+export async function deleteCampaignImage(
+  campaignId: string,
+  imageId: string,
+): Promise<Campaign> {
+  const { data } = await api.delete<Campaign>(
+    `/v1/campaigns/${campaignId}/images/${imageId}`,
+  )
+  return data
+}

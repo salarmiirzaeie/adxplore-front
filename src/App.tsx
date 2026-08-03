@@ -6,6 +6,8 @@ import { CampaignsPage } from './pages/CampaignsPage'
 import { CreateCampaignPage } from './pages/CreateCampaignPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { EditProfilePage } from './pages/EditProfilePage'
+import { InfluencerDetailPage } from './pages/InfluencerDetailPage'
+import { InfluencersPage } from './pages/InfluencersPage'
 import { LoginPage } from './pages/LoginPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { OtpPage } from './pages/OtpPage'
@@ -33,6 +35,8 @@ export default function App() {
           <Route path="campaigns" element={<CampaignsPage />} />
           <Route path="campaigns/new" element={<CreateCampaignPage />} />
           <Route path="campaigns/:id" element={<CampaignDetailPage />} />
+          <Route path="influencers" element={<InfluencersPage />} />
+          <Route path="influencers/:id" element={<InfluencerDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/edit" element={<EditProfilePage />} />
         </Route>

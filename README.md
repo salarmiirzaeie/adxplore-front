@@ -30,6 +30,8 @@ Ensure the API is running on port 3000.
 | `/app/campaigns` | Brand campaign list |
 | `/app/campaigns/new` | Create campaign |
 | `/app/campaigns/:id` | Campaign detail |
+| `/app/influencers` | Browse influencers (brand) |
+| `/app/influencers/:id` | Influencer card (brand) |
 | `/app/profile` | View profile |
 | `/app/profile/edit` | Edit profile |
 

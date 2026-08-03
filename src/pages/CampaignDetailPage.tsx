@@ -1,5 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { getApiErrorMessage } from '../api/client'
+import { CampaignImagesEditor } from '../components/CampaignImagesEditor'
 import { Button } from '../components/ui/Button'
 import { useMe } from '../hooks/useAuth'
 import { useCampaign, useUpdateCampaign } from '../hooks/useCampaigns'
@@ -84,6 +85,13 @@ export function CampaignDetailPage() {
           <DetailRow label="بودجه" value={budget} dir="ltr" />
         </dl>
       </section>
+
+      <div className="mb-4">
+        <CampaignImagesEditor
+          campaignId={campaign.id}
+          images={campaign.images ?? []}
+        />
+      </div>
 
       {update.isError ? (
         <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">

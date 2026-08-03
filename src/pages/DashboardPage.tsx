@@ -54,10 +54,10 @@ export function DashboardPage() {
                 ساخت کمپین
               </Link>
               <Link
-                to="/app/campaigns"
+                to="/app/influencers"
                 className="inline-flex rounded-xl border border-border px-5 py-3 text-sm font-semibold text-navy transition hover:bg-surface"
               >
-                مشاهده کمپین‌ها
+                پیدا کردن اینفلوئنسر
               </Link>
             </>
           ) : (

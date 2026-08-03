@@ -1,0 +1,192 @@
+import { useMemo, useState } from 'react'
+import { Link, Navigate } from 'react-router-dom'
+import { Avatar } from '../components/ui/Avatar'
+import { useMe } from '../hooks/useAuth'
+import { useInfluencers } from '../hooks/useInfluencers'
+import {
+  BRAND_CATEGORIES,
+  FOLLOWER_RANGES,
+  IRAN_CITIES,
+  brandCategoryLabel,
+  followerRangeLabel,
+} from '../lib/brand-options'
+import type {
+  BrandCategory,
+  FollowerRange,
+  InfluencerCard,
+  ListInfluencersParams,
+} from '../types/api'
+
+function InfluencerCardView({ influencer }: { influencer: InfluencerCard }) {
+  return (
+    <Link
+      to={`/app/influencers/${influencer.id}`}
+      className="card-elevated block rounded-2xl px-5 py-5 transition hover:border-purple/30 hover:shadow-md"
+    >
+      <div className="mb-3 flex items-start gap-3">
+        <Avatar src={influencer.photoUrl} name={influencer.name} size="md" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-base font-extrabold text-navy">{influencer.name}</h2>
+            <span className="shrink-0 rounded-lg bg-purple-soft/60 px-2 py-1 text-[11px] font-bold text-purple-deep">
+              {followerRangeLabel(influencer.followerRange)}
+            </span>
+          </div>
+          <p className="mt-1 text-sm font-semibold text-muted" dir="ltr">
+            {influencer.website}
+          </p>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
+        <span className="rounded-lg bg-surface px-2 py-1">
+          {brandCategoryLabel(influencer.category)}
+        </span>
+        <span className="rounded-lg bg-surface px-2 py-1">{influencer.city}</span>
+      </div>
+    </Link>
+  )
+}
+
+export function InfluencersPage() {
+  const { data: user } = useMe()
+  const [category, setCategory] = useState<BrandCategory | ''>('')
+  const [city, setCity] = useState('')
+  const [followerRange, setFollowerRange] = useState<FollowerRange | ''>('')
+
+  const params = useMemo<ListInfluencersParams>(() => {
+    const next: ListInfluencersParams = {}
+    if (category) next.category = category
+    if (city) next.city = city
+    if (followerRange) next.followerRange = followerRange
+    return next
+  }, [category, city, followerRange])
+
+  const isBrand = user?.role === 'BRAND'
+  const { data: influencers, isLoading, isError, isFetching } = useInfluencers(
+    params,
+    isBrand,
+  )
+
+  if (!user) return null
+  if (!isBrand) {
+    return <Navigate to="/app" replace />
+  }
+
+  const hasFilters = Boolean(category || city || followerRange)
+
+  return (
+    <div className="mx-auto max-w-3xl animate-fade-slide-in">
+      <section className="mb-6 sm:mb-8">
+        <p className="mb-1 text-sm font-medium text-purple">کشف</p>
+        <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
+          اینفلوئنسرها
+        </h1>
+        <p className="mt-2 text-sm text-muted">
+          بر اساس دسته، شهر و بازه فالوور فیلتر کنید.
+        </p>
+      </section>
+
+      <section className="card-elevated mb-5 rounded-2xl px-4 py-4 sm:px-5">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-semibold text-muted">دسته</span>
+            <select
+              className="input-brand py-2.5 text-sm"
+              value={category}
+              onChange={(e) => setCategory(e.target.value as BrandCategory | '')}
+            >
+              <option value="">همه</option>
+              {BRAND_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-semibold text-muted">شهر</span>
+            <select
+              className="input-brand py-2.5 text-sm"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            >
+              <option value="">همه</option>
+              {IRAN_CITIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-semibold text-muted">فالوور</span>
+            <select
+              className="input-brand py-2.5 text-sm"
+              value={followerRange}
+              onChange={(e) =>
+                setFollowerRange(e.target.value as FollowerRange | '')
+              }
+            >
+              <option value="">همه</option>
+              {FOLLOWER_RANGES.map((r) => (
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {hasFilters ? (
+          <button
+            type="button"
+            onClick={() => {
+              setCategory('')
+              setCity('')
+              setFollowerRange('')
+            }}
+            className="mt-3 text-xs font-semibold text-purple hover:text-purple-deep"
+          >
+            پاک کردن فیلترها
+          </button>
+        ) : null}
+      </section>
+
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <span className="size-8 animate-spin rounded-full border-2 border-purple border-t-transparent" />
+        </div>
+      ) : null}
+
+      {isError ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          بارگذاری اینفلوئنسرها ناموفق بود.
+        </p>
+      ) : null}
+
+      {!isLoading && !isError && influencers?.length === 0 ? (
+        <section className="card-elevated rounded-2xl px-6 py-14 text-center">
+          <h2 className="text-lg font-extrabold text-navy">نتیجه‌ای پیدا نشد</h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
+            {hasFilters
+              ? 'فیلترها را تغییر دهید یا پاک کنید.'
+              : 'هنوز اینفلوئنسر تکمیل‌پروفایلی ثبت نشده است.'}
+          </p>
+        </section>
+      ) : null}
+
+      {influencers && influencers.length > 0 ? (
+        <div className={`flex flex-col gap-3 ${isFetching ? 'opacity-70' : ''}`}>
+          <p className="text-xs font-semibold text-muted">
+            {influencers.length.toLocaleString('fa-IR')} اینفلوئنسر
+          </p>
+          {influencers.map((influencer) => (
+            <InfluencerCardView key={influencer.id} influencer={influencer} />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}

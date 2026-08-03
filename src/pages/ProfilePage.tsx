@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Avatar } from '../components/ui/Avatar'
 import { useMe } from '../hooks/useAuth'
 import {
   brandCategoryLabel,
@@ -89,16 +90,19 @@ export function ProfilePage() {
   return (
     <div className="mx-auto max-w-2xl animate-fade-slide-in">
       <section className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="mb-1 text-sm font-medium text-purple">پروفایل</p>
-          <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
-            {isBrand ? 'پروفایل برند' : 'پروفایل اینفلوئنسر'}
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            {isBrand
-              ? 'اطلاعات برند شما برای پیشنهاد اینفلوئنسرها استفاده می‌شود.'
-              : 'این اطلاعات برای پیشنهاد کمپین‌های مرتبط استفاده می‌شود.'}
-          </p>
+        <div className="flex items-start gap-4">
+          <Avatar src={user.photoUrl} name={user.name} size="lg" />
+          <div>
+            <p className="mb-1 text-sm font-medium text-purple">پروفایل</p>
+            <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
+              {isBrand ? 'پروفایل برند' : 'پروفایل اینفلوئنسر'}
+            </h1>
+            <p className="mt-2 text-sm text-muted">
+              {isBrand
+                ? 'اطلاعات برند شما برای پیشنهاد اینفلوئنسرها استفاده می‌شود.'
+                : 'این اطلاعات برای پیشنهاد کمپین‌های مرتبط استفاده می‌شود.'}
+            </p>
+          </div>
         </div>
         <Link
           to="/app/profile/edit"

@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Logo } from './brand/Logo'
+import { Avatar } from './ui/Avatar'
 import { useLogout, useMe } from '../hooks/useAuth'
 import { formatPhoneDisplay } from '../lib/phone'
 
@@ -13,6 +14,7 @@ const navItems = [
     to: '/app',
     label: 'داشبورد',
     end: true,
+    roles: ['BRAND', 'INFLUENCER'] as const,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
@@ -27,6 +29,7 @@ const navItems = [
   {
     to: '/app/campaigns',
     label: 'کمپین‌ها',
+    roles: ['BRAND', 'INFLUENCER'] as const,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
@@ -39,9 +42,30 @@ const navItems = [
     ),
   },
   {
+    to: '/app/influencers',
+    label: 'اینفلوئنسرها',
+    roles: ['BRAND'] as const,
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+        />
+        <path
+          d="M4 20c1.2-3.2 3.8-5 8-5s6.8 1.8 8 5"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  {
     to: '/app/offers',
     label: 'پیشنهادها',
     disabled: true,
+    roles: ['BRAND', 'INFLUENCER'] as const,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
@@ -56,6 +80,7 @@ const navItems = [
   {
     to: '/app/profile',
     label: 'پروفایل',
+    roles: ['BRAND', 'INFLUENCER'] as const,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
         <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.75" />
@@ -71,40 +96,45 @@ const navItems = [
 ] as const
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+  const { data: user } = useMe()
+  const role = user?.role
+
   return (
     <nav className="flex flex-1 flex-col gap-1 px-3" aria-label="منوی پنل">
-      {navItems.map((item) =>
-        'disabled' in item && item.disabled ? (
-          <span
-            key={item.to}
-            className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400"
-            title="به‌زودی"
-          >
-            <span className="opacity-50">{item.icon}</span>
-            <span className="flex-1">{item.label}</span>
-            <span className="rounded-md bg-surface px-1.5 py-0.5 text-[10px] font-bold text-muted">
-              به‌زودی
+      {navItems
+        .filter((item) => !role || item.roles.includes(role))
+        .map((item) =>
+          'disabled' in item && item.disabled ? (
+            <span
+              key={item.to}
+              className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400"
+              title="به‌زودی"
+            >
+              <span className="opacity-50">{item.icon}</span>
+              <span className="flex-1">{item.label}</span>
+              <span className="rounded-md bg-surface px-1.5 py-0.5 text-[10px] font-bold text-muted">
+                به‌زودی
+              </span>
             </span>
-          </span>
-        ) : (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={'end' in item ? item.end : false}
-            onClick={onNavigate}
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
-                isActive
-                  ? 'bg-purple-soft/70 text-purple-deep'
-                  : 'text-navy-muted hover:bg-surface hover:text-navy'
-              }`
-            }
-          >
-            {item.icon}
-            {item.label}
-          </NavLink>
-        ),
-      )}
+          ) : (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={'end' in item ? item.end : false}
+              onClick={onNavigate}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+                  isActive
+                    ? 'bg-purple-soft/70 text-purple-deep'
+                    : 'text-navy-muted hover:bg-surface hover:text-navy'
+                }`
+              }
+            >
+              {item.icon}
+              {item.label}
+            </NavLink>
+          ),
+        )}
     </nav>
   )
 }
@@ -134,12 +164,17 @@ function SidebarBody({
 
       <div className="mt-auto border-t border-border p-4">
         <div className="mb-3 rounded-xl bg-surface px-3 py-3">
-          <p className="truncate text-sm font-bold text-navy">{displayName}</p>
-          {user ? (
-            <p className="mt-1 text-xs text-muted" dir="ltr">
-              {formatPhoneDisplay(user.phone)}
-            </p>
-          ) : null}
+          <div className="flex items-center gap-3">
+            <Avatar src={user?.photoUrl} name={displayName} size="sm" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-navy">{displayName}</p>
+              {user ? (
+                <p className="mt-1 text-xs text-muted" dir="ltr">
+                  {formatPhoneDisplay(user.phone)}
+                </p>
+              ) : null}
+            </div>
+          </div>
         </div>
         <button
           type="button"

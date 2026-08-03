@@ -54,6 +54,7 @@ export interface AuthUser {
   phone: string
   name: string | null
   role: UserRole
+  photoUrl: string | null
   category: BrandCategory | null
   city: string | null
   website: string | null
@@ -75,6 +76,7 @@ export interface UserProfile {
   phone: string
   name: string | null
   role: UserRole
+  photoUrl: string | null
   category: BrandCategory | null
   city: string | null
   website: string | null
@@ -95,6 +97,12 @@ export interface UpdateProfileBody {
   followerRange?: FollowerRange | null
 }
 
+export interface CampaignImage {
+  id: string
+  url: string
+  sortOrder: number
+}
+
 export interface Campaign {
   id: string
   brandId: string
@@ -106,6 +114,7 @@ export interface Campaign {
   budgetMin: number | null
   budgetMax: number | null
   status: CampaignStatus
+  images: CampaignImage[]
   createdAt: string
   updatedAt: string
 }
@@ -130,6 +139,22 @@ export interface UpdateCampaignBody {
   budgetMin?: number
   budgetMax?: number
   status?: CampaignStatus
+}
+
+export interface InfluencerCard {
+  id: string
+  name: string
+  website: string
+  photoUrl: string | null
+  category: BrandCategory
+  city: string
+  followerRange: FollowerRange
+}
+
+export interface ListInfluencersParams {
+  category?: BrandCategory
+  city?: string
+  followerRange?: FollowerRange
 }
 
 export interface HealthResponse {

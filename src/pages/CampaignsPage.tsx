@@ -16,33 +16,40 @@ function statusClass(status: CampaignStatus) {
 }
 
 function CampaignCard({ campaign }: { campaign: Campaign }) {
+  const cover = campaign.images?.[0]?.url
+
   return (
     <Link
       to={`/app/campaigns/${campaign.id}`}
-      className="card-elevated block rounded-2xl px-5 py-5 transition hover:border-purple/30 hover:shadow-md"
+      className="card-elevated block overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md"
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
-        <span
-          className={`shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold ${statusClass(campaign.status)}`}
-        >
-          {campaignStatusLabel(campaign.status)}
-        </span>
-      </div>
-      <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
-      <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
-        <span className="rounded-lg bg-surface px-2 py-1">
-          {brandCategoryLabel(campaign.category)}
-        </span>
-        <span className="rounded-lg bg-surface px-2 py-1">{campaign.city}</span>
-        <span className="rounded-lg bg-surface px-2 py-1">
-          {deliverableLabel(campaign.deliverable)}
-        </span>
-        {formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ? (
-          <span className="rounded-lg bg-surface px-2 py-1" dir="ltr">
-            {formatBudgetRange(campaign.budgetMin, campaign.budgetMax)}
+      {cover ? (
+        <img src={cover} alt="" className="h-36 w-full object-cover" />
+      ) : null}
+      <div className="px-5 py-5">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
+          <span
+            className={`shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold ${statusClass(campaign.status)}`}
+          >
+            {campaignStatusLabel(campaign.status)}
           </span>
-        ) : null}
+        </div>
+        <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
+        <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
+          <span className="rounded-lg bg-surface px-2 py-1">
+            {brandCategoryLabel(campaign.category)}
+          </span>
+          <span className="rounded-lg bg-surface px-2 py-1">{campaign.city}</span>
+          <span className="rounded-lg bg-surface px-2 py-1">
+            {deliverableLabel(campaign.deliverable)}
+          </span>
+          {formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ? (
+            <span className="rounded-lg bg-surface px-2 py-1" dir="ltr">
+              {formatBudgetRange(campaign.budgetMin, campaign.budgetMax)}
+            </span>
+          ) : null}
+        </div>
       </div>
     </Link>
   )

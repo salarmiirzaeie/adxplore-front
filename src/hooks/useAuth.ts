@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { requestOtp, verifyOtp } from '../api/auth'
-import { getMe, updateMe } from '../api/users'
+import { deleteMyPhoto, getMe, updateMe, uploadMyPhoto } from '../api/users'
 import {
   clearAccessToken,
   clearLoginPhone,
@@ -72,6 +72,7 @@ export function useVerifyOtp() {
         phone: data.user.phone,
         name: data.user.name,
         role: data.user.role,
+        photoUrl: data.user.photoUrl,
         category: data.user.category,
         city: data.user.city,
         website: data.user.website,
@@ -100,6 +101,28 @@ export function useUpdateProfile(options?: { redirectTo?: string | null }) {
       if (redirectTo) {
         navigate(redirectTo, { replace: true })
       }
+    },
+  })
+}
+
+export function useUploadPhoto() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (file: File) => uploadMyPhoto(file),
+    onSuccess: (user) => {
+      queryClient.setQueryData(meQueryKey, user)
+    },
+  })
+}
+
+export function useDeletePhoto() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => deleteMyPhoto(),
+    onSuccess: (user) => {
+      queryClient.setQueryData(meQueryKey, user)
     },
   })
 }
