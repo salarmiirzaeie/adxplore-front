@@ -84,6 +84,15 @@ export function clearLoginRole(): void {
   }
 }
 
-export function isProfileComplete(user: { name: string | null }): boolean {
-  return Boolean(user.name?.trim())
+export function isProfileComplete(user: {
+  name: string | null
+  role: UserRole
+  category?: string | null
+  city?: string | null
+}): boolean {
+  if (!user.name?.trim()) return false
+  if (user.role === 'BRAND') {
+    return Boolean(user.category && user.city?.trim())
+  }
+  return true
 }

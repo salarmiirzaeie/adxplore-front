@@ -12,9 +12,10 @@ import { z } from 'zod'
 import { getApiErrorMessage } from '../api/client'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/ui/Button'
-import { useRequestOtp, useVerifyOtp } from '../hooks/useAuth'
+import { resolveLoginRole, useRequestOtp, useVerifyOtp } from '../hooks/useAuth'
 import { getLoginPhone } from '../lib/auth-storage'
 import { formatPhoneDisplay } from '../lib/phone'
+import type { UserRole } from '../types/api'
 
 const schema = z.object({
   code: z
@@ -28,10 +29,16 @@ type FormValues = z.infer<typeof schema>
 const RESEND_SECONDS = 60
 const DIGITS = 5
 
+const roleLabel: Record<UserRole, string> = {
+  INFLUENCER: 'اینفلوئنسر',
+  BRAND: 'برند',
+}
+
 export function OtpPage() {
   const location = useLocation()
-  const statePhone = (location.state as { phone?: string } | null)?.phone
-  const phone = statePhone || getLoginPhone()
+  const state = location.state as { phone?: string; role?: UserRole } | null
+  const phone = state?.phone || getLoginPhone()
+  const role = resolveLoginRole(state?.role)
 
   const verify = useVerifyOtp()
   const resend = useRequestOtp()
@@ -63,7 +70,7 @@ export function OtpPage() {
     inputsRef.current[0]?.focus()
   }, [])
 
-  if (!phone) {
+  if (!phone || !role) {
     return <Navigate to="/login" replace />
   }
 
@@ -110,18 +117,21 @@ export function OtpPage() {
   }
 
   const onSubmit = handleSubmit((values) => {
-    verify.mutate({ phone, code: values.code })
+    verify.mutate({ phone, code: values.code, role })
   })
 
   const handleResend = () => {
     if (cooldown > 0 || resend.isPending) return
-    resend.mutate(phone, {
-      onSuccess: () => {
-        setCooldown(RESEND_SECONDS)
-        setValue('code', '')
-        inputsRef.current[0]?.focus()
+    resend.mutate(
+      { phone, role },
+      {
+        onSuccess: () => {
+          setCooldown(RESEND_SECONDS)
+          setValue('code', '')
+          inputsRef.current[0]?.focus()
+        },
       },
-    })
+    )
   }
 
   return (
@@ -134,7 +144,7 @@ export function OtpPage() {
           <span dir="ltr" className="inline-block tabular-nums">
             {formatPhoneDisplay(phone)}
           </span>{' '}
-          ارسال شد.
+          ارسال شد · ورود به عنوان {roleLabel[role]}
         </>
       }
       backTo="/login"

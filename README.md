@@ -25,10 +25,13 @@ Ensure the API is running on port 3000.
 |-------|-------------|
 | `/login` | Phone → SMS OTP request |
 | `/login/otp` | 5-digit OTP verify |
-| `/onboarding` | Profile name (API field) |
-| `/app` | Dashboard shell |
+| `/onboarding` | Brand: 3-step profile · Influencer: display name |
+| `/app` | Dashboard |
+| `/app/profile` | View profile |
+| `/app/profile/edit` | Edit profile |
 
 ## Notes
 
-- Profile API currently supports only `name` — role / category / city UI deferred.
+- Brand onboarding requires name + category + city (goal / business size optional).
+- Profile `PATCH /v1/users/me` accepts name, category, city, website, goal, businessSize (null clears optional fields).
 - PWA manifest placeholders are in `public/manifest.webmanifest`; install prompt is phase 2.

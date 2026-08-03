@@ -57,7 +57,6 @@ const navItems = [
   {
     to: '/app/profile',
     label: 'پروفایل',
-    disabled: true,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
         <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.75" />

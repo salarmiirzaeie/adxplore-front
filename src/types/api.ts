@@ -2,6 +2,24 @@
 
 export type UserRole = 'INFLUENCER' | 'BRAND'
 
+export type BrandCategory =
+  | 'BEAUTY'
+  | 'FASHION'
+  | 'FOOD'
+  | 'HEALTH'
+  | 'TECH'
+  | 'EDUCATION'
+  | 'TRAVEL'
+  | 'SPORTS'
+  | 'HOME'
+  | 'FINANCE'
+  | 'ENTERTAINMENT'
+  | 'OTHER'
+
+export type BrandGoal = 'AWARENESS' | 'SALES' | 'CONTENT' | 'LAUNCH'
+
+export type BusinessSize = 'SOLO' | 'SME' | 'AGENCY' | 'ENTERPRISE'
+
 export interface RequestOtpBody {
   phone: string
 }
@@ -23,6 +41,11 @@ export interface AuthUser {
   phone: string
   name: string | null
   role: UserRole
+  category: BrandCategory | null
+  city: string | null
+  website: string | null
+  goal: BrandGoal | null
+  businessSize: BusinessSize | null
 }
 
 export interface VerifyOtpResponse {
@@ -38,12 +61,22 @@ export interface UserProfile {
   phone: string
   name: string | null
   role: UserRole
+  category: BrandCategory | null
+  city: string | null
+  website: string | null
+  goal: BrandGoal | null
+  businessSize: BusinessSize | null
   createdAt: string
   updatedAt: string
 }
 
 export interface UpdateProfileBody {
   name?: string
+  category?: BrandCategory
+  city?: string
+  website?: string | null
+  goal?: BrandGoal | null
+  businessSize?: BusinessSize | null
 }
 
 export interface HealthResponse {
