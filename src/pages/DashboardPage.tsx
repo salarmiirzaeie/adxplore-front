@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useMe } from '../hooks/useAuth'
 import { formatPhoneDisplay } from '../lib/phone'
 
@@ -5,6 +6,8 @@ export function DashboardPage() {
   const { data: user } = useMe()
 
   if (!user) return null
+
+  const isBrand = user.role === 'BRAND'
 
   return (
     <div className="mx-auto max-w-4xl animate-fade-slide-in">
@@ -18,7 +21,7 @@ export function DashboardPage() {
             {formatPhoneDisplay(user.phone)}
           </span>
           <span className="mx-2 text-border">·</span>
-          <span>{user.role === 'BRAND' ? 'برند' : 'اینفلوئنسر'}</span>
+          <span>{isBrand ? 'برند' : 'اینفلوئنسر'}</span>
         </p>
       </section>
 
@@ -33,27 +36,39 @@ export function DashboardPage() {
             />
           </svg>
         </div>
-        <h2 className="text-xl font-extrabold text-navy">کمپین‌ها به‌زودی</h2>
+        <h2 className="text-xl font-extrabold text-navy">
+          {isBrand ? 'کمپین‌های شما' : 'پیشنهادها به‌زودی'}
+        </h2>
         <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-muted">
-          {user.role === 'BRAND'
-            ? 'به‌زودی می‌توانید کمپین بسازید، اینفلوئنسر پیدا کنید و پیشنهادها را مدیریت کنید.'
-            : 'به‌زودی می‌توانید پیشنهادها را ببینید و در کمپین‌ها همکاری کنید.'}
+          {isBrand
+            ? 'کمپین بسازید، وضعیت آن را مدیریت کنید و به‌زودی به اینفلوئنسرها پیشنهاد دهید.'
+            : 'به‌زودی می‌توانید کمپین‌های باز را ببینید و پیشنهاد دریافت کنید.'}
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <button
-            type="button"
-            disabled
-            className="btn-primary cursor-not-allowed rounded-xl px-5 py-3 text-sm font-bold opacity-50"
-          >
-            ساخت کمپین
-          </button>
-          <button
-            type="button"
-            disabled
-            className="cursor-not-allowed rounded-xl border border-border px-5 py-3 text-sm font-semibold text-muted opacity-70"
-          >
-            پیشنهادها به‌زودی
-          </button>
+          {isBrand ? (
+            <>
+              <Link
+                to="/app/campaigns/new"
+                className="btn-primary inline-flex rounded-xl px-5 py-3 text-sm font-bold"
+              >
+                ساخت کمپین
+              </Link>
+              <Link
+                to="/app/campaigns"
+                className="inline-flex rounded-xl border border-border px-5 py-3 text-sm font-semibold text-navy transition hover:bg-surface"
+              >
+                مشاهده کمپین‌ها
+              </Link>
+            </>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="cursor-not-allowed rounded-xl border border-border px-5 py-3 text-sm font-semibold text-muted opacity-70"
+            >
+              پیشنهادها به‌زودی
+            </button>
+          )}
         </div>
       </section>
     </div>

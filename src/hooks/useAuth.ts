@@ -77,6 +77,7 @@ export function useVerifyOtp() {
         website: data.user.website,
         goal: data.user.goal,
         businessSize: data.user.businessSize,
+        followerRange: data.user.followerRange,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })

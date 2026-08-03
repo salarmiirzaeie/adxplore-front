@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { GuestRoute, ProtectedRoute } from './components/ProtectedRoute'
+import { CampaignDetailPage } from './pages/CampaignDetailPage'
+import { CampaignsPage } from './pages/CampaignsPage'
+import { CreateCampaignPage } from './pages/CreateCampaignPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { EditProfilePage } from './pages/EditProfilePage'
 import { LoginPage } from './pages/LoginPage'
@@ -27,6 +30,9 @@ export default function App() {
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/app" element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="campaigns" element={<CampaignsPage />} />
+          <Route path="campaigns/new" element={<CreateCampaignPage />} />
+          <Route path="campaigns/:id" element={<CampaignDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/edit" element={<EditProfilePage />} />
         </Route>

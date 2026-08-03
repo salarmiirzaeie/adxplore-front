@@ -42,7 +42,7 @@ export const brandProfileSchema = z.object({
       'ENTERTAINMENT',
       'OTHER',
     ],
-    { required_error: 'دسته را انتخاب کنید' },
+    { error: 'دسته را انتخاب کنید' },
   ),
   city: z
     .string()

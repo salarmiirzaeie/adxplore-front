@@ -89,10 +89,20 @@ export function isProfileComplete(user: {
   role: UserRole
   category?: string | null
   city?: string | null
+  website?: string | null
+  followerRange?: string | null
 }): boolean {
   if (!user.name?.trim()) return false
   if (user.role === 'BRAND') {
     return Boolean(user.category && user.city?.trim())
+  }
+  if (user.role === 'INFLUENCER') {
+    return Boolean(
+      user.category &&
+        user.city?.trim() &&
+        user.website?.trim() &&
+        user.followerRange,
+    )
   }
   return true
 }

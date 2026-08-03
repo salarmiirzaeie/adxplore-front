@@ -27,7 +27,6 @@ const navItems = [
   {
     to: '/app/campaigns',
     label: 'کمپین‌ها',
-    disabled: true,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path

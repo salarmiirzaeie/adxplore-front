@@ -27,11 +27,15 @@ Ensure the API is running on port 3000.
 | `/login/otp` | 5-digit OTP verify |
 | `/onboarding` | Brand: 3-step profile · Influencer: display name |
 | `/app` | Dashboard |
+| `/app/campaigns` | Brand campaign list |
+| `/app/campaigns/new` | Create campaign |
+| `/app/campaigns/:id` | Campaign detail |
 | `/app/profile` | View profile |
 | `/app/profile/edit` | Edit profile |
 
 ## Notes
 
 - Brand onboarding requires name + category + city (goal / business size optional).
-- Profile `PATCH /v1/users/me` accepts name, category, city, website, goal, businessSize (null clears optional fields).
+- Influencer onboarding requires name + Instagram + category + city + follower range.
+- Profile `PATCH /v1/users/me` accepts name, category, city, website, goal, businessSize, followerRange (null clears optional fields).
 - PWA manifest placeholders are in `public/manifest.webmanifest`; install prompt is phase 2.

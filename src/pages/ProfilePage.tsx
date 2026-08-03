@@ -4,6 +4,7 @@ import {
   brandCategoryLabel,
   brandGoalLabel,
   businessSizeLabel,
+  followerRangeLabel,
 } from '../lib/brand-options'
 import { formatPhoneDisplay } from '../lib/phone'
 import type { UserProfile } from '../types/api'
@@ -32,7 +33,7 @@ function ProfileField({
 
 function BrandProfileView({ user }: { user: UserProfile }) {
   return (
-    <dl className="divide-y-0">
+    <dl>
       <ProfileField label="نام برند" value={user.name} />
       <ProfileField
         label="اینستاگرام / وب‌سایت"
@@ -59,12 +60,21 @@ function InfluencerProfileView({ user }: { user: UserProfile }) {
   return (
     <dl>
       <ProfileField label="نام نمایشی" value={user.name} />
+      <ProfileField label="اینستاگرام" value={user.website} dir="ltr" />
+      <ProfileField
+        label="دسته‌بندی محتوا"
+        value={brandCategoryLabel(user.category)}
+      />
+      <ProfileField label="شهر" value={user.city} />
+      <ProfileField
+        label="بازه فالوور"
+        value={followerRangeLabel(user.followerRange)}
+      />
       <ProfileField
         label="شماره موبایل"
         value={formatPhoneDisplay(user.phone)}
         dir="ltr"
       />
-      <ProfileField label="نقش" value="اینفلوئنسر" />
     </dl>
   )
 }
@@ -82,12 +92,12 @@ export function ProfilePage() {
         <div>
           <p className="mb-1 text-sm font-medium text-purple">پروفایل</p>
           <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
-            {isBrand ? 'پروفایل برند' : 'پروفایل من'}
+            {isBrand ? 'پروفایل برند' : 'پروفایل اینفلوئنسر'}
           </h1>
           <p className="mt-2 text-sm text-muted">
             {isBrand
               ? 'اطلاعات برند شما برای پیشنهاد اینفلوئنسرها استفاده می‌شود.'
-              : 'اطلاعات حساب کاربری شما.'}
+              : 'این اطلاعات برای پیشنهاد کمپین‌های مرتبط استفاده می‌شود.'}
           </p>
         </div>
         <Link

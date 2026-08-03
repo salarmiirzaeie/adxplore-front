@@ -20,6 +20,19 @@ export type BrandGoal = 'AWARENESS' | 'SALES' | 'CONTENT' | 'LAUNCH'
 
 export type BusinessSize = 'SOLO' | 'SME' | 'AGENCY' | 'ENTERPRISE'
 
+export type FollowerRange =
+  | 'UNDER_1K'
+  | 'FROM_1K_5K'
+  | 'FROM_5K_10K'
+  | 'FROM_10K_50K'
+  | 'FROM_50K_100K'
+  | 'FROM_100K_500K'
+  | 'OVER_500K'
+
+export type CampaignStatus = 'DRAFT' | 'OPEN' | 'CLOSED'
+
+export type DeliverableType = 'STORY' | 'POST' | 'REEL'
+
 export interface RequestOtpBody {
   phone: string
 }
@@ -46,6 +59,7 @@ export interface AuthUser {
   website: string | null
   goal: BrandGoal | null
   businessSize: BusinessSize | null
+  followerRange: FollowerRange | null
 }
 
 export interface VerifyOtpResponse {
@@ -66,6 +80,7 @@ export interface UserProfile {
   website: string | null
   goal: BrandGoal | null
   businessSize: BusinessSize | null
+  followerRange: FollowerRange | null
   createdAt: string
   updatedAt: string
 }
@@ -77,6 +92,44 @@ export interface UpdateProfileBody {
   website?: string | null
   goal?: BrandGoal | null
   businessSize?: BusinessSize | null
+  followerRange?: FollowerRange | null
+}
+
+export interface Campaign {
+  id: string
+  brandId: string
+  title: string
+  brief: string
+  category: BrandCategory
+  city: string
+  deliverable: DeliverableType
+  budgetMin: number | null
+  budgetMax: number | null
+  status: CampaignStatus
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateCampaignBody {
+  title: string
+  brief: string
+  category: BrandCategory
+  city: string
+  deliverable: DeliverableType
+  budgetMin?: number
+  budgetMax?: number
+  status?: CampaignStatus
+}
+
+export interface UpdateCampaignBody {
+  title?: string
+  brief?: string
+  category?: BrandCategory
+  city?: string
+  deliverable?: DeliverableType
+  budgetMin?: number
+  budgetMax?: number
+  status?: CampaignStatus
 }
 
 export interface HealthResponse {
