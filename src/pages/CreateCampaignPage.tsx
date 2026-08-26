@@ -15,6 +15,7 @@ import {
   BRAND_CATEGORIES,
   DELIVERABLE_TYPES,
   IRAN_CITIES,
+  normalizeCategories,
 } from '../lib/brand-options'
 import type {
   BrandCategory,
@@ -37,23 +38,24 @@ const schema = z
       .trim()
       .min(10, 'توضیح حداقل ۱۰ کاراکتر باشد')
       .max(2000, 'توضیح حداکثر ۲۰۰۰ کاراکتر باشد'),
-    category: z.enum(
-      [
-        'BEAUTY',
-        'FASHION',
-        'FOOD',
-        'HEALTH',
-        'TECH',
-        'EDUCATION',
-        'TRAVEL',
-        'SPORTS',
-        'HOME',
-        'FINANCE',
-        'ENTERTAINMENT',
-        'OTHER',
-      ],
-      { error: 'دسته را انتخاب کنید' },
-    ),
+    categories: z
+      .array(
+        z.enum([
+          'BEAUTY',
+          'FASHION',
+          'FOOD',
+          'HEALTH',
+          'TECH',
+          'EDUCATION',
+          'TRAVEL',
+          'SPORTS',
+          'HOME',
+          'FINANCE',
+          'ENTERTAINMENT',
+          'OTHER',
+        ]),
+      )
+      .min(1, 'حداقل یک دسته انتخاب کنید'),
     city: z.string().trim().min(2, 'شهر را انتخاب کنید').max(80),
     deliverable: z.enum(['STORY', 'POST', 'REEL'], {
       error: 'نوع محتوا را انتخاب کنید',
@@ -122,7 +124,7 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
     defaultValues: {
       title: '',
       brief: '',
-      category: (user.category ?? undefined) as BrandCategory | undefined,
+      categories: normalizeCategories(user.categories, user.category),
       city: user.city ?? '',
       deliverable: undefined,
       budgetMin: '',
@@ -135,7 +137,8 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
     const body: CreateCampaignBody = {
       title: values.title.trim(),
       brief: values.brief.trim(),
-      category: values.category,
+      categories: values.categories,
+      category: values.categories[0] as BrandCategory,
       city: values.city.trim(),
       deliverable: values.deliverable as DeliverableType,
       status: values.publish ? 'OPEN' : 'DRAFT',
@@ -148,7 +151,7 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
   const remaining = MAX_IMAGES - files.length
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-slide-in">
+    <div>
       <section className="mb-6 sm:mb-8">
         <Link
           to="/app/campaigns"
@@ -243,15 +246,18 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
           </div>
 
           <Controller
-            name="category"
+            name="categories"
             control={control}
             render={({ field }) => (
               <OptionGrid
                 label="دسته"
                 options={BRAND_CATEGORIES}
                 value={field.value}
-                onChange={field.onChange}
-                error={errors.category?.message}
+                onChange={(v) =>
+                  field.onChange(Array.isArray(v) ? v : v ? [v] : [])
+                }
+                error={errors.categories?.message}
+                multiple
               />
             )}
           />

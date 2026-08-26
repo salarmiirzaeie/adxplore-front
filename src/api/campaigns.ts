@@ -1,5 +1,6 @@
 import { api } from './client'
 import type {
+  BrowseCampaignsParams,
   Campaign,
   CreateCampaignBody,
   UpdateCampaignBody,
@@ -7,6 +8,19 @@ import type {
 
 export async function listCampaigns(): Promise<Campaign[]> {
   const { data } = await api.get<Campaign[]>('/v1/campaigns')
+  return data
+}
+
+export async function browseCampaigns(
+  params: BrowseCampaignsParams = {},
+): Promise<Campaign[]> {
+  const { data } = await api.get<Campaign[]>('/v1/campaigns/browse', {
+    params: {
+      ...params,
+      forMe: params.forMe || undefined,
+      invited: params.invited || undefined,
+    },
+  })
   return data
 }
 

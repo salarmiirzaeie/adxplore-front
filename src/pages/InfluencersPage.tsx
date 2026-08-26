@@ -7,7 +7,7 @@ import {
   BRAND_CATEGORIES,
   FOLLOWER_RANGES,
   IRAN_CITIES,
-  brandCategoryLabel,
+  brandCategoriesLabel,
   followerRangeLabel,
 } from '../lib/brand-options'
 import type {
@@ -21,28 +21,31 @@ function InfluencerCardView({ influencer }: { influencer: InfluencerCard }) {
   return (
     <Link
       to={`/app/influencers/${influencer.id}`}
-      className="card-elevated block rounded-2xl px-5 py-5 transition hover:border-purple/30 hover:shadow-md"
+      className="flex h-full flex-col rounded-2xl border border-border bg-white p-5 transition hover:border-purple/25 hover:shadow-md"
     >
-      <div className="mb-3 flex items-start gap-3">
-        <Avatar src={influencer.photoUrl} name={influencer.name} size="md" />
+      <div className="mb-4 flex items-start gap-4">
+        <Avatar src={influencer.photoUrl} name={influencer.name} size="lg" />
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3">
-            <h2 className="text-base font-extrabold text-navy">{influencer.name}</h2>
-            <span className="shrink-0 rounded-lg bg-purple-soft/60 px-2 py-1 text-[11px] font-bold text-purple-deep">
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="text-base font-extrabold text-navy sm:text-lg">
+              {influencer.name}
+            </h2>
+            <span className="shrink-0 rounded-lg bg-purple-soft/60 px-2.5 py-1 text-[11px] font-bold text-purple-deep">
               {followerRangeLabel(influencer.followerRange)}
             </span>
           </div>
-          <p className="mt-1 text-sm font-semibold text-muted" dir="ltr">
+          <p className="mt-1 truncate text-sm text-muted" dir="ltr">
             {influencer.website}
           </p>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
-        <span className="rounded-lg bg-surface px-2 py-1">
-          {brandCategoryLabel(influencer.category)}
+      <div className="mt-auto flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
+        <span className="rounded-lg bg-surface px-2.5 py-1">
+          {brandCategoriesLabel(influencer.categories, influencer.category)}
         </span>
-        <span className="rounded-lg bg-surface px-2 py-1">{influencer.city}</span>
+        <span className="rounded-lg bg-surface px-2.5 py-1">{influencer.city}</span>
       </div>
+      <p className="mt-4 text-xs font-bold text-purple">مشاهده پروفایل و دعوت</p>
     </Link>
   )
 }
@@ -75,18 +78,18 @@ export function InfluencersPage() {
   const hasFilters = Boolean(category || city || followerRange)
 
   return (
-    <div className="mx-auto max-w-3xl animate-fade-slide-in">
+    <>
       <section className="mb-6 sm:mb-8">
         <p className="mb-1 text-sm font-medium text-purple">کشف</p>
         <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
           اینفلوئنسرها
         </h1>
         <p className="mt-2 text-sm text-muted">
-          بر اساس دسته، شهر و بازه فالوور فیلتر کنید.
+          بر اساس دسته، شهر و بازه فالوور فیلتر کنید و برای کمپین دعوت بفرستید.
         </p>
       </section>
 
-      <section className="card-elevated mb-5 rounded-2xl px-4 py-4 sm:px-5">
+      <section className="mb-6 rounded-2xl border border-border bg-white px-4 py-4 sm:px-6">
         <div className="grid gap-3 sm:grid-cols-3">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-semibold text-muted">دسته</span>
@@ -167,9 +170,9 @@ export function InfluencersPage() {
       ) : null}
 
       {!isLoading && !isError && influencers?.length === 0 ? (
-        <section className="card-elevated rounded-2xl px-6 py-14 text-center">
+        <section className="rounded-2xl border border-border bg-white px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">نتیجه‌ای پیدا نشد</h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
+          <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
             {hasFilters
               ? 'فیلترها را تغییر دهید یا پاک کنید.'
               : 'هنوز اینفلوئنسر تکمیل‌پروفایلی ثبت نشده است.'}
@@ -178,15 +181,17 @@ export function InfluencersPage() {
       ) : null}
 
       {influencers && influencers.length > 0 ? (
-        <div className={`flex flex-col gap-3 ${isFetching ? 'opacity-70' : ''}`}>
-          <p className="text-xs font-semibold text-muted">
+        <div className={isFetching ? 'opacity-70' : ''}>
+          <p className="mb-3 text-xs font-semibold text-muted">
             {influencers.length.toLocaleString('fa-IR')} اینفلوئنسر
           </p>
-          {influencers.map((influencer) => (
-            <InfluencerCardView key={influencer.id} influencer={influencer} />
-          ))}
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {influencers.map((influencer) => (
+              <InfluencerCardView key={influencer.id} influencer={influencer} />
+            ))}
+          </div>
         </div>
       ) : null}
-    </div>
+    </>
   )
 }

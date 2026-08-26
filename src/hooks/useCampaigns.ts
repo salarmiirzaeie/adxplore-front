@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import {
+  browseCampaigns,
   createCampaign,
   deleteCampaignImage,
   getCampaign,
@@ -9,9 +10,14 @@ import {
   uploadCampaignImages,
 } from '../api/campaigns'
 import { getAccessToken } from '../lib/auth-storage'
-import type { CreateCampaignBody, UpdateCampaignBody } from '../types/api'
+import type {
+  BrowseCampaignsParams,
+  CreateCampaignBody,
+  UpdateCampaignBody,
+} from '../types/api'
 
 export const campaignsQueryKey = ['campaigns'] as const
+export const browseCampaignsQueryKey = ['campaigns', 'browse'] as const
 
 export function campaignQueryKey(id: string) {
   return ['campaigns', id] as const
@@ -21,6 +27,18 @@ export function useCampaigns(enabled = true) {
   return useQuery({
     queryKey: campaignsQueryKey,
     queryFn: listCampaigns,
+    enabled: enabled && Boolean(getAccessToken()),
+    staleTime: 30_000,
+  })
+}
+
+export function useBrowseCampaigns(
+  params: BrowseCampaignsParams = {},
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: [...browseCampaignsQueryKey, params],
+    queryFn: () => browseCampaigns(params),
     enabled: enabled && Boolean(getAccessToken()),
     staleTime: 30_000,
   })
@@ -57,7 +75,8 @@ export function useCreateCampaign() {
     onSuccess: (campaign) => {
       queryClient.invalidateQueries({ queryKey: campaignsQueryKey })
       queryClient.setQueryData(campaignQueryKey(campaign.id), campaign)
-      navigate(`/app/campaigns/${campaign.id}`, { replace: true })
+      const invite = campaign.status === 'OPEN' ? '?invite=1' : ''
+      navigate(`/app/campaigns/${campaign.id}${invite}`, { replace: true })
     },
   })
 }

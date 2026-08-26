@@ -88,17 +88,20 @@ export function isProfileComplete(user: {
   name: string | null
   role: UserRole
   category?: string | null
+  categories?: string[] | null
   city?: string | null
   website?: string | null
   followerRange?: string | null
 }): boolean {
   if (!user.name?.trim()) return false
+  const hasCategory =
+    Boolean(user.category) || Boolean(user.categories && user.categories.length > 0)
   if (user.role === 'BRAND') {
-    return Boolean(user.category && user.city?.trim())
+    return Boolean(hasCategory && user.city?.trim())
   }
   if (user.role === 'INFLUENCER') {
     return Boolean(
-      user.category &&
+      hasCategory &&
         user.city?.trim() &&
         user.website?.trim() &&
         user.followerRange,

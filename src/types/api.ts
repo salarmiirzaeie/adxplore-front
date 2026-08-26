@@ -56,6 +56,7 @@ export interface AuthUser {
   role: UserRole
   photoUrl: string | null
   category: BrandCategory | null
+  categories: BrandCategory[]
   city: string | null
   website: string | null
   goal: BrandGoal | null
@@ -78,6 +79,7 @@ export interface UserProfile {
   role: UserRole
   photoUrl: string | null
   category: BrandCategory | null
+  categories: BrandCategory[]
   city: string | null
   website: string | null
   goal: BrandGoal | null
@@ -90,6 +92,7 @@ export interface UserProfile {
 export interface UpdateProfileBody {
   name?: string
   category?: BrandCategory
+  categories?: BrandCategory[]
   city?: string
   website?: string | null
   goal?: BrandGoal | null
@@ -109,20 +112,31 @@ export interface Campaign {
   title: string
   brief: string
   category: BrandCategory
+  categories: BrandCategory[]
   city: string
   deliverable: DeliverableType
   budgetMin: number | null
   budgetMax: number | null
   status: CampaignStatus
   images: CampaignImage[]
+  brand?: OfferParty
   createdAt: string
   updatedAt: string
+}
+
+export interface BrowseCampaignsParams {
+  category?: BrandCategory
+  city?: string
+  q?: string
+  forMe?: boolean
+  invited?: boolean
 }
 
 export interface CreateCampaignBody {
   title: string
   brief: string
-  category: BrandCategory
+  category?: BrandCategory
+  categories: BrandCategory[]
   city: string
   deliverable: DeliverableType
   budgetMin?: number
@@ -134,6 +148,7 @@ export interface UpdateCampaignBody {
   title?: string
   brief?: string
   category?: BrandCategory
+  categories?: BrandCategory[]
   city?: string
   deliverable?: DeliverableType
   budgetMin?: number
@@ -147,6 +162,7 @@ export interface InfluencerCard {
   website: string
   photoUrl: string | null
   category: BrandCategory
+  categories: BrandCategory[]
   city: string
   followerRange: FollowerRange
 }
@@ -155,6 +171,218 @@ export interface ListInfluencersParams {
   category?: BrandCategory
   city?: string
   followerRange?: FollowerRange
+}
+
+export type InvitationStatus = 'PENDING' | 'CANCELLED'
+
+export type OfferStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
+
+export type NotificationType =
+  | 'INVITATION_RECEIVED'
+  | 'OFFER_RECEIVED'
+  | 'OFFER_ACCEPTED'
+  | 'OFFER_REJECTED'
+  | 'OFFER_CANCELLED'
+  | 'DEAL_STARTED'
+  | 'DELIVERABLE_SUBMITTED'
+  | 'REVISION_REQUESTED'
+  | 'DEAL_COMPLETED'
+  | 'DEAL_CANCELLED'
+  | 'CHAT_MESSAGE'
+
+export type MessageKind = 'TEXT' | 'SYSTEM' | 'DELIVERABLE'
+
+export interface ChatMessageMetadata {
+  event?: string
+  dealId?: string
+  contentUrl?: string
+  note?: string | null
+  proofUrl?: string | null
+  brandFeedback?: string | null
+}
+
+export interface ChatMessage {
+  id: string
+  conversationId: string
+  senderId: string
+  kind: MessageKind
+  body: string
+  metadata: ChatMessageMetadata | null
+  createdAt: string
+  readAt: string | null
+}
+
+export interface Conversation {
+  id: string
+  offerId: string
+  campaignId: string
+  brandId: string
+  influencerId: string
+  campaignTitle: string | null
+  peerName: string | null
+  peerPhotoUrl: string | null
+  lastMessage: ChatMessage | null
+  unreadCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SendChatMessageBody {
+  body: string
+}
+
+export type DealStatus =
+  | 'IN_PROGRESS'
+  | 'DELIVERED'
+  | 'REVISION_REQUESTED'
+  | 'COMPLETED'
+  | 'CANCELLED'
+
+export interface Deal {
+  id: string
+  offerId: string
+  campaignId: string
+  brandId: string
+  influencerId: string
+  fee: number
+  status: DealStatus
+  contentUrl: string | null
+  note: string | null
+  proofUrl: string | null
+  brandFeedback: string | null
+  submittedAt: string | null
+  completedAt: string | null
+  campaign: OfferCampaign
+  brand: OfferParty
+  influencer: OfferParty
+  createdAt: string
+  updatedAt: string
+}
+
+export interface SubmitDeliverableBody {
+  contentUrl: string
+  note?: string
+  proof?: File
+}
+
+export interface UpdateDealStatusBody {
+  status: 'COMPLETED' | 'REVISION_REQUESTED' | 'CANCELLED'
+  brandFeedback?: string
+}
+
+export interface OfferParty {
+  id: string
+  name: string | null
+  photoUrl: string | null
+  website: string | null
+  category: BrandCategory | null
+  categories: BrandCategory[]
+  city: string | null
+  followerRange: FollowerRange | null
+}
+
+export interface InvitationCampaign {
+  id: string
+  title: string
+  deliverable: DeliverableType
+  category: BrandCategory
+  categories: BrandCategory[]
+  city: string
+  status: CampaignStatus
+  brief: string
+  budgetMin: number | null
+  budgetMax: number | null
+}
+
+export interface Invitation {
+  id: string
+  campaignId: string
+  brandId: string
+  influencerId: string
+  message: string | null
+  status: InvitationStatus
+  campaign: InvitationCampaign
+  brand: OfferParty
+  influencer: OfferParty
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateInvitationBody {
+  campaignId: string
+  influencerId: string
+  message?: string
+}
+
+export interface BulkCreateInvitationsBody {
+  campaignId: string
+  influencerIds: string[]
+  message?: string
+}
+
+export interface BulkCreateInvitationsResult {
+  created: Invitation[]
+  skippedCount: number
+}
+
+export interface UpdateInvitationStatusBody {
+  status: 'CANCELLED'
+}
+
+export interface OfferCampaign {
+  id: string
+  title: string
+  deliverable: DeliverableType
+  category: BrandCategory
+  categories: BrandCategory[]
+  city: string
+  status: CampaignStatus
+  brief: string
+  budgetMin: number | null
+  budgetMax: number | null
+}
+
+export interface Offer {
+  id: string
+  campaignId: string
+  brandId: string
+  influencerId: string
+  fee: number
+  message: string | null
+  deadline: string | null
+  status: OfferStatus
+  campaign: OfferCampaign
+  brand: OfferParty
+  influencer: OfferParty
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateOfferBody {
+  campaignId: string
+  fee: number
+  message?: string
+  deadline?: string
+}
+
+export interface UpdateOfferStatusBody {
+  status: 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
+}
+
+export interface AppNotification {
+  id: string
+  userId: string
+  type: NotificationType
+  title: string
+  body: string
+  linkPath: string | null
+  entityId: string | null
+  readAt: string | null
+  createdAt: string
+}
+
+export interface UnreadCountResponse {
+  count: number
 }
 
 export interface HealthResponse {

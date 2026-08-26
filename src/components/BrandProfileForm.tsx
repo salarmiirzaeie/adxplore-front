@@ -11,6 +11,7 @@ import {
   BRAND_GOALS,
   BUSINESS_SIZES,
   IRAN_CITIES,
+  normalizeCategories,
 } from '../lib/brand-options'
 import type {
   BrandCategory,
@@ -20,6 +21,21 @@ import type {
   UserProfile,
 } from '../types/api'
 
+const categoryEnum = z.enum([
+  'BEAUTY',
+  'FASHION',
+  'FOOD',
+  'HEALTH',
+  'TECH',
+  'EDUCATION',
+  'TRAVEL',
+  'SPORTS',
+  'HOME',
+  'FINANCE',
+  'ENTERTAINMENT',
+  'OTHER',
+])
+
 export const brandProfileSchema = z.object({
   name: z
     .string()
@@ -27,23 +43,9 @@ export const brandProfileSchema = z.object({
     .min(2, 'نام برند حداقل ۲ کاراکتر باشد')
     .max(80, 'نام برند حداکثر ۸۰ کاراکتر باشد'),
   website: z.string().trim().max(200, 'آدرس حداکثر ۲۰۰ کاراکتر باشد'),
-  category: z.enum(
-    [
-      'BEAUTY',
-      'FASHION',
-      'FOOD',
-      'HEALTH',
-      'TECH',
-      'EDUCATION',
-      'TRAVEL',
-      'SPORTS',
-      'HOME',
-      'FINANCE',
-      'ENTERTAINMENT',
-      'OTHER',
-    ],
-    { error: 'دسته را انتخاب کنید' },
-  ),
+  categories: z
+    .array(categoryEnum)
+    .min(1, 'حداقل یک دسته انتخاب کنید'),
   city: z
     .string()
     .trim()
@@ -64,13 +66,19 @@ export type BrandProfileFormValues = z.infer<typeof brandProfileSchema>
 export function toBrandProfileFormValues(
   user: Pick<
     UserProfile,
-    'name' | 'website' | 'category' | 'city' | 'goal' | 'businessSize'
+    | 'name'
+    | 'website'
+    | 'category'
+    | 'categories'
+    | 'city'
+    | 'goal'
+    | 'businessSize'
   >,
 ): BrandProfileFormValues {
   return {
     name: user.name ?? '',
     website: user.website ?? '',
-    category: (user.category ?? undefined) as BrandCategory,
+    categories: normalizeCategories(user.categories, user.category),
     city: user.city ?? '',
     goal: user.goal ?? '',
     businessSize: user.businessSize ?? '',
@@ -82,7 +90,8 @@ export function brandFormToUpdateBody(
 ): UpdateProfileBody {
   return {
     name: values.name.trim(),
-    category: values.category,
+    categories: values.categories,
+    category: values.categories[0] as BrandCategory,
     city: values.city.trim(),
     website: values.website.trim() ? values.website.trim() : null,
     goal: values.goal ? (values.goal as BrandGoal) : null,
@@ -118,21 +127,18 @@ export function BrandProfileForm({
     formState: { errors, isDirty },
   } = useForm<BrandProfileFormValues>({
     resolver: zodResolver(brandProfileSchema),
-    values: defaults,
-  })
-
-  const submit = handleSubmit((values) => {
-    onSubmit(brandFormToUpdateBody(values))
+    defaultValues: defaults,
   })
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-6">
+    <form
+      className="flex flex-col gap-8"
+      onSubmit={handleSubmit((values) => onSubmit(brandFormToUpdateBody(values)))}
+    >
       <section className="flex flex-col gap-4">
         <h2 className="text-sm font-extrabold text-navy">اطلاعات برند</h2>
         <Input
           label="نام برند"
-          autoComplete="organization"
-          placeholder="مثلاً کافه نوآ"
           error={errors.name?.message}
           {...register('name')}
         />
@@ -150,15 +156,16 @@ export function BrandProfileForm({
       <section className="flex flex-col gap-4">
         <h2 className="text-sm font-extrabold text-navy">دسته و موقعیت</h2>
         <Controller
-          name="category"
+          name="categories"
           control={control}
           render={({ field }) => (
             <OptionGrid
               label="دسته فعالیت"
               options={BRAND_CATEGORIES}
               value={field.value}
-              onChange={field.onChange}
-              error={errors.category?.message}
+              onChange={(v) => field.onChange(Array.isArray(v) ? v : v ? [v] : [])}
+              error={errors.categories?.message}
+              multiple
             />
           )}
         />

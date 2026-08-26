@@ -10,6 +10,7 @@ import {
   FOLLOWER_RANGES,
   INFLUENCER_CATEGORIES,
   IRAN_CITIES,
+  normalizeCategories,
 } from '../lib/brand-options'
 import type {
   BrandCategory,
@@ -18,23 +19,20 @@ import type {
   UserProfile,
 } from '../types/api'
 
-const categoryEnum = z.enum(
-  [
-    'BEAUTY',
-    'FASHION',
-    'FOOD',
-    'HEALTH',
-    'TECH',
-    'EDUCATION',
-    'TRAVEL',
-    'SPORTS',
-    'HOME',
-    'FINANCE',
-    'ENTERTAINMENT',
-    'OTHER',
-  ],
-  { error: 'دسته‌بندی را انتخاب کنید' },
-)
+const categoryEnum = z.enum([
+  'BEAUTY',
+  'FASHION',
+  'FOOD',
+  'HEALTH',
+  'TECH',
+  'EDUCATION',
+  'TRAVEL',
+  'SPORTS',
+  'HOME',
+  'FINANCE',
+  'ENTERTAINMENT',
+  'OTHER',
+])
 
 const followerEnum = z.enum(
   [
@@ -60,7 +58,7 @@ export const influencerProfileSchema = z.object({
     .trim()
     .min(2, 'آیدی اینستاگرام را وارد کنید')
     .max(200, 'آدرس حداکثر ۲۰۰ کاراکتر باشد'),
-  category: categoryEnum,
+  categories: z.array(categoryEnum).min(1, 'حداقل یک دسته انتخاب کنید'),
   city: z
     .string()
     .trim()
@@ -74,13 +72,13 @@ export type InfluencerProfileFormValues = z.infer<typeof influencerProfileSchema
 export function toInfluencerProfileFormValues(
   user: Pick<
     UserProfile,
-    'name' | 'website' | 'category' | 'city' | 'followerRange'
+    'name' | 'website' | 'category' | 'categories' | 'city' | 'followerRange'
   >,
 ): InfluencerProfileFormValues {
   return {
     name: user.name ?? '',
     website: user.website ?? '',
-    category: (user.category ?? undefined) as BrandCategory,
+    categories: normalizeCategories(user.categories, user.category),
     city: user.city ?? '',
     followerRange: (user.followerRange ?? undefined) as FollowerRange,
   }
@@ -92,7 +90,8 @@ export function influencerFormToUpdateBody(
   return {
     name: values.name.trim(),
     website: values.website.trim(),
-    category: values.category,
+    categories: values.categories,
+    category: values.categories[0] as BrandCategory,
     city: values.city.trim(),
     followerRange: values.followerRange,
   }
@@ -124,27 +123,25 @@ export function InfluencerProfileForm({
     formState: { errors, isDirty },
   } = useForm<InfluencerProfileFormValues>({
     resolver: zodResolver(influencerProfileSchema),
-    values: defaults,
-  })
-
-  const submit = handleSubmit((values) => {
-    onSubmit(influencerFormToUpdateBody(values))
+    defaultValues: defaults,
   })
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-6">
+    <form
+      className="flex flex-col gap-8"
+      onSubmit={handleSubmit((values) =>
+        onSubmit(influencerFormToUpdateBody(values)),
+      )}
+    >
       <section className="flex flex-col gap-4">
-        <h2 className="text-sm font-extrabold text-navy">اطلاعات شخصی</h2>
         <Input
           label="نام نمایشی"
-          autoComplete="name"
-          placeholder="مثلاً سارا محمدی"
           error={errors.name?.message}
           {...register('name')}
         />
         <Input
-          label="اینستاگرام"
-          placeholder="@username یا instagram.com/username"
+          label="آیدی اینستاگرام"
+          placeholder="@username"
           dir="ltr"
           className="text-left"
           error={errors.website?.message}
@@ -153,17 +150,17 @@ export function InfluencerProfileForm({
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-sm font-extrabold text-navy">نیچ و موقعیت</h2>
         <Controller
-          name="category"
+          name="categories"
           control={control}
           render={({ field }) => (
             <OptionGrid
               label="دسته‌بندی محتوا"
               options={INFLUENCER_CATEGORIES}
               value={field.value}
-              onChange={field.onChange}
-              error={errors.category?.message}
+              onChange={(v) => field.onChange(Array.isArray(v) ? v : v ? [v] : [])}
+              error={errors.categories?.message}
+              multiple
             />
           )}
         />
@@ -180,10 +177,6 @@ export function InfluencerProfileForm({
           error={errors.city?.message}
           {...register('city')}
         />
-      </section>
-
-      <section className="flex flex-col gap-4">
-        <h2 className="text-sm font-extrabold text-navy">اندازه مخاطب</h2>
         <Controller
           name="followerRange"
           control={control}

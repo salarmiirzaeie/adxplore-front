@@ -57,7 +57,7 @@ function InfluencerOnboarding({
     defaultValues: {
       name: defaults.name ?? '',
       website: defaults.website ?? '',
-      category: defaults.category,
+      categories: defaults.categories ?? [],
       city: defaults.city ?? '',
       followerRange: defaults.followerRange,
     },
@@ -65,7 +65,7 @@ function InfluencerOnboarding({
 
   const stepFields: Array<(keyof InfluencerValues)[]> = [
     ['name', 'website'],
-    ['category', 'city'],
+    ['categories', 'city'],
     ['followerRange'],
   ]
 
@@ -138,15 +138,18 @@ function InfluencerOnboarding({
         {step === 1 ? (
           <>
             <Controller
-              name="category"
+              name="categories"
               control={control}
               render={({ field }) => (
                 <OptionGrid
                   label="دسته‌بندی محتوا"
                   options={INFLUENCER_CATEGORIES}
                   value={field.value}
-                  onChange={field.onChange}
-                  error={errors.category?.message}
+                  onChange={(v) =>
+                    field.onChange(Array.isArray(v) ? v : v ? [v] : [])
+                  }
+                  error={errors.categories?.message}
+                  multiple
                 />
               )}
             />
@@ -231,7 +234,7 @@ function BrandOnboarding({
     defaultValues: {
       name: defaults.name ?? '',
       website: defaults.website ?? '',
-      category: defaults.category,
+      categories: defaults.categories ?? [],
       city: defaults.city ?? '',
       goal: defaults.goal ?? '',
       businessSize: defaults.businessSize ?? '',
@@ -240,7 +243,7 @@ function BrandOnboarding({
 
   const stepFields: Array<(keyof BrandValues)[]> = [
     ['name', 'website'],
-    ['category', 'city'],
+    ['categories', 'city'],
     ['goal', 'businessSize'],
   ]
 
@@ -264,7 +267,7 @@ function BrandOnboarding({
   const onFinalSubmit = handleSubmit(submitProfile)
 
   const skipOptional = async () => {
-    const ok = await trigger(['name', 'website', 'category', 'city'])
+    const ok = await trigger(['name', 'website', 'categories', 'city'])
     if (!ok) {
       const values = getValues()
       if (!values.name?.trim() || (values.website && values.website.length > 200)) {
@@ -328,15 +331,18 @@ function BrandOnboarding({
         {step === 1 ? (
           <>
             <Controller
-              name="category"
+              name="categories"
               control={control}
               render={({ field }) => (
                 <OptionGrid
                   label="دسته فعالیت"
                   options={BRAND_CATEGORIES}
                   value={field.value}
-                  onChange={field.onChange}
-                  error={errors.category?.message}
+                  onChange={(v) =>
+                    field.onChange(Array.isArray(v) ? v : v ? [v] : [])
+                  }
+                  error={errors.categories?.message}
+                  multiple
                 />
               )}
             />
@@ -458,7 +464,11 @@ export function OnboardingPage() {
         defaults={{
           name: user.name ?? '',
           website: user.website ?? '',
-          category: user.category ?? undefined,
+          categories: user.categories?.length
+            ? user.categories
+            : user.category
+              ? [user.category]
+              : [],
           city: user.city ?? '',
           goal: user.goal ?? '',
           businessSize: user.businessSize ?? '',
@@ -473,7 +483,11 @@ export function OnboardingPage() {
       defaults={{
         name: user.name ?? '',
         website: user.website ?? '',
-        category: user.category ?? undefined,
+        categories: user.categories?.length
+          ? user.categories
+          : user.category
+            ? [user.category]
+            : [],
         city: user.city ?? '',
         followerRange: user.followerRange ?? undefined,
       }}

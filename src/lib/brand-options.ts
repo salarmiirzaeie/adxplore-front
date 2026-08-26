@@ -3,8 +3,11 @@ import type {
   BrandGoal,
   BusinessSize,
   CampaignStatus,
+  DealStatus,
   DeliverableType,
   FollowerRange,
+  InvitationStatus,
+  OfferStatus,
 } from '../types/api'
 
 export const BRAND_CATEGORIES: Array<{ value: BrandCategory; label: string }> = [
@@ -67,6 +70,35 @@ export const CAMPAIGN_STATUSES: Array<{
   { value: 'CLOSED', label: 'بسته' },
 ]
 
+export const OFFER_STATUSES: Array<{
+  value: OfferStatus
+  label: string
+}> = [
+  { value: 'PENDING', label: 'در انتظار' },
+  { value: 'ACCEPTED', label: 'در حال انجام' },
+  { value: 'REJECTED', label: 'ردشده' },
+  { value: 'CANCELLED', label: 'لغوشده' },
+]
+
+export const INVITATION_STATUSES: Array<{
+  value: InvitationStatus
+  label: string
+}> = [
+  { value: 'PENDING', label: 'فعال' },
+  { value: 'CANCELLED', label: 'لغوشده' },
+]
+
+export const DEAL_STATUSES: Array<{
+  value: DealStatus
+  label: string
+}> = [
+  { value: 'IN_PROGRESS', label: 'در حال انجام' },
+  { value: 'DELIVERED', label: 'تحویل‌شده' },
+  { value: 'REVISION_REQUESTED', label: 'نیاز به اصلاح' },
+  { value: 'COMPLETED', label: 'تکمیل‌شده' },
+  { value: 'CANCELLED', label: 'لغوشده' },
+]
+
 export const IRAN_CITIES = [
   'تهران',
   'کرج',
@@ -88,7 +120,26 @@ export const IRAN_CITIES = [
 
 export function brandCategoryLabel(value: BrandCategory | null | undefined) {
   if (!value) return null
-  return BRAND_CATEGORIES.find((c) => c.value === value)?.label ?? value
+  return BRAND_CATEGORIES.find((s) => s.value === value)?.label ?? value
+}
+
+export function brandCategoriesLabel(
+  values: BrandCategory[] | null | undefined,
+  fallback?: BrandCategory | null,
+) {
+  const list =
+    values && values.length > 0 ? values : fallback ? [fallback] : []
+  if (!list.length) return null
+  return list.map((v) => brandCategoryLabel(v) ?? v).join(' · ')
+}
+
+export function normalizeCategories(
+  values: BrandCategory[] | null | undefined,
+  fallback?: BrandCategory | null,
+): BrandCategory[] {
+  if (values && values.length > 0) return [...new Set(values)]
+  if (fallback) return [fallback]
+  return []
 }
 
 export function brandGoalLabel(value: BrandGoal | null | undefined) {
@@ -114,6 +165,33 @@ export function deliverableLabel(value: DeliverableType | null | undefined) {
 export function campaignStatusLabel(value: CampaignStatus | null | undefined) {
   if (!value) return null
   return CAMPAIGN_STATUSES.find((s) => s.value === value)?.label ?? value
+}
+
+export function offerStatusLabel(value: OfferStatus | null | undefined) {
+  if (!value) return null
+  return OFFER_STATUSES.find((s) => s.value === value)?.label ?? value
+}
+
+/** For accepted offers, prefer live deal progress when available. */
+export function offerPipelineLabel(
+  offerStatus: OfferStatus | null | undefined,
+  dealStatus?: DealStatus | null,
+) {
+  if (!offerStatus) return null
+  if (offerStatus === 'ACCEPTED' && dealStatus) {
+    return dealStatusLabel(dealStatus)
+  }
+  return offerStatusLabel(offerStatus)
+}
+
+export function invitationStatusLabel(value: InvitationStatus | null | undefined) {
+  if (!value) return null
+  return INVITATION_STATUSES.find((s) => s.value === value)?.label ?? value
+}
+
+export function dealStatusLabel(value: DealStatus | null | undefined) {
+  if (!value) return null
+  return DEAL_STATUSES.find((s) => s.value === value)?.label ?? value
 }
 
 export function formatBudgetRange(

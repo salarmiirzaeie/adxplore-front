@@ -74,6 +74,7 @@ export function useVerifyOtp() {
         role: data.user.role,
         photoUrl: data.user.photoUrl,
         category: data.user.category,
+        categories: data.user.categories ?? [],
         city: data.user.city,
         website: data.user.website,
         goal: data.user.goal,
@@ -135,6 +136,7 @@ export function useLogout() {
     clearAccessToken()
     clearLoginPhone()
     clearLoginRole()
+    void import('../lib/chat-socket').then((m) => m.disconnectChatSocket())
     queryClient.clear()
     navigate('/login', { replace: true })
   }

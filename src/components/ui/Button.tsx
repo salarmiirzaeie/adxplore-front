@@ -5,6 +5,7 @@ type Variant = 'primary' | 'ghost' | 'outline' | 'soft'
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   loading?: boolean
+  fullWidth?: boolean
   children: ReactNode
 }
 
@@ -18,6 +19,7 @@ const variants: Record<Variant, string> = {
 export function Button({
   variant = 'primary',
   loading = false,
+  fullWidth = true,
   disabled,
   children,
   className = '',
@@ -28,7 +30,7 @@ export function Button({
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50 ${fullWidth ? 'w-full' : 'w-auto shrink-0'} ${variants[variant]} ${className}`}
       {...props}
     >
       {loading ? (

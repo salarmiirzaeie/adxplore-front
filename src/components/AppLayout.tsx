@@ -1,10 +1,13 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { AppShell } from './AppShell'
+import { PageContainer } from './ui/PageContainer'
 import { useMe } from '../hooks/useAuth'
 import { isProfileComplete } from '../lib/auth-storage'
 
 export function AppLayout() {
   const { data: user, isLoading, isError } = useMe()
+  const { pathname } = useLocation()
+  const isMessagesRoute = pathname.startsWith('/app/messages')
 
   if (isError) {
     return <Navigate to="/login" replace />
@@ -22,7 +25,16 @@ export function AppLayout() {
           <span className="text-sm">در حال بارگذاری…</span>
         </div>
       ) : (
-        <Outlet />
+        <PageContainer
+          animate={!isMessagesRoute}
+          className={
+            isMessagesRoute
+              ? 'flex h-full min-h-0 flex-1 flex-col overflow-hidden'
+              : undefined
+          }
+        >
+          <Outlet />
+        </PageContainer>
       )}
     </AppShell>
   )

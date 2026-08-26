@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Avatar } from '../components/ui/Avatar'
 import { useMe } from '../hooks/useAuth'
 import {
-  brandCategoryLabel,
+  brandCategoriesLabel,
   brandGoalLabel,
   businessSizeLabel,
   followerRangeLabel,
@@ -41,7 +41,10 @@ function BrandProfileView({ user }: { user: UserProfile }) {
         value={user.website}
         dir="ltr"
       />
-      <ProfileField label="دسته فعالیت" value={brandCategoryLabel(user.category)} />
+      <ProfileField
+        label="دسته فعالیت"
+        value={brandCategoriesLabel(user.categories, user.category)}
+      />
       <ProfileField label="شهر" value={user.city} />
       <ProfileField label="هدف اصلی" value={brandGoalLabel(user.goal)} />
       <ProfileField
@@ -64,7 +67,7 @@ function InfluencerProfileView({ user }: { user: UserProfile }) {
       <ProfileField label="اینستاگرام" value={user.website} dir="ltr" />
       <ProfileField
         label="دسته‌بندی محتوا"
-        value={brandCategoryLabel(user.category)}
+        value={brandCategoriesLabel(user.categories, user.category)}
       />
       <ProfileField label="شهر" value={user.city} />
       <ProfileField
@@ -88,7 +91,7 @@ export function ProfilePage() {
   const isBrand = user.role === 'BRAND'
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-slide-in">
+    <div>
       <section className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-start gap-4">
           <Avatar src={user.photoUrl} name={user.name} size="lg" />

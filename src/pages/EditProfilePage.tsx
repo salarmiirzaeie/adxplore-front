@@ -18,7 +18,7 @@ export function EditProfilePage() {
   if (!user) return null
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-slide-in">
+    <div>
       <section className="mb-6 sm:mb-8">
         <Link
           to="/app/profile"

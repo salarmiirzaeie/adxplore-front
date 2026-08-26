@@ -1,22 +1,63 @@
-import { useState, type ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { type ReactNode, useEffect, useState } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Logo } from './brand/Logo'
 import { Avatar } from './ui/Avatar'
 import { useLogout, useMe } from '../hooks/useAuth'
+import { useUnreadCount } from '../hooks/useNotifications'
 import { formatPhoneDisplay } from '../lib/phone'
 
 interface AppShellProps {
   children: ReactNode
 }
 
-const navItems = [
+type NavItem = {
+  to: string
+  label: string
+  tabLabel: string
+  end?: boolean
+  icon: ReactNode
+}
+
+const messagesNavIcon = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <path
+      d="M6 5h12a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-4.5L9 20v-2H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3z"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinejoin="round"
+    />
+    <circle cx="9" cy="11.5" r="1" fill="currentColor" />
+    <circle cx="12" cy="11.5" r="1" fill="currentColor" />
+    <circle cx="15" cy="11.5" r="1" fill="currentColor" />
+  </svg>
+)
+
+const invitationsNavIcon = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <circle cx="9" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.75" />
+    <path
+      d="M4 19.5c0-2.5 2.5-4.5 5-4.5s5 2 5 4.5"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+    />
+    <path
+      d="M19 8.5v5M16.5 11h5"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+    />
+  </svg>
+)
+
+const brandNav: NavItem[] = [
   {
     to: '/app',
     label: 'داشبورد',
+    tabLabel: 'داشبورد',
     end: true,
-    roles: ['BRAND', 'INFLUENCER'] as const,
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
           d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"
           stroke="currentColor"
@@ -28,10 +69,10 @@ const navItems = [
   },
   {
     to: '/app/campaigns',
-    label: 'کمپین‌ها',
-    roles: ['BRAND', 'INFLUENCER'] as const,
+    label: 'کمپین‌های من',
+    tabLabel: 'کمپین',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
         <path
           d="M4 7h16M4 12h10M4 17h14"
           stroke="currentColor"
@@ -44,16 +85,19 @@ const navItems = [
   {
     to: '/app/influencers',
     label: 'اینفلوئنسرها',
-    roles: ['BRAND'] as const,
+    tabLabel: 'کشف',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.75" />
+        <circle cx="16.5" cy="9.5" r="2.25" stroke="currentColor" strokeWidth="1.75" />
         <path
-          d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0z"
+          d="M3.5 19c1.2-2.8 3.4-4.2 5.5-4.2s4.3 1.4 5.5 4.2"
           stroke="currentColor"
           strokeWidth="1.75"
+          strokeLinecap="round"
         />
         <path
-          d="M4 20c1.2-3.2 3.8-5 8-5s6.8 1.8 8 5"
+          d="M14 15.2c1.1-.5 2.4-.7 3.7-.2 1.5.6 2.5 1.9 3.1 3.5"
           stroke="currentColor"
           strokeWidth="1.75"
           strokeLinecap="round"
@@ -62,27 +106,17 @@ const navItems = [
     ),
   },
   {
-    to: '/app/offers',
-    label: 'پیشنهادها',
-    disabled: true,
-    roles: ['BRAND', 'INFLUENCER'] as const,
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <path
-          d="M12 3l2.4 4.9L20 9l-4 3.9.9 5.4L12 15.9 7.1 18.3 8 12.9 4 9l5.6-1.1L12 3z"
-          stroke="currentColor"
-          strokeWidth="1.75"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
+    to: '/app/messages',
+    label: 'پیام‌ها',
+    tabLabel: 'پیام',
+    icon: messagesNavIcon,
   },
   {
     to: '/app/profile',
     label: 'پروفایل',
-    roles: ['BRAND', 'INFLUENCER'] as const,
+    tabLabel: 'پروفایل',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
         <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.75" />
         <path
           d="M5 19.5c1.5-3 4-4.5 7-4.5s5.5 1.5 7 4.5"
@@ -93,58 +127,179 @@ const navItems = [
       </svg>
     ),
   },
-] as const
+]
 
-function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+const influencerNav: NavItem[] = [
+  {
+    to: '/app',
+    label: 'داشبورد',
+    tabLabel: 'خانه',
+    end: true,
+    icon: brandNav[0].icon,
+  },
+  {
+    to: '/app/campaigns',
+    label: 'کمپین‌ها',
+    tabLabel: 'کمپین',
+    icon: brandNav[1].icon,
+  },
+  {
+    to: '/app/invitations',
+    label: 'دعوت‌ها',
+    tabLabel: 'دعوت',
+    icon: invitationsNavIcon,
+  },
+  {
+    to: '/app/messages',
+    label: 'پیام‌ها',
+    tabLabel: 'پیام',
+    icon: messagesNavIcon,
+  },
+  {
+    to: '/app/profile',
+    label: 'پروفایل',
+    tabLabel: 'پروفایل',
+    icon: brandNav[4].icon,
+  },
+]
+
+function useMessagesRoute() {
+  const { pathname } = useLocation()
+  return pathname.startsWith('/app/messages')
+}
+
+function useChatThreadRoute() {
+  const { pathname } = useLocation()
+  return /^\/app\/messages\/[^/]+$/.test(pathname)
+}
+
+function useRoleNav() {
   const { data: user } = useMe()
-  const role = user?.role
+  return user?.role === 'INFLUENCER' ? influencerNav : brandNav
+}
+
+const SIDEBAR_COLLAPSED_KEY = 'adxplore-sidebar-collapsed'
+
+function readSidebarCollapsed() {
+  try {
+    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function SidebarCollapseToggle({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean
+  onToggle: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border text-navy-muted transition hover:bg-surface hover:text-navy"
+      aria-label={collapsed ? 'باز کردن منو' : 'جمع کردن منو'}
+      title={collapsed ? 'باز کردن منو' : 'جمع کردن منو'}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        {collapsed ? (
+          <path
+            d="M14 6l-6 6 6 6"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ) : (
+          <path
+            d="M10 6l6 6-6 6"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+      </svg>
+    </button>
+  )
+}
+
+function SidebarNav({ collapsed }: { collapsed: boolean }) {
+  const items = useRoleNav()
 
   return (
-    <nav className="flex flex-1 flex-col gap-1 px-3" aria-label="منوی پنل">
-      {navItems
-        .filter((item) => !role || item.roles.includes(role))
-        .map((item) =>
-          'disabled' in item && item.disabled ? (
-            <span
-              key={item.to}
-              className="flex cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400"
-              title="به‌زودی"
-            >
-              <span className="opacity-50">{item.icon}</span>
-              <span className="flex-1">{item.label}</span>
-              <span className="rounded-md bg-surface px-1.5 py-0.5 text-[10px] font-bold text-muted">
-                به‌زودی
-              </span>
-            </span>
-          ) : (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={'end' in item ? item.end : false}
-              onClick={onNavigate}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
-                  isActive
-                    ? 'bg-purple-soft/70 text-purple-deep'
-                    : 'text-navy-muted hover:bg-surface hover:text-navy'
-                }`
-              }
-            >
-              {item.icon}
-              {item.label}
-            </NavLink>
-          ),
-        )}
+    <nav
+      className={`flex flex-1 flex-col gap-1 ${collapsed ? 'px-2' : 'px-3'}`}
+      aria-label="منوی پنل"
+    >
+      {items.map((item) => (
+        <NavLink
+          key={item.to}
+          to={item.to}
+          end={item.end}
+          title={collapsed ? item.label : undefined}
+          className={({ isActive }) =>
+            `flex items-center rounded-xl text-sm font-semibold transition-colors ${
+              collapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2.5'
+            } ${
+              isActive
+                ? 'bg-purple-soft/70 text-purple-deep'
+                : 'text-navy-muted hover:bg-surface hover:text-navy'
+            }`
+          }
+        >
+          <span className="shrink-0">{item.icon}</span>
+          {!collapsed ? <span className="truncate">{item.label}</span> : null}
+        </NavLink>
+      ))}
+    </nav>
+  )
+}
+
+function MobileTabBar() {
+  const items = useRoleNav()
+
+  return (
+    <nav
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface-elevated/95 backdrop-blur-xl lg:hidden"
+      style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+      aria-label="منوی اصلی"
+    >
+      <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1.5">
+        {items.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              `flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 text-[10px] font-bold transition-colors ${
+                isActive ? 'text-purple' : 'text-navy-muted'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <span className={isActive ? 'text-purple' : 'opacity-80'}>
+                  {item.icon}
+                </span>
+                <span className="truncate">{item.tabLabel}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
     </nav>
   )
 }
 
 function SidebarBody({
-  onNavigate,
-  showBrand = true,
+  collapsed,
+  onToggleCollapse,
 }: {
-  onNavigate?: () => void
-  showBrand?: boolean
+  collapsed: boolean
+  onToggleCollapse: () => void
 }) {
   const { data: user } = useMe()
   const logout = useLogout()
@@ -152,112 +307,195 @@ function SidebarBody({
 
   return (
     <div className="flex h-full flex-col">
-      {showBrand ? (
-        <div className="border-b border-border px-4 py-5">
-          <Logo showEnglish />
+      <div
+        className={`border-b border-border ${collapsed ? 'px-2 py-3' : 'px-4 py-5'}`}
+      >
+        <div
+          className={`flex items-center ${
+            collapsed ? 'flex-col gap-2' : 'justify-between gap-2'
+          }`}
+        >
+          {collapsed ? (
+            <Logo variant="icon" className="h-9 w-9" />
+          ) : (
+            <Logo showEnglish />
+          )}
+          <SidebarCollapseToggle
+            collapsed={collapsed}
+            onToggle={onToggleCollapse}
+          />
         </div>
-      ) : null}
-
-      <div className="py-4">
-        <SidebarNav onNavigate={onNavigate} />
       </div>
 
-      <div className="mt-auto border-t border-border p-4">
-        <div className="mb-3 rounded-xl bg-surface px-3 py-3">
-          <div className="flex items-center gap-3">
+      <div className="py-4">
+        <SidebarNav collapsed={collapsed} />
+      </div>
+
+      <div className={`mt-auto border-t border-border ${collapsed ? 'p-2' : 'p-4'}`}>
+        <div
+          className={`mb-3 rounded-xl bg-surface ${
+            collapsed ? 'flex justify-center px-2 py-2' : 'px-3 py-3'
+          }`}
+          title={collapsed ? displayName : undefined}
+        >
+          <div
+            className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}
+          >
             <Avatar src={user?.photoUrl} name={displayName} size="sm" />
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-navy">{displayName}</p>
-              {user ? (
-                <p className="mt-1 text-xs text-muted" dir="ltr">
-                  {formatPhoneDisplay(user.phone)}
-                </p>
-              ) : null}
-            </div>
+            {!collapsed ? (
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-navy">{displayName}</p>
+                {user ? (
+                  <p className="mt-1 text-xs text-muted" dir="ltr">
+                    {formatPhoneDisplay(user.phone)}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
         <button
           type="button"
           onClick={logout}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-semibold text-navy-muted transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+          title="خروج از حساب"
+          className={`flex w-full items-center rounded-xl border border-border text-sm font-semibold text-navy-muted transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 ${
+            collapsed ? 'justify-center px-2 py-2.5' : 'justify-center gap-2 px-3 py-2.5'
+          }`}
         >
-          خروج از حساب
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path
+              d="M10 7V5a2 2 0 0 1 2-2h7v18h-7a2 2 0 0 1-2-2v-2M14 12H4m0 0l3-3M4 12l3 3"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          {!collapsed ? 'خروج از حساب' : null}
         </button>
       </div>
     </div>
   )
 }
 
-export function AppShell({ children }: AppShellProps) {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const { data: user } = useMe()
+function NotificationBell() {
+  const { data } = useUnreadCount()
+  const count = data?.count ?? 0
 
   return (
-    <div className="flex min-h-dvh bg-surface">
-      {/* First flex child sits on the right in RTL */}
-      <aside className="sticky top-0 hidden h-dvh w-[var(--sidebar-width)] shrink-0 border-l border-border bg-surface-elevated lg:block">
-        <SidebarBody />
+    <Link
+      to="/app/notifications"
+      className="relative inline-flex size-10 items-center justify-center rounded-xl border border-border text-navy transition hover:bg-surface"
+      aria-label="اعلان‌ها"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M6 9a6 6 0 1 1 12 0c0 3.5 1.5 5 1.5 5H4.5S6 12.5 6 9z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M10 19a2 2 0 0 0 4 0"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+        />
+      </svg>
+      {count > 0 ? (
+        <span className="absolute -top-1 -left-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-purple px-1 text-[10px] font-bold text-white">
+          {count > 9 ? '۹+' : count.toLocaleString('fa-IR')}
+        </span>
+      ) : null}
+    </Link>
+  )
+}
+
+export function AppShell({ children }: AppShellProps) {
+  const { data: user } = useMe()
+  const isMessagesRoute = useMessagesRoute()
+  const isChatThreadRoute = useChatThreadRoute()
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(readSidebarCollapsed)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        SIDEBAR_COLLAPSED_KEY,
+        sidebarCollapsed ? '1' : '0',
+      )
+    } catch {
+      /* ignore */
+    }
+  }, [sidebarCollapsed])
+
+  useEffect(() => {
+    if (!isChatThreadRoute) return
+    const mq = window.matchMedia('(max-width: 1023px)')
+    if (!mq.matches) return
+
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [isChatThreadRoute])
+
+  return (
+    <div
+      className={`flex bg-surface ${
+        isMessagesRoute ? 'h-dvh overflow-hidden' : 'min-h-dvh'
+      }`}
+    >
+      <aside
+        className={`sticky top-0 hidden h-dvh shrink-0 border-l border-border bg-surface-elevated transition-[width] duration-200 ease-out lg:block ${
+          sidebarCollapsed
+            ? 'w-[var(--sidebar-width-collapsed)]'
+            : 'w-[var(--sidebar-width)]'
+        }`}
+      >
+        <SidebarBody
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
+        />
       </aside>
 
-      {mobileOpen ? (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            aria-label="بستن منو"
-            className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
-            onClick={() => setMobileOpen(false)}
-          />
-          <aside className="absolute inset-y-0 right-0 flex w-[min(18rem,88vw)] flex-col bg-surface-elevated shadow-2xl animate-fade-slide-in">
-            <div className="flex items-center justify-between border-b border-border px-4 py-4">
-              <Logo showEnglish={false} />
-              <button
-                type="button"
-                onClick={() => setMobileOpen(false)}
-                className="rounded-lg px-2 py-1 text-sm font-medium text-muted hover:bg-surface"
-              >
-                بستن
-              </button>
-            </div>
-            <SidebarBody showBrand={false} onNavigate={() => setMobileOpen(false)} />
-          </aside>
-        </div>
-      ) : null}
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b border-border bg-surface-elevated/90 px-4 backdrop-blur-xl sm:h-16 sm:px-6">
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm font-semibold text-navy lg:hidden"
-            onClick={() => setMobileOpen(true)}
-            aria-label="باز کردن منو"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path
-                d="M4 7h16M4 12h16M4 17h16"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-              />
-            </svg>
-            منو
-          </button>
-
+      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <header
+          className={`sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-surface-elevated/90 px-4 backdrop-blur-xl sm:h-16 sm:px-6 ${
+            isChatThreadRoute ? 'hidden lg:flex' : ''
+          }`}
+        >
           <div className="lg:hidden">
             <Logo variant="icon" className="h-8 w-8" />
           </div>
 
-          <div className="ms-auto hidden text-left sm:block">
-            <p className="text-sm font-bold text-navy">{user?.name || '…'}</p>
-            {user ? (
-              <p className="text-xs text-muted" dir="ltr">
-                {formatPhoneDisplay(user.phone)}
-              </p>
-            ) : null}
+          <div className="ms-auto flex items-center gap-3">
+            <NotificationBell />
+            <div className="hidden text-left sm:block">
+              <p className="text-sm font-bold text-navy">{user?.name || '…'}</p>
+              {user ? (
+                <p className="text-xs text-muted" dir="ltr">
+                  {formatPhoneDisplay(user.phone)}
+                </p>
+              ) : null}
+            </div>
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">{children}</main>
+        <main
+          className={`flex min-h-0 flex-1 flex-col ${
+            isChatThreadRoute
+              ? 'overflow-hidden p-0'
+              : isMessagesRoute
+                ? 'overflow-hidden p-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] lg:pb-0'
+                : 'px-4 py-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-8 lg:px-8 lg:pb-8'
+          }`}
+        >
+          {children}
+        </main>
       </div>
+
+      {!isChatThreadRoute ? <MobileTabBar /> : null}
     </div>
   )
 }

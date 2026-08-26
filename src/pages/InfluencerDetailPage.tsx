@@ -1,12 +1,22 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Avatar } from '../components/ui/Avatar'
-import { Button } from '../components/ui/Button'
 import { useMe } from '../hooks/useAuth'
 import { useInfluencer } from '../hooks/useInfluencers'
 import {
-  brandCategoryLabel,
+  brandCategoriesLabel,
   followerRangeLabel,
 } from '../lib/brand-options'
+
+function StatCard({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
+  return (
+    <div className="rounded-2xl border border-border bg-white px-5 py-4">
+      <p className="text-xs font-semibold text-muted">{label}</p>
+      <p className="mt-2 text-base font-extrabold text-navy" dir={dir}>
+        {value}
+      </p>
+    </div>
+  )
+}
 
 export function InfluencerDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -31,7 +41,7 @@ export function InfluencerDetailPage() {
 
   if (isError || !influencer) {
     return (
-      <div className="mx-auto max-w-2xl py-16 text-center">
+      <div className="py-16 text-center">
         <p className="text-sm text-red-600">اینفلوئنسر پیدا نشد.</p>
         <Link
           to="/app/influencers"
@@ -44,52 +54,62 @@ export function InfluencerDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl animate-fade-slide-in">
-      <section className="mb-6 sm:mb-8">
-        <Link
-          to="/app/influencers"
-          className="mb-3 inline-block text-sm font-medium text-muted transition hover:text-purple"
-        >
-          ← بازگشت به اینفلوئنسرها
-        </Link>
-        <div className="flex items-center gap-4">
+    <>
+      <Link
+        to="/app/influencers"
+        className="mb-4 inline-block text-sm font-medium text-muted transition hover:text-purple"
+      >
+        ← بازگشت به اینفلوئنسرها
+      </Link>
+
+      <section className="mb-6 rounded-2xl border border-border bg-white p-6 sm:p-8">
+        <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
           <Avatar src={influencer.photoUrl} name={influencer.name} size="xl" />
-          <div>
+          <div className="min-w-0 flex-1 text-center sm:text-right">
             <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
               {influencer.name}
             </h1>
             <p className="mt-2 text-sm font-semibold text-muted" dir="ltr">
               {influencer.website}
             </p>
+            <p className="mt-3 text-sm text-muted">
+              {brandCategoriesLabel(influencer.categories, influencer.category)} ·{' '}
+              {influencer.city}
+            </p>
           </div>
-        </div>
-      </section>
-
-      <section className="card-elevated mb-5 rounded-2xl px-5 py-2 sm:px-7">
-        <div className="border-b border-border py-4">
-          <p className="text-xs font-semibold text-muted">دسته‌بندی</p>
-          <p className="mt-1.5 text-sm font-bold text-navy">
-            {brandCategoryLabel(influencer.category)}
-          </p>
-        </div>
-        <div className="border-b border-border py-4">
-          <p className="text-xs font-semibold text-muted">شهر</p>
-          <p className="mt-1.5 text-sm font-bold text-navy">{influencer.city}</p>
-        </div>
-        <div className="py-4">
-          <p className="text-xs font-semibold text-muted">بازه فالوور</p>
-          <p className="mt-1.5 text-sm font-bold text-navy" dir="ltr">
+          <span className="shrink-0 rounded-xl bg-purple-soft/60 px-4 py-2 text-sm font-bold text-purple-deep">
             {followerRangeLabel(influencer.followerRange)}
-          </p>
+          </span>
         </div>
       </section>
 
-      <Button type="button" disabled className="opacity-60">
-        ارسال پیشنهاد · به‌زودی
-      </Button>
-      <p className="mt-3 text-center text-xs text-muted">
-        پیشنهاد روی کمپین در مرحله بعد اضافه می‌شود.
-      </p>
-    </div>
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <StatCard
+            label="دسته‌بندی"
+            value={brandCategoriesLabel(influencer.categories, influencer.category) ?? '—'}
+          />
+          <StatCard label="شهر" value={influencer.city} />
+          <StatCard
+            label="بازه فالوور"
+            value={followerRangeLabel(influencer.followerRange) ?? '—'}
+            dir="ltr"
+          />
+        </div>
+
+        <section className="rounded-2xl border border-border bg-white p-6 lg:sticky lg:top-24 lg:self-start">
+          <h2 className="text-base font-extrabold text-navy">دعوت به کمپین</h2>
+          <p className="mt-2 text-sm leading-7 text-muted">
+            یک کمپین فعال انتخاب کنید و برای این اینفلوئنسر دعوت بفرستید.
+          </p>
+          <Link
+            to={`/app/invitations/new?influencerId=${influencer.id}`}
+            className="btn-primary mt-5 inline-flex w-full items-center justify-center rounded-xl px-4 py-3.5 text-sm font-bold"
+          >
+            انتخاب کمپین و ارسال دعوت
+          </Link>
+        </section>
+      </div>
+    </>
   )
 }

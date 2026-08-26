@@ -4,11 +4,23 @@ import { GuestRoute, ProtectedRoute } from './components/ProtectedRoute'
 import { CampaignDetailPage } from './pages/CampaignDetailPage'
 import { CampaignsPage } from './pages/CampaignsPage'
 import { CreateCampaignPage } from './pages/CreateCampaignPage'
+import { CreateInvitationPage } from './pages/CreateInvitationPage'
+import { CreateOfferPage } from './pages/CreateOfferPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { DealDetailPage } from './pages/DealDetailPage'
 import { EditProfilePage } from './pages/EditProfilePage'
 import { InfluencerDetailPage } from './pages/InfluencerDetailPage'
 import { InfluencersPage } from './pages/InfluencersPage'
+import { InvitationsPage } from './pages/InvitationsPage'
+import {
+  DealsListRedirect,
+  InvitationToCampaignRedirect,
+} from './pages/LegacyRedirects'
 import { LoginPage } from './pages/LoginPage'
+import { MessagesPage } from './pages/MessagesPage'
+import { NotificationsPage } from './pages/NotificationsPage'
+import { OfferDetailPage } from './pages/OfferDetailPage'
+import { OffersPage } from './pages/OffersPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { OtpPage } from './pages/OtpPage'
 import { ProfilePage } from './pages/ProfilePage'
@@ -37,6 +49,20 @@ export default function App() {
           <Route path="campaigns/:id" element={<CampaignDetailPage />} />
           <Route path="influencers" element={<InfluencersPage />} />
           <Route path="influencers/:id" element={<InfluencerDetailPage />} />
+          <Route path="invitations" element={<InvitationsPage />} />
+          <Route path="invitations/new" element={<CreateInvitationPage />} />
+          <Route
+            path="invitations/:id"
+            element={<InvitationToCampaignRedirect />}
+          />
+          <Route path="messages" element={<MessagesPage />} />
+          <Route path="messages/:offerId" element={<MessagesPage />} />
+          <Route path="offers" element={<OffersPage />} />
+          <Route path="offers/new" element={<CreateOfferPage />} />
+          <Route path="offers/:id" element={<OfferDetailPage />} />
+          <Route path="deals" element={<DealsListRedirect />} />
+          <Route path="deals/:id" element={<DealDetailPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/edit" element={<EditProfilePage />} />
         </Route>
