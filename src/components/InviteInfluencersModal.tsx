@@ -6,15 +6,16 @@ import { useInfluencers } from '../hooks/useInfluencers'
 import {
   BRAND_CATEGORIES,
   FOLLOWER_RANGES,
-  IRAN_CITIES,
   brandCategoriesLabel,
   followerRangeLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 import type {
   BrandCategory,
   FollowerRange,
   ListInfluencersParams,
 } from '../types/api'
+import { IranCitySelect } from './IranCitySelect'
 import { Avatar } from './ui/Avatar'
 import { Button } from './ui/Button'
 
@@ -32,18 +33,19 @@ export function InviteInfluencersModal({
   onClose,
 }: InviteInfluencersModalProps) {
   const [category, setCategory] = useState<BrandCategory | ''>('')
+  const [province, setProvince] = useState('')
   const [city, setCity] = useState('')
   const [followerRange, setFollowerRange] = useState<FollowerRange | ''>('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [doneMessage, setDoneMessage] = useState<string | null>(null)
 
   const params = useMemo<ListInfluencersParams>(() => {
     const next: ListInfluencersParams = {}
     if (category) next.category = category
     if (city) next.city = city
+    if (province) next.province = province
     if (followerRange) next.followerRange = followerRange
     return next
-  }, [category, city, followerRange])
+  }, [category, city, province, followerRange])
 
   const { data: influencers, isLoading, isError } = useInfluencers(params, open)
   const bulk = useBulkCreateInvitations()
@@ -58,6 +60,12 @@ export function InviteInfluencersModal({
   }, [open])
 
   if (!open) return null
+
+  const close = () => {
+    setSelected(new Set())
+    bulk.reset()
+    onClose()
+  }
 
   const toggle = (id: string) => {
     setSelected((prev) => {
@@ -75,15 +83,7 @@ export function InviteInfluencersModal({
         influencerIds: [...selected],
       },
       {
-        onSuccess: (result) => {
-          setDoneMessage(
-            `${result.created.length.toLocaleString('fa-IR')} دعوت ارسال شد` +
-              (result.skippedCount
-                ? ` · ${result.skippedCount.toLocaleString('fa-IR')} مورد رد شد`
-                : ''),
-          )
-          setSelected(new Set())
-        },
+        onSuccess: () => close(),
       },
     )
   }
@@ -99,7 +99,7 @@ export function InviteInfluencersModal({
         type="button"
         aria-label="بستن"
         className="absolute inset-0 bg-ink/50 backdrop-blur-[2px]"
-        onClick={onClose}
+        onClick={close}
       />
       <div className="relative z-10 flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-3xl border border-border bg-surface-elevated shadow-2xl animate-fade-slide-in sm:rounded-3xl">
         <div className="border-b border-border px-5 py-4 sm:px-6">
@@ -118,14 +118,14 @@ export function InviteInfluencersModal({
             </div>
             <button
               type="button"
-              onClick={onClose}
+              onClick={close}
               className="rounded-lg px-2 py-1 text-sm font-medium text-muted hover:bg-surface"
             >
               بستن
             </button>
           </div>
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <select
               className="input-brand py-2 text-sm"
               value={category}
@@ -138,18 +138,16 @@ export function InviteInfluencersModal({
                 </option>
               ))}
             </select>
-            <select
-              className="input-brand py-2 text-sm"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            >
-              <option value="">همه شهرها</option>
-              {IRAN_CITIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            <IranCitySelect
+              variant="filter"
+              optional
+              province={province}
+              city={city}
+              onChange={({ province: nextProvince, city: nextCity }) => {
+                setProvince(nextProvince)
+                setCity(nextCity)
+              }}
+            />
             <select
               className="input-brand py-2 text-sm"
               value={followerRange}
@@ -211,7 +209,7 @@ export function InviteInfluencersModal({
                     </p>
                     <p className="truncate text-xs text-muted">
                       {brandCategoriesLabel(inf.categories, inf.category)} ·{' '}
-                      {inf.city} ·{' '}
+                      {formatLocation(inf.city, inf.province)} ·{' '}
                       {followerRangeLabel(inf.followerRange)}
                     </p>
                   </div>
@@ -222,11 +220,6 @@ export function InviteInfluencersModal({
         </div>
 
         <div className="border-t border-border px-5 py-4 sm:px-6">
-          {doneMessage ? (
-            <p className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
-              {doneMessage}
-            </p>
-          ) : null}
           {bulk.isError ? (
             <p className="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
               {getApiErrorMessage(bulk.error, 'ارسال دعوت ناموفق بود')}
@@ -240,7 +233,7 @@ export function InviteInfluencersModal({
             >
               ارسال دعوت ({selected.size.toLocaleString('fa-IR')})
             </Button>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={close}>
               بعداً
             </Button>
           </div>

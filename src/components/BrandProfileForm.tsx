@@ -5,14 +5,14 @@ import { getApiErrorMessage } from '../api/client'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 import { OptionGrid } from './ui/OptionGrid'
-import { Select } from './ui/Select'
+import { IranCitySelect } from './IranCitySelect'
 import {
   BRAND_CATEGORIES,
   BRAND_GOALS,
   BUSINESS_SIZES,
-  IRAN_CITIES,
   normalizeCategories,
 } from '../lib/brand-options'
+import { refineIranLocation } from '../lib/iran-locations'
 import type {
   BrandCategory,
   BrandGoal,
@@ -21,45 +21,55 @@ import type {
   UserProfile,
 } from '../types/api'
 
-const categoryEnum = z.enum([
-  'BEAUTY',
-  'FASHION',
-  'FOOD',
-  'HEALTH',
-  'TECH',
-  'EDUCATION',
-  'TRAVEL',
-  'SPORTS',
-  'HOME',
-  'FINANCE',
-  'ENTERTAINMENT',
-  'OTHER',
-])
+const categoryEnum = z.enum(
+  [
+    'BEAUTY',
+    'FASHION',
+    'FOOD',
+    'HEALTH',
+    'TECH',
+    'EDUCATION',
+    'TRAVEL',
+    'SPORTS',
+    'HOME',
+    'FINANCE',
+    'ENTERTAINMENT',
+    'OTHER',
+  ],
+  { error: 'دسته را انتخاب کنید' },
+)
 
-export const brandProfileSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, 'نام برند حداقل ۲ کاراکتر باشد')
-    .max(80, 'نام برند حداکثر ۸۰ کاراکتر باشد'),
-  website: z.string().trim().max(200, 'آدرس حداکثر ۲۰۰ کاراکتر باشد'),
-  categories: z
-    .array(categoryEnum)
-    .min(1, 'حداقل یک دسته انتخاب کنید'),
-  city: z
-    .string()
-    .trim()
-    .min(2, 'شهر را انتخاب کنید')
-    .max(80, 'شهر حداکثر ۸۰ کاراکتر باشد'),
-  goal: z.union([
-    z.enum(['AWARENESS', 'SALES', 'CONTENT', 'LAUNCH']),
-    z.literal(''),
-  ]),
-  businessSize: z.union([
-    z.enum(['SOLO', 'SME', 'AGENCY', 'ENTERPRISE']),
-    z.literal(''),
-  ]),
-})
+export const brandProfileSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(2, 'نام برند حداقل ۲ کاراکتر باشد')
+      .max(80, 'نام برند حداکثر ۸۰ کاراکتر باشد'),
+    website: z.string().trim().max(200, 'آدرس حداکثر ۲۰۰ کاراکتر باشد'),
+    categories: z
+      .array(categoryEnum, { error: 'حداقل یک دسته انتخاب کنید' })
+      .min(1, 'حداقل یک دسته انتخاب کنید'),
+    province: z.string(),
+    city: z
+      .string()
+      .trim()
+      .min(2, 'شهر را انتخاب کنید')
+      .max(80, 'شهر حداکثر ۸۰ کاراکتر باشد'),
+    goal: z.union([
+      z.enum(['AWARENESS', 'SALES', 'CONTENT', 'LAUNCH'], {
+        error: 'هدف را انتخاب کنید',
+      }),
+      z.literal(''),
+    ]),
+    businessSize: z.union([
+      z.enum(['SOLO', 'SME', 'AGENCY', 'ENTERPRISE'], {
+        error: 'اندازه کسب‌وکار را انتخاب کنید',
+      }),
+      z.literal(''),
+    ]),
+  })
+  .superRefine((values, ctx) => refineIranLocation(values, ctx))
 
 export type BrandProfileFormValues = z.infer<typeof brandProfileSchema>
 
@@ -71,6 +81,7 @@ export function toBrandProfileFormValues(
     | 'category'
     | 'categories'
     | 'city'
+    | 'province'
     | 'goal'
     | 'businessSize'
   >,
@@ -79,6 +90,7 @@ export function toBrandProfileFormValues(
     name: user.name ?? '',
     website: user.website ?? '',
     categories: normalizeCategories(user.categories, user.category),
+    province: user.province ?? '',
     city: user.city ?? '',
     goal: user.goal ?? '',
     businessSize: user.businessSize ?? '',
@@ -93,6 +105,7 @@ export function brandFormToUpdateBody(
     categories: values.categories,
     category: values.categories[0] as BrandCategory,
     city: values.city.trim(),
+    province: values.province.trim(),
     website: values.website.trim() ? values.website.trim() : null,
     goal: values.goal ? (values.goal as BrandGoal) : null,
     businessSize: values.businessSize
@@ -124,6 +137,8 @@ export function BrandProfileForm({
     register,
     control,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isDirty },
   } = useForm<BrandProfileFormValues>({
     resolver: zodResolver(brandProfileSchema),
@@ -132,6 +147,7 @@ export function BrandProfileForm({
 
   return (
     <form
+      noValidate
       className="flex flex-col gap-8"
       onSubmit={handleSubmit((values) => onSubmit(brandFormToUpdateBody(values)))}
     >
@@ -169,18 +185,15 @@ export function BrandProfileForm({
             />
           )}
         />
-        <Select
-          label="شهر"
-          placeholder="شهر را انتخاب کنید"
-          options={[
-            ...IRAN_CITIES.map((c) => ({ value: c, label: c })),
-            ...(defaults.city &&
-            !IRAN_CITIES.includes(defaults.city as (typeof IRAN_CITIES)[number])
-              ? [{ value: defaults.city, label: defaults.city }]
-              : []),
-          ]}
-          error={errors.city?.message}
-          {...register('city')}
+        <IranCitySelect
+          province={watch('province')}
+          city={watch('city')}
+          provinceError={errors.province?.message}
+          cityError={errors.city?.message}
+          onChange={({ province, city }) => {
+            setValue('province', province, { shouldDirty: true, shouldValidate: true })
+            setValue('city', city, { shouldDirty: true, shouldValidate: true })
+          }}
         />
       </section>
 

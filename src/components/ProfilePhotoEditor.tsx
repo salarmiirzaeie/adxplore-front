@@ -39,7 +39,7 @@ export function ProfilePhotoEditor({
             type="button"
             disabled={busy}
             onClick={() => inputRef.current?.click()}
-            className="rounded-xl border border-border bg-white px-3 py-2 text-xs font-bold text-navy transition hover:border-purple/40 hover:bg-surface disabled:opacity-50"
+            className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs font-bold text-navy transition hover:border-purple/40 hover:bg-surface disabled:opacity-50"
           >
             {upload.isPending ? 'در حال آپلود…' : photoUrl ? 'تغییر عکس' : 'انتخاب عکس'}
           </button>

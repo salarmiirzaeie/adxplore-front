@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from './ui/Button'
 import {
-  deliverableLabel,
+  deliverablesLabel,
   offerPipelineLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 import type { DealStatus, Offer } from '../types/api'
 
 interface OfferProposalCardProps {
@@ -38,7 +39,7 @@ export function OfferProposalCard({
     : null
 
   return (
-    <article className="mx-auto w-full max-w-md rounded-2xl border border-emerald-200/80 bg-white p-3 shadow-sm sm:p-5">
+    <article className="mx-auto w-full max-w-md rounded-2xl border border-emerald-200/80 bg-surface-elevated p-3 shadow-sm sm:p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold text-emerald-700">پیشنهاد همکاری</p>
@@ -61,12 +62,14 @@ export function OfferProposalCard({
         <div>
           <dt className="text-[11px] font-semibold text-muted">نوع محتوا</dt>
           <dd className="mt-0.5 font-bold text-navy">
-            {deliverableLabel(offer.campaign.deliverable) ?? '—'}
+            {deliverablesLabel(offer.campaign.deliverables, offer.campaign.deliverable) ?? '—'}
           </dd>
         </div>
         <div>
           <dt className="text-[11px] font-semibold text-muted">شهر</dt>
-          <dd className="mt-0.5 font-bold text-navy">{offer.campaign.city}</dd>
+          <dd className="mt-0.5 font-bold text-navy">
+            {formatLocation(offer.campaign.city, offer.campaign.province)}
+          </dd>
         </div>
         <div>
           <dt className="text-[11px] font-semibold text-muted">مهلت</dt>

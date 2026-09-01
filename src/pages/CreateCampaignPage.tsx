@@ -7,16 +7,17 @@ import { getApiErrorMessage } from '../api/client'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { OptionGrid } from '../components/ui/OptionGrid'
-import { Select } from '../components/ui/Select'
+import { IranCitySelect } from '../components/IranCitySelect'
 import { Textarea } from '../components/ui/Textarea'
 import { useMe } from '../hooks/useAuth'
 import { useCreateCampaign } from '../hooks/useCampaigns'
 import {
   BRAND_CATEGORIES,
   DELIVERABLE_TYPES,
-  IRAN_CITIES,
   normalizeCategories,
 } from '../lib/brand-options'
+import { parseNumber } from '../lib/digits'
+import { NATIONWIDE_CITY, refineIranLocation } from '../lib/iran-locations'
 import type {
   BrandCategory,
   CreateCampaignBody,
@@ -40,33 +41,44 @@ const schema = z
       .max(2000, 'توضیح حداکثر ۲۰۰۰ کاراکتر باشد'),
     categories: z
       .array(
-        z.enum([
-          'BEAUTY',
-          'FASHION',
-          'FOOD',
-          'HEALTH',
-          'TECH',
-          'EDUCATION',
-          'TRAVEL',
-          'SPORTS',
-          'HOME',
-          'FINANCE',
-          'ENTERTAINMENT',
-          'OTHER',
-        ]),
+        z.enum(
+          [
+            'BEAUTY',
+            'FASHION',
+            'FOOD',
+            'HEALTH',
+            'TECH',
+            'EDUCATION',
+            'TRAVEL',
+            'SPORTS',
+            'HOME',
+            'FINANCE',
+            'ENTERTAINMENT',
+            'OTHER',
+          ],
+          { error: 'دسته را انتخاب کنید' },
+        ),
+        { error: 'حداقل یک دسته انتخاب کنید' },
       )
       .min(1, 'حداقل یک دسته انتخاب کنید'),
-    city: z.string().trim().min(2, 'شهر را انتخاب کنید').max(80),
-    deliverable: z.enum(['STORY', 'POST', 'REEL'], {
-      error: 'نوع محتوا را انتخاب کنید',
-    }),
+    city: z
+      .string()
+      .trim()
+      .min(2, 'شهر را انتخاب کنید')
+      .max(80, 'شهر حداکثر ۸۰ کاراکتر باشد'),
+    province: z.string(),
+    deliverables: z
+      .array(z.enum(['STORY', 'POST', 'REEL'], { error: 'نوع محتوا را انتخاب کنید' }), {
+        error: 'حداقل یک نوع محتوا انتخاب کنید',
+      })
+      .min(1, 'حداقل یک نوع محتوا انتخاب کنید'),
     budgetMin: z.string().trim(),
     budgetMax: z.string().trim(),
     publish: z.boolean(),
   })
   .superRefine((values, ctx) => {
-    const min = values.budgetMin ? Number(values.budgetMin) : null
-    const max = values.budgetMax ? Number(values.budgetMax) : null
+    const min = values.budgetMin ? parseNumber(values.budgetMin) : null
+    const max = values.budgetMax ? parseNumber(values.budgetMax) : null
     if (values.budgetMin && Number.isNaN(min)) {
       ctx.addIssue({
         code: 'custom',
@@ -94,6 +106,7 @@ const schema = z
         message: 'حداکثر باید بزرگ‌تر یا مساوی حداقل باشد',
       })
     }
+    refineIranLocation(values, ctx, { allowNationwide: true })
   })
 
 type FormValues = z.infer<typeof schema>
@@ -118,6 +131,8 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
     register,
     control,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -125,8 +140,9 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
       title: '',
       brief: '',
       categories: normalizeCategories(user.categories, user.category),
+      province: user.province ?? '',
       city: user.city ?? '',
-      deliverable: undefined,
+      deliverables: [],
       budgetMin: '',
       budgetMax: '',
       publish: false,
@@ -140,11 +156,16 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
       categories: values.categories,
       category: values.categories[0] as BrandCategory,
       city: values.city.trim(),
-      deliverable: values.deliverable as DeliverableType,
+      province:
+        values.city.trim() === NATIONWIDE_CITY
+          ? null
+          : values.province.trim() || null,
+      deliverables: values.deliverables as DeliverableType[],
+      deliverable: values.deliverables[0] as DeliverableType,
       status: values.publish ? 'OPEN' : 'DRAFT',
     }
-    if (values.budgetMin) body.budgetMin = Number(values.budgetMin)
-    if (values.budgetMax) body.budgetMax = Number(values.budgetMax)
+    if (values.budgetMin) body.budgetMin = parseNumber(values.budgetMin)
+    if (values.budgetMax) body.budgetMax = parseNumber(values.budgetMax)
     create.mutate({ body, files })
   })
 
@@ -193,7 +214,7 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
                 <button
                   type="button"
                   onClick={() => inputRef.current?.click()}
-                  className="rounded-xl border border-border bg-white px-3 py-2 text-xs font-bold text-navy transition hover:border-purple/40 hover:bg-surface"
+                  className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs font-bold text-navy transition hover:border-purple/40 hover:bg-surface"
                 >
                   افزودن تصویر
                 </button>
@@ -262,30 +283,31 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
             )}
           />
 
-          <Select
-            label="شهر"
-            placeholder="شهر را انتخاب کنید"
-            options={[
-              ...IRAN_CITIES.map((c) => ({ value: c, label: c })),
-              ...(user.city &&
-              !IRAN_CITIES.includes(user.city as (typeof IRAN_CITIES)[number])
-                ? [{ value: user.city, label: user.city }]
-                : []),
-            ]}
-            error={errors.city?.message}
-            {...register('city')}
+          <IranCitySelect
+            allowNationwide
+            province={watch('province')}
+            city={watch('city')}
+            provinceError={errors.province?.message}
+            cityError={errors.city?.message}
+            onChange={({ province, city }) => {
+              setValue('province', province, { shouldValidate: true })
+              setValue('city', city, { shouldValidate: true })
+            }}
           />
 
           <Controller
-            name="deliverable"
+            name="deliverables"
             control={control}
             render={({ field }) => (
               <OptionGrid
                 label="نوع محتوا"
                 options={DELIVERABLE_TYPES}
                 value={field.value}
-                onChange={field.onChange}
-                error={errors.deliverable?.message}
+                onChange={(v) =>
+                  field.onChange(Array.isArray(v) ? v : v ? [v] : [])
+                }
+                error={errors.deliverables?.message}
+                multiple
               />
             )}
           />

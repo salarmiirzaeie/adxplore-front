@@ -15,10 +15,10 @@ import {
   type InfluencerProfileFormValues,
 } from '../components/InfluencerProfileForm'
 import { ProfilePhotoEditor } from '../components/ProfilePhotoEditor'
+import { IranCitySelect } from '../components/IranCitySelect'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { OptionGrid } from '../components/ui/OptionGrid'
-import { Select } from '../components/ui/Select'
 import { useMe, useUpdateProfile } from '../hooks/useAuth'
 import { getAccessToken, isProfileComplete } from '../lib/auth-storage'
 import {
@@ -27,7 +27,6 @@ import {
   BUSINESS_SIZES,
   FOLLOWER_RANGES,
   INFLUENCER_CATEGORIES,
-  IRAN_CITIES,
 } from '../lib/brand-options'
 
 const TOTAL_STEPS = 3
@@ -51,6 +50,8 @@ function InfluencerOnboarding({
     handleSubmit,
     trigger,
     clearErrors,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<InfluencerValues>({
     resolver: zodResolver(influencerProfileSchema),
@@ -58,6 +59,7 @@ function InfluencerOnboarding({
       name: defaults.name ?? '',
       website: defaults.website ?? '',
       categories: defaults.categories ?? [],
+      province: defaults.province ?? '',
       city: defaults.city ?? '',
       followerRange: defaults.followerRange,
     },
@@ -65,7 +67,7 @@ function InfluencerOnboarding({
 
   const stepFields: Array<(keyof InfluencerValues)[]> = [
     ['name', 'website'],
-    ['categories', 'city'],
+    ['categories', 'province', 'city'],
     ['followerRange'],
   ]
 
@@ -108,7 +110,7 @@ function InfluencerOnboarding({
       subtitle={titles[step].subtitle}
       step={`مرحله ${step + 1} از ${TOTAL_STEPS}`}
     >
-      <form onSubmit={onFinalSubmit} className="flex flex-col gap-5">
+      <form noValidate onSubmit={onFinalSubmit} className="flex flex-col gap-5">
         {step === 0 ? (
           <>
             <ProfilePhotoEditor
@@ -153,12 +155,15 @@ function InfluencerOnboarding({
                 />
               )}
             />
-            <Select
-              label="شهر"
-              placeholder="شهر را انتخاب کنید"
-              options={IRAN_CITIES.map((c) => ({ value: c, label: c }))}
-              error={errors.city?.message}
-              {...register('city')}
+            <IranCitySelect
+              province={watch('province')}
+              city={watch('city')}
+              provinceError={errors.province?.message}
+              cityError={errors.city?.message}
+              onChange={({ province, city }) => {
+                setValue('province', province, { shouldValidate: true })
+                setValue('city', city, { shouldValidate: true })
+              }}
             />
           </>
         ) : null}
@@ -228,6 +233,8 @@ function BrandOnboarding({
     trigger,
     clearErrors,
     getValues,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<BrandValues>({
     resolver: zodResolver(brandProfileSchema),
@@ -235,6 +242,7 @@ function BrandOnboarding({
       name: defaults.name ?? '',
       website: defaults.website ?? '',
       categories: defaults.categories ?? [],
+      province: defaults.province ?? '',
       city: defaults.city ?? '',
       goal: defaults.goal ?? '',
       businessSize: defaults.businessSize ?? '',
@@ -243,7 +251,7 @@ function BrandOnboarding({
 
   const stepFields: Array<(keyof BrandValues)[]> = [
     ['name', 'website'],
-    ['categories', 'city'],
+    ['categories', 'province', 'city'],
     ['goal', 'businessSize'],
   ]
 
@@ -267,7 +275,7 @@ function BrandOnboarding({
   const onFinalSubmit = handleSubmit(submitProfile)
 
   const skipOptional = async () => {
-    const ok = await trigger(['name', 'website', 'categories', 'city'])
+    const ok = await trigger(['name', 'website', 'categories', 'province', 'city'])
     if (!ok) {
       const values = getValues()
       if (!values.name?.trim() || (values.website && values.website.length > 200)) {
@@ -300,7 +308,7 @@ function BrandOnboarding({
       subtitle={titles[step].subtitle}
       step={`مرحله ${step + 1} از ${TOTAL_STEPS}`}
     >
-      <form onSubmit={onFinalSubmit} className="flex flex-col gap-5">
+      <form noValidate onSubmit={onFinalSubmit} className="flex flex-col gap-5">
         {step === 0 ? (
           <>
             <ProfilePhotoEditor
@@ -346,12 +354,15 @@ function BrandOnboarding({
                 />
               )}
             />
-            <Select
-              label="شهر"
-              placeholder="شهر را انتخاب کنید"
-              options={IRAN_CITIES.map((c) => ({ value: c, label: c }))}
-              error={errors.city?.message}
-              {...register('city')}
+            <IranCitySelect
+              province={watch('province')}
+              city={watch('city')}
+              provinceError={errors.province?.message}
+              cityError={errors.city?.message}
+              onChange={({ province, city }) => {
+                setValue('province', province, { shouldValidate: true })
+                setValue('city', city, { shouldValidate: true })
+              }}
             />
           </>
         ) : null}
@@ -469,6 +480,7 @@ export function OnboardingPage() {
             : user.category
               ? [user.category]
               : [],
+          province: user.province ?? '',
           city: user.city ?? '',
           goal: user.goal ?? '',
           businessSize: user.businessSize ?? '',
@@ -487,7 +499,8 @@ export function OnboardingPage() {
           ? user.categories
           : user.category
             ? [user.category]
-            : [],
+              : [],
+        province: user.province ?? '',
         city: user.city ?? '',
         followerRange: user.followerRange ?? undefined,
       }}

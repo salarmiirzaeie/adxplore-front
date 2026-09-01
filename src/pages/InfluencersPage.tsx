@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { Avatar } from '../components/ui/Avatar'
+import { IranCitySelect } from '../components/IranCitySelect'
 import { useMe } from '../hooks/useAuth'
 import { useInfluencers } from '../hooks/useInfluencers'
 import {
   BRAND_CATEGORIES,
   FOLLOWER_RANGES,
-  IRAN_CITIES,
   brandCategoriesLabel,
   followerRangeLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 import type {
   BrandCategory,
   FollowerRange,
@@ -21,7 +22,7 @@ function InfluencerCardView({ influencer }: { influencer: InfluencerCard }) {
   return (
     <Link
       to={`/app/influencers/${influencer.id}`}
-      className="flex h-full flex-col rounded-2xl border border-border bg-white p-5 transition hover:border-purple/25 hover:shadow-md"
+      className="flex h-full flex-col rounded-2xl border border-border bg-surface-elevated p-5 transition hover:border-purple/25 hover:shadow-md"
     >
       <div className="mb-4 flex items-start gap-4">
         <Avatar src={influencer.photoUrl} name={influencer.name} size="lg" />
@@ -43,7 +44,9 @@ function InfluencerCardView({ influencer }: { influencer: InfluencerCard }) {
         <span className="rounded-lg bg-surface px-2.5 py-1">
           {brandCategoriesLabel(influencer.categories, influencer.category)}
         </span>
-        <span className="rounded-lg bg-surface px-2.5 py-1">{influencer.city}</span>
+        <span className="rounded-lg bg-surface px-2.5 py-1">
+          {formatLocation(influencer.city, influencer.province)}
+        </span>
       </div>
       <p className="mt-4 text-xs font-bold text-purple">مشاهده پروفایل و دعوت</p>
     </Link>
@@ -53,6 +56,7 @@ function InfluencerCardView({ influencer }: { influencer: InfluencerCard }) {
 export function InfluencersPage() {
   const { data: user } = useMe()
   const [category, setCategory] = useState<BrandCategory | ''>('')
+  const [province, setProvince] = useState('')
   const [city, setCity] = useState('')
   const [followerRange, setFollowerRange] = useState<FollowerRange | ''>('')
 
@@ -60,9 +64,10 @@ export function InfluencersPage() {
     const next: ListInfluencersParams = {}
     if (category) next.category = category
     if (city) next.city = city
+    if (province) next.province = province
     if (followerRange) next.followerRange = followerRange
     return next
-  }, [category, city, followerRange])
+  }, [category, city, province, followerRange])
 
   const isBrand = user?.role === 'BRAND'
   const { data: influencers, isLoading, isError, isFetching } = useInfluencers(
@@ -75,7 +80,7 @@ export function InfluencersPage() {
     return <Navigate to="/app" replace />
   }
 
-  const hasFilters = Boolean(category || city || followerRange)
+  const hasFilters = Boolean(category || city || province || followerRange)
 
   return (
     <>
@@ -89,8 +94,8 @@ export function InfluencersPage() {
         </p>
       </section>
 
-      <section className="mb-6 rounded-2xl border border-border bg-white px-4 py-4 sm:px-6">
-        <div className="grid gap-3 sm:grid-cols-3">
+      <section className="mb-6 rounded-2xl border border-border bg-surface-elevated px-4 py-4 sm:px-6">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-semibold text-muted">دسته</span>
             <select
@@ -107,21 +112,17 @@ export function InfluencersPage() {
             </select>
           </label>
 
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-semibold text-muted">شهر</span>
-            <select
-              className="input-brand py-2.5 text-sm"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            >
-              <option value="">همه</option>
-              {IRAN_CITIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
+          <IranCitySelect
+            variant="filter"
+            optional
+            showLabels
+            province={province}
+            city={city}
+            onChange={({ province: nextProvince, city: nextCity }) => {
+              setProvince(nextProvince)
+              setCity(nextCity)
+            }}
+          />
 
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-semibold text-muted">فالوور</span>
@@ -147,6 +148,7 @@ export function InfluencersPage() {
             type="button"
             onClick={() => {
               setCategory('')
+              setProvince('')
               setCity('')
               setFollowerRange('')
             }}
@@ -170,7 +172,7 @@ export function InfluencersPage() {
       ) : null}
 
       {!isLoading && !isError && influencers?.length === 0 ? (
-        <section className="rounded-2xl border border-border bg-white px-6 py-14 text-center">
+        <section className="rounded-2xl border border-border bg-surface-elevated px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">نتیجه‌ای پیدا نشد</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
             {hasFilters

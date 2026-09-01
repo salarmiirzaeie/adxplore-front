@@ -13,7 +13,7 @@ const variants: Record<Variant, string> = {
   primary: 'btn-primary',
   soft: 'bg-purple-soft/60 text-purple-deep hover:bg-purple-soft',
   ghost: 'bg-transparent text-muted hover:bg-surface hover:text-navy',
-  outline: 'border border-border bg-white text-navy hover:border-purple/40 hover:bg-surface',
+  outline: 'border border-border bg-surface-elevated text-navy hover:border-purple/40 hover:bg-surface',
 }
 
 export function Button({

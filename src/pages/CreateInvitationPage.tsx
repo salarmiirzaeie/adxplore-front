@@ -12,7 +12,7 @@ import { useMe } from '../hooks/useAuth'
 import { useCampaigns } from '../hooks/useCampaigns'
 import { useInfluencer } from '../hooks/useInfluencers'
 import { useCreateInvitation } from '../hooks/useInvitations'
-import { deliverableLabel } from '../lib/brand-options'
+import { deliverablesLabel } from '../lib/brand-options'
 
 const schema = z.object({
   campaignId: z.string().min(1, 'کمپین را انتخاب کنید'),
@@ -139,7 +139,7 @@ export function CreateInvitationPage() {
                 placeholder="انتخاب کمپین فعال"
                 options={openCampaigns.map((c) => ({
                   value: c.id,
-                  label: `${c.title} · ${deliverableLabel(c.deliverable)}`,
+                  label: `${c.title} · ${deliverablesLabel(c.deliverables, c.deliverable)}`,
                 }))}
                 error={errors.campaignId?.message}
                 {...field}

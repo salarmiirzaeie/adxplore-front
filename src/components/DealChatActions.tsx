@@ -7,6 +7,7 @@ import {
   useSubmitDeliverable,
   useUpdateDealStatus,
 } from '../hooks/useDeals'
+import { useRequestDealPayment } from '../hooks/usePayments'
 import { dealStatusLabel } from '../lib/brand-options'
 import type { Deal } from '../types/api'
 
@@ -19,6 +20,7 @@ interface DealChatActionsProps {
 export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsProps) {
   const submit = useSubmitDeliverable(deal.id)
   const update = useUpdateDealStatus(deal.id)
+  const pay = useRequestDealPayment(deal.id)
   const fileRef = useRef<HTMLInputElement>(null)
   const [contentUrl, setContentUrl] = useState(deal.contentUrl ?? '')
   const [note, setNote] = useState('')
@@ -27,13 +29,16 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
   const [showSubmit, setShowSubmit] = useState(false)
   const [showRevision, setShowRevision] = useState(false)
 
+  const needsPayment = deal.status === 'PENDING_PAYMENT'
   const canSubmit =
     !isBrand &&
     (deal.status === 'IN_PROGRESS' || deal.status === 'REVISION_REQUESTED')
   const canReview = isBrand && deal.status === 'DELIVERED'
   const canCancel =
-    deal.status === 'IN_PROGRESS' || deal.status === 'REVISION_REQUESTED'
-  const busy = submit.isPending || update.isPending
+    deal.status === 'PENDING_PAYMENT' ||
+    deal.status === 'IN_PROGRESS' ||
+    deal.status === 'REVISION_REQUESTED'
+  const busy = submit.isPending || update.isPending || pay.isPending
 
   if (deal.status === 'COMPLETED' || deal.status === 'CANCELLED') {
     return (
@@ -45,7 +50,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
     )
   }
 
-  if (!canSubmit && !canReview && !canCancel) return null
+  if (!needsPayment && !canSubmit && !canReview && !canCancel) return null
 
   const onSubmitDeliverable = () => {
     const url = contentUrl.trim()
@@ -64,6 +69,16 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
     )
   }
 
+  const onPay = () => {
+    pay.mutate(undefined, {
+      onSuccess: (res) => {
+        if (res.paymentUrl) {
+          window.location.assign(res.paymentUrl)
+        }
+      },
+    })
+  }
+
   return (
     <div className="shrink-0 border-t border-border bg-surface/60 px-3 py-3 sm:px-4">
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -74,6 +89,37 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
           {deal.fee.toLocaleString('fa-IR')} تومان
         </p>
       </div>
+
+      {needsPayment ? (
+        <div className="space-y-2">
+          {isBrand ? (
+            <>
+              <p className="text-xs leading-6 text-muted">
+                برای شروع همکاری، مبلغ پیشنهاد را از طریق زرین‌پال پرداخت کنید.
+                مبلغ تا تأیید تحویل در حساب امانی می‌ماند.
+              </p>
+              <Button
+                type="button"
+                fullWidth={false}
+                className="w-full"
+                loading={pay.isPending}
+                onClick={onPay}
+              >
+                پرداخت امن · {deal.fee.toLocaleString('fa-IR')} تومان
+              </Button>
+              {pay.isError ? (
+                <p className="text-xs text-red-600">
+                  {getApiErrorMessage(pay.error, 'خطا در اتصال به درگاه')}
+                </p>
+              ) : null}
+            </>
+          ) : (
+            <p className="text-xs leading-6 text-muted">
+              در انتظار پرداخت برند برای شروع همکاری…
+            </p>
+          )}
+        </div>
+      ) : null}
 
       {canSubmit && !showSubmit ? (
         <Button
@@ -89,7 +135,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
       ) : null}
 
       {canSubmit && showSubmit ? (
-        <div className="space-y-3 rounded-xl border border-border bg-white p-3">
+        <div className="space-y-3 rounded-xl border border-border bg-surface-elevated p-3">
           <Input
             label="لینک محتوا"
             value={contentUrl}
@@ -170,7 +216,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
               </Button>
             </div>
           ) : (
-            <div className="space-y-2 rounded-xl border border-border bg-white p-3">
+            <div className="space-y-2 rounded-xl border border-border bg-surface-elevated p-3">
               <Textarea
                 label="بازخورد برای اصلاح"
                 rows={3}

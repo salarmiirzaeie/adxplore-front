@@ -23,7 +23,9 @@ import { OfferDetailPage } from './pages/OfferDetailPage'
 import { OffersPage } from './pages/OffersPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { OtpPage } from './pages/OtpPage'
+import { PaymentResultPage } from './pages/PaymentResultPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { WalletPage } from './pages/WalletPage'
 import { getAccessToken } from './lib/auth-storage'
 
 function HomeRedirect() {
@@ -62,6 +64,8 @@ export default function App() {
           <Route path="offers/:id" element={<OfferDetailPage />} />
           <Route path="deals" element={<DealsListRedirect />} />
           <Route path="deals/:id" element={<DealDetailPage />} />
+          <Route path="payments/result" element={<PaymentResultPage />} />
+          <Route path="wallet" element={<WalletPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/edit" element={<EditProfilePage />} />

@@ -11,7 +11,7 @@ import type { UserRole } from '../types/api'
 
 const schema = z.object({
   role: z.enum(['INFLUENCER', 'BRAND'], {
-    required_error: 'نوع حساب را انتخاب کنید',
+    error: 'نوع حساب را انتخاب کنید',
   }),
   phone: z
     .string()
@@ -64,7 +64,7 @@ export function LoginPage() {
       title="ورود به ادکسپلور"
       subtitle="نوع حساب را انتخاب کنید و شماره موبایل خود را وارد کنید."
     >
-      <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
         <Controller
           name="role"
           control={control}

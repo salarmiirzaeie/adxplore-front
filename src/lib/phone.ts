@@ -1,6 +1,8 @@
+import { toEnglishDigits } from './digits'
+
 /** Normalize Iranian mobile numbers to 09xxxxxxxxx. */
 export function normalizeIranPhone(phone: string): string {
-  const digits = phone.replace(/[\s\-()]/g, '')
+  const digits = toEnglishDigits(phone).replace(/[\s\-()]/g, '')
   let normalized = digits
 
   if (normalized.startsWith('+98')) {
@@ -18,7 +20,7 @@ export function normalizeIranPhone(phone: string): string {
 export const IRAN_MOBILE_PATTERN = /^(\+98|0|98)?9\d{9}$/
 
 export function isValidIranMobile(phone: string): boolean {
-  const cleaned = phone.replace(/[\s\-()]/g, '')
+  const cleaned = toEnglishDigits(phone).replace(/[\s\-()]/g, '')
   return IRAN_MOBILE_PATTERN.test(cleaned)
 }
 

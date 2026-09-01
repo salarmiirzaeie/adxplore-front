@@ -58,6 +58,7 @@ export interface AuthUser {
   category: BrandCategory | null
   categories: BrandCategory[]
   city: string | null
+  province: string | null
   website: string | null
   goal: BrandGoal | null
   businessSize: BusinessSize | null
@@ -81,6 +82,7 @@ export interface UserProfile {
   category: BrandCategory | null
   categories: BrandCategory[]
   city: string | null
+  province: string | null
   website: string | null
   goal: BrandGoal | null
   businessSize: BusinessSize | null
@@ -94,6 +96,7 @@ export interface UpdateProfileBody {
   category?: BrandCategory
   categories?: BrandCategory[]
   city?: string
+  province?: string
   website?: string | null
   goal?: BrandGoal | null
   businessSize?: BusinessSize | null
@@ -114,7 +117,9 @@ export interface Campaign {
   category: BrandCategory
   categories: BrandCategory[]
   city: string
+  province: string | null
   deliverable: DeliverableType
+  deliverables: DeliverableType[]
   budgetMin: number | null
   budgetMax: number | null
   status: CampaignStatus
@@ -127,6 +132,7 @@ export interface Campaign {
 export interface BrowseCampaignsParams {
   category?: BrandCategory
   city?: string
+  province?: string
   q?: string
   forMe?: boolean
   invited?: boolean
@@ -138,7 +144,9 @@ export interface CreateCampaignBody {
   category?: BrandCategory
   categories: BrandCategory[]
   city: string
-  deliverable: DeliverableType
+  province?: string | null
+  deliverable?: DeliverableType
+  deliverables: DeliverableType[]
   budgetMin?: number
   budgetMax?: number
   status?: CampaignStatus
@@ -150,7 +158,9 @@ export interface UpdateCampaignBody {
   category?: BrandCategory
   categories?: BrandCategory[]
   city?: string
+  province?: string | null
   deliverable?: DeliverableType
+  deliverables?: DeliverableType[]
   budgetMin?: number
   budgetMax?: number
   status?: CampaignStatus
@@ -164,12 +174,14 @@ export interface InfluencerCard {
   category: BrandCategory
   categories: BrandCategory[]
   city: string
+  province: string | null
   followerRange: FollowerRange
 }
 
 export interface ListInfluencersParams {
   category?: BrandCategory
   city?: string
+  province?: string
   followerRange?: FollowerRange
 }
 
@@ -232,11 +244,19 @@ export interface SendChatMessageBody {
 }
 
 export type DealStatus =
+  | 'PENDING_PAYMENT'
   | 'IN_PROGRESS'
   | 'DELIVERED'
   | 'REVISION_REQUESTED'
   | 'COMPLETED'
   | 'CANCELLED'
+
+export type PaymentStatus =
+  | 'PENDING'
+  | 'HELD'
+  | 'RELEASED'
+  | 'FAILED'
+  | 'REFUNDED'
 
 export interface Deal {
   id: string
@@ -259,6 +279,81 @@ export interface Deal {
   updatedAt: string
 }
 
+export interface Payment {
+  id: string
+  dealId: string
+  brandId: string
+  influencerId: string
+  amountToman: number
+  amountRial: number
+  description: string | null
+  authority: string | null
+  refId: string | null
+  cardPan: string | null
+  status: PaymentStatus
+  errorMessage: string | null
+  paidAt: string | null
+  releasedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PaymentRequestResult {
+  success: boolean
+  paymentId: string
+  authority: string
+  paymentUrl: string
+  amountToman: number
+  amountRial: number
+  reused?: boolean
+  sandbox?: boolean
+  status: PaymentStatus
+}
+
+export interface PaymentStatusResult {
+  success: boolean
+  dealId: string
+  offerId: string
+  dealStatus: string
+  paid: boolean
+  paymentStatus: PaymentStatus | null
+  refId: string | null
+  amountToman: number | null
+}
+
+export type WalletTxType =
+  | 'TOP_UP'
+  | 'ESCROW_HOLD'
+  | 'ESCROW_RELEASE'
+  | 'ESCROW_REFUND'
+  | 'DEAL_EARNING'
+  | 'WITHDRAW_REQUEST'
+  | 'WITHDRAW_DONE'
+  | 'WITHDRAW_CANCEL'
+
+export interface Wallet {
+  id: string
+  userId: string
+  availableToman: number
+  heldToman: number
+  totalToman: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface WalletTransaction {
+  id: string
+  walletId: string
+  type: WalletTxType
+  amountToman: number
+  availableAfter: number
+  heldAfter: number
+  dealId: string | null
+  paymentId: string | null
+  description: string | null
+  createdAt: string
+}
+
 export interface SubmitDeliverableBody {
   contentUrl: string
   note?: string
@@ -278,6 +373,7 @@ export interface OfferParty {
   category: BrandCategory | null
   categories: BrandCategory[]
   city: string | null
+  province: string | null
   followerRange: FollowerRange | null
 }
 
@@ -285,9 +381,11 @@ export interface InvitationCampaign {
   id: string
   title: string
   deliverable: DeliverableType
+  deliverables: DeliverableType[]
   category: BrandCategory
   categories: BrandCategory[]
   city: string
+  province: string | null
   status: CampaignStatus
   brief: string
   budgetMin: number | null
@@ -333,9 +431,11 @@ export interface OfferCampaign {
   id: string
   title: string
   deliverable: DeliverableType
+  deliverables: DeliverableType[]
   category: BrandCategory
   categories: BrandCategory[]
   city: string
+  province: string | null
   status: CampaignStatus
   brief: string
   budgetMin: number | null

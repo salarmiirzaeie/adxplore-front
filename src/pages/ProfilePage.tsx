@@ -7,6 +7,7 @@ import {
   businessSizeLabel,
   followerRangeLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 import { formatPhoneDisplay } from '../lib/phone'
 import type { UserProfile } from '../types/api'
 
@@ -45,7 +46,10 @@ function BrandProfileView({ user }: { user: UserProfile }) {
         label="دسته فعالیت"
         value={brandCategoriesLabel(user.categories, user.category)}
       />
-      <ProfileField label="شهر" value={user.city} />
+      <ProfileField
+        label="شهر"
+        value={formatLocation(user.city, user.province)}
+      />
       <ProfileField label="هدف اصلی" value={brandGoalLabel(user.goal)} />
       <ProfileField
         label="اندازه کسب‌وکار"
@@ -69,7 +73,10 @@ function InfluencerProfileView({ user }: { user: UserProfile }) {
         label="دسته‌بندی محتوا"
         value={brandCategoriesLabel(user.categories, user.category)}
       />
-      <ProfileField label="شهر" value={user.city} />
+      <ProfileField
+        label="شهر"
+        value={formatLocation(user.city, user.province)}
+      />
       <ProfileField
         label="بازه فالوور"
         value={followerRangeLabel(user.followerRange)}

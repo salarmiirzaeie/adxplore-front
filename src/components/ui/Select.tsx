@@ -6,10 +6,21 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   hint?: string
   options: Array<{ value: string; label: string }>
   placeholder?: string
+  allowEmpty?: boolean
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select(
-  { label, error, hint, options, placeholder, className = '', id, ...props },
+  {
+    label,
+    error,
+    hint,
+    options,
+    placeholder,
+    allowEmpty = false,
+    className = '',
+    id,
+    ...props
+  },
   ref,
 ) {
   const selectId = id || props.name
@@ -25,7 +36,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         {...props}
       >
         {placeholder ? (
-          <option value="" disabled>
+          <option value="" disabled={!allowEmpty}>
             {placeholder}
           </option>
         ) : null}

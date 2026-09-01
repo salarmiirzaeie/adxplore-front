@@ -117,7 +117,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
 
   if (loadingOffer || loadingConv) {
     return (
-      <div className="flex h-full items-center justify-center bg-white">
+      <div className="flex h-full items-center justify-center bg-surface-elevated">
         <span className="size-8 animate-spin rounded-full border-2 border-purple border-t-transparent" />
       </div>
     )
@@ -125,7 +125,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
 
   if (offerError || convError || !offer || !conversation) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 bg-white px-6 text-center">
+      <div className="flex h-full flex-col items-center justify-center gap-3 bg-surface-elevated px-6 text-center">
         <p className="text-sm text-red-600">گفتگو پیدا نشد.</p>
         <button
           type="button"
@@ -154,9 +154,9 @@ export function ChatThread({ offerId }: ChatThreadProps) {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-surface-elevated">
       <div className="shrink-0">
-        <header className="flex items-center gap-2 border-b border-border bg-white px-2 py-2 max-lg:pt-[max(0.5rem,env(safe-area-inset-top))] sm:gap-3 sm:px-4 sm:py-3 lg:px-5">
+        <header className="flex items-center gap-2 border-b border-border bg-surface-elevated px-2 py-2 max-lg:pt-[max(0.5rem,env(safe-area-inset-top))] sm:gap-3 sm:px-4 sm:py-3 lg:px-5">
         <BackButton onClick={() => navigate('/app/messages')} />
         <Avatar src={peer?.photoUrl} name={peer?.name} size="sm" />
         <div className="min-w-0 flex-1">
@@ -218,7 +218,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
           isBrand={Boolean(isBrand)}
           pending={Boolean(pending)}
           updating={update.isPending}
-          onAccept={() => update.mutate({ status: 'ACCEPTED' })}
+          onAccept={() => update.mutate({ status: 'ACCEPTED' }, { onSuccess: refreshTimeline })}
           onReject={() => update.mutate({ status: 'REJECTED' }, { onSuccess: refreshTimeline })}
           onCancel={() => update.mutate({ status: 'CANCELLED' }, { onSuccess: refreshTimeline })}
         />
@@ -263,7 +263,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
                   className={`w-fit max-w-[min(85%,20rem)] rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm ${
                     mine
                       ? 'rounded-br-md bg-purple text-white'
-                      : 'rounded-bl-md border border-border bg-white text-navy'
+                      : 'rounded-bl-md border border-border bg-surface text-navy'
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words">{m.body}</p>
@@ -285,14 +285,14 @@ export function ChatThread({ offerId }: ChatThreadProps) {
         </div>
       </div>
 
-      <footer className="shrink-0 border-t border-border bg-white pb-[env(safe-area-inset-bottom)]">
-        {relatedDeal && offer.status === 'ACCEPTED' ? (
-          <DealChatActions
-            deal={relatedDeal}
-            isBrand={Boolean(isBrand)}
-            onUpdated={refreshTimeline}
-          />
-        ) : null}
+      <footer className="shrink-0 border-t border-border bg-surface-elevated pb-[env(safe-area-inset-bottom)]">
+      {relatedDeal ? (
+        <DealChatActions
+          deal={relatedDeal}
+          isBrand={Boolean(isBrand)}
+          onUpdated={refreshTimeline}
+        />
+      ) : null}
 
         {send.isError ? (
           <p className="border-b border-red-100 bg-red-50 px-4 py-2 text-xs text-red-600">

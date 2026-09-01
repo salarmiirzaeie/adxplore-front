@@ -90,6 +90,7 @@ export function isProfileComplete(user: {
   category?: string | null
   categories?: string[] | null
   city?: string | null
+  province?: string | null
   website?: string | null
   followerRange?: string | null
 }): boolean {
@@ -97,12 +98,13 @@ export function isProfileComplete(user: {
   const hasCategory =
     Boolean(user.category) || Boolean(user.categories && user.categories.length > 0)
   if (user.role === 'BRAND') {
-    return Boolean(hasCategory && user.city?.trim())
+    return Boolean(hasCategory && user.city?.trim() && user.province?.trim())
   }
   if (user.role === 'INFLUENCER') {
     return Boolean(
       hasCategory &&
         user.city?.trim() &&
+        user.province?.trim() &&
         user.website?.trim() &&
         user.followerRange,
     )

@@ -76,6 +76,7 @@ export function useVerifyOtp() {
         category: data.user.category,
         categories: data.user.categories ?? [],
         city: data.user.city,
+        province: data.user.province,
         website: data.user.website,
         goal: data.user.goal,
         businessSize: data.user.businessSize,

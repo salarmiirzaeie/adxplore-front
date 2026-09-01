@@ -16,11 +16,12 @@ import { useOffers } from '../hooks/useOffers'
 import {
   brandCategoriesLabel,
   campaignStatusLabel,
-  deliverableLabel,
+  deliverablesLabel,
   formatBudgetRange,
   invitationStatusLabel,
   offerPipelineLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 
 function DetailRow({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
   return (
@@ -110,10 +111,16 @@ function BrandCampaignDetail({ id }: { id: string }) {
               brandCategoriesLabel(campaign.categories, campaign.category) ?? '—'
             }
           />
-          <DetailRow label="شهر" value={campaign.city} />
+          <DetailRow
+            label="شهر"
+            value={formatLocation(campaign.city, campaign.province) ?? '—'}
+          />
           <DetailRow
             label="نوع محتوا"
-            value={deliverableLabel(campaign.deliverable) ?? '—'}
+            value={
+              deliverablesLabel(campaign.deliverables, campaign.deliverable) ??
+              '—'
+            }
           />
           <DetailRow label="بودجه" value={budget} dir="ltr" />
         </dl>
@@ -225,7 +232,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
                 <Link
                   key={offer.id}
                   to={href}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-white px-4 py-3.5 transition hover:border-purple/25 hover:bg-surface"
+                  className="flex items-center gap-3 rounded-xl border border-border bg-surface-elevated px-4 py-3.5 transition hover:border-purple/25 hover:bg-surface"
                 >
                   <Avatar
                     src={offer.influencer.photoUrl}
@@ -341,7 +348,7 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
             </p>
             <p className="text-xs text-muted">
               {brandCategoriesLabel(campaign.categories, campaign.category)} ·{' '}
-              {campaign.city}
+              {formatLocation(campaign.city, campaign.province)}
             </p>
           </div>
         </div>
@@ -360,7 +367,10 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
           <DetailRow label="بریف" value={campaign.brief} />
           <DetailRow
             label="نوع محتوا"
-            value={deliverableLabel(campaign.deliverable) ?? '—'}
+            value={
+              deliverablesLabel(campaign.deliverables, campaign.deliverable) ??
+              '—'
+            }
           />
           <DetailRow label="بودجه" value={budget} dir="ltr" />
           {invite?.message ? (

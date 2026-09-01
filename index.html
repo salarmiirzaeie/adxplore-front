@@ -5,11 +5,23 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/logo.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#7C3AED" />
+    <meta name="theme-color" content="#0b1120" />
     <meta name="description" content="ادکسپلور — پنل بازار اینفلوئنسر اینستاگرام" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <title>ادکسپلور | پنل</title>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem('adxplore-theme')
+          if (theme === 'light') {
+            document.documentElement.classList.add('light')
+            var meta = document.querySelector('meta[name="theme-color"]')
+            if (meta) meta.setAttribute('content', '#ffffff')
+          }
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

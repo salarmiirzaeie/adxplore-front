@@ -6,10 +6,11 @@ import {
   brandCategoriesLabel,
   followerRangeLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 
 function StatCard({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
   return (
-    <div className="rounded-2xl border border-border bg-white px-5 py-4">
+    <div className="rounded-2xl border border-border bg-surface-elevated px-5 py-4">
       <p className="text-xs font-semibold text-muted">{label}</p>
       <p className="mt-2 text-base font-extrabold text-navy" dir={dir}>
         {value}
@@ -62,7 +63,7 @@ export function InfluencerDetailPage() {
         ← بازگشت به اینفلوئنسرها
       </Link>
 
-      <section className="mb-6 rounded-2xl border border-border bg-white p-6 sm:p-8">
+      <section className="mb-6 rounded-2xl border border-border bg-surface-elevated p-6 sm:p-8">
         <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
           <Avatar src={influencer.photoUrl} name={influencer.name} size="xl" />
           <div className="min-w-0 flex-1 text-center sm:text-right">
@@ -74,7 +75,7 @@ export function InfluencerDetailPage() {
             </p>
             <p className="mt-3 text-sm text-muted">
               {brandCategoriesLabel(influencer.categories, influencer.category)} ·{' '}
-              {influencer.city}
+              {formatLocation(influencer.city, influencer.province)}
             </p>
           </div>
           <span className="shrink-0 rounded-xl bg-purple-soft/60 px-4 py-2 text-sm font-bold text-purple-deep">
@@ -89,7 +90,10 @@ export function InfluencerDetailPage() {
             label="دسته‌بندی"
             value={brandCategoriesLabel(influencer.categories, influencer.category) ?? '—'}
           />
-          <StatCard label="شهر" value={influencer.city} />
+          <StatCard
+            label="شهر"
+            value={formatLocation(influencer.city, influencer.province) ?? '—'}
+          />
           <StatCard
             label="بازه فالوور"
             value={followerRangeLabel(influencer.followerRange) ?? '—'}
@@ -97,7 +101,7 @@ export function InfluencerDetailPage() {
           />
         </div>
 
-        <section className="rounded-2xl border border-border bg-white p-6 lg:sticky lg:top-24 lg:self-start">
+        <section className="rounded-2xl border border-border bg-surface-elevated p-6 lg:sticky lg:top-24 lg:self-start">
           <h2 className="text-base font-extrabold text-navy">دعوت به کمپین</h2>
           <p className="mt-2 text-sm leading-7 text-muted">
             یک کمپین فعال انتخاب کنید و برای این اینفلوئنسر دعوت بفرستید.

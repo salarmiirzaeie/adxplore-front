@@ -92,6 +92,7 @@ export const DEAL_STATUSES: Array<{
   value: DealStatus
   label: string
 }> = [
+  { value: 'PENDING_PAYMENT', label: 'در انتظار پرداخت' },
   { value: 'IN_PROGRESS', label: 'در حال انجام' },
   { value: 'DELIVERED', label: 'تحویل‌شده' },
   { value: 'REVISION_REQUESTED', label: 'نیاز به اصلاح' },
@@ -99,24 +100,7 @@ export const DEAL_STATUSES: Array<{
   { value: 'CANCELLED', label: 'لغوشده' },
 ]
 
-export const IRAN_CITIES = [
-  'تهران',
-  'کرج',
-  'اصفهان',
-  'مشهد',
-  'شیراز',
-  'تبریز',
-  'اهواز',
-  'قم',
-  'کرمان',
-  'رشت',
-  'یزد',
-  'همدان',
-  'ارومیه',
-  'کرمانشاه',
-  'بندرعباس',
-  'سایر',
-] as const
+export { NATIONWIDE_CITY } from './iran-locations'
 
 export function brandCategoryLabel(value: BrandCategory | null | undefined) {
   if (!value) return null
@@ -160,6 +144,25 @@ export function followerRangeLabel(value: FollowerRange | null | undefined) {
 export function deliverableLabel(value: DeliverableType | null | undefined) {
   if (!value) return null
   return DELIVERABLE_TYPES.find((d) => d.value === value)?.label ?? value
+}
+
+export function deliverablesLabel(
+  values: DeliverableType[] | null | undefined,
+  fallback?: DeliverableType | null,
+) {
+  const list =
+    values && values.length > 0 ? values : fallback ? [fallback] : []
+  if (!list.length) return null
+  return list.map((v) => deliverableLabel(v) ?? v).join(' · ')
+}
+
+export function normalizeDeliverables(
+  values: DeliverableType[] | null | undefined,
+  fallback?: DeliverableType | null,
+): DeliverableType[] {
+  if (values && values.length > 0) return [...new Set(values)]
+  if (fallback) return [fallback]
+  return []
 }
 
 export function campaignStatusLabel(value: CampaignStatus | null | undefined) {

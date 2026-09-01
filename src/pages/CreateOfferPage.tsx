@@ -1,25 +1,30 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 import { getApiErrorMessage } from '../api/client'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { JalaliDatePicker } from '../components/ui/JalaliDatePicker'
 import { Textarea } from '../components/ui/Textarea'
 import { useMe } from '../hooks/useAuth'
 import { useCampaign } from '../hooks/useCampaigns'
 import { useCreateOffer, useOffers } from '../hooks/useOffers'
 import {
-  deliverableLabel,
+  deliverablesLabel,
   formatBudgetRange,
 } from '../lib/brand-options'
+import { parseNumber } from '../lib/digits'
 
 const schema = z.object({
   fee: z
     .string()
     .trim()
     .min(1, 'مبلغ را وارد کنید')
-    .refine((v) => !Number.isNaN(Number(v)) && Number(v) >= 0, {
+    .refine((v) => {
+      const n = parseNumber(v)
+      return !Number.isNaN(n) && n >= 0
+    }, {
       message: 'مبلغ معتبر وارد کنید',
     }),
   message: z.string().trim().max(1000, 'پیام حداکثر ۱۰۰۰ کاراکتر باشد'),
@@ -27,6 +32,16 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
+
+function toDeadlineIso(value: string) {
+  const raw = value.trim()
+  if (!raw) return undefined
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(raw)
+    ? new Date(`${raw}T12:00:00`)
+    : new Date(raw)
+  if (Number.isNaN(parsed.getTime())) return undefined
+  return parsed.toISOString()
+}
 
 export function CreateOfferPage() {
   const [params] = useSearchParams()
@@ -44,6 +59,7 @@ export function CreateOfferPage() {
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({
@@ -103,7 +119,8 @@ export function CreateOfferPage() {
           ارسال پیشنهاد
         </h1>
         <p className="mt-2 text-sm text-muted">
-          کمپین «{campaign.title}» · {deliverableLabel(campaign.deliverable)} ·
+          کمپین «{campaign.title}» ·{' '}
+          {deliverablesLabel(campaign.deliverables, campaign.deliverable)} ·
           بودجه {budget}
         </p>
       </section>
@@ -113,17 +130,14 @@ export function CreateOfferPage() {
         onSubmit={handleSubmit((values) => {
           create.mutate({
             campaignId,
-            fee: Number(values.fee),
+            fee: parseNumber(values.fee),
             message: values.message || undefined,
-            deadline: values.deadline
-              ? new Date(values.deadline).toISOString()
-              : undefined,
+            deadline: toDeadlineIso(values.deadline),
           })
         })}
       >
         <Input
           label="مبلغ پیشنهادی (تومان)"
-          type="number"
           inputMode="numeric"
           dir="ltr"
           error={errors.fee?.message}
@@ -137,12 +151,19 @@ export function CreateOfferPage() {
           {...register('message')}
         />
 
-        <Input
-          label="مهلت تحویل (اختیاری)"
-          type="date"
-          dir="ltr"
-          error={errors.deadline?.message}
-          {...register('deadline')}
+        <Controller
+          name="deadline"
+          control={control}
+          render={({ field }) => (
+            <JalaliDatePicker
+              label="مهلت تحویل (اختیاری)"
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.deadline?.message}
+              hint="تقویم شمسی"
+              placeholder="انتخاب تاریخ شمسی"
+            />
+          )}
         />
 
         {create.isError ? (

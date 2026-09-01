@@ -48,7 +48,7 @@ function ConversationRow({
       type="button"
       onClick={onSelect}
       className={`flex w-full items-start gap-3 border-b border-border px-4 py-3.5 text-right transition active:bg-surface ${
-        active ? 'bg-purple-soft/50' : 'bg-white hover:bg-surface'
+        active ? 'bg-purple-soft/50' : 'hover:bg-surface'
       }`}
     >
       <Avatar
@@ -113,13 +113,13 @@ export function MessagesPage() {
   const showListOnMobile = !isThread
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-white lg:flex-row">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-surface-elevated lg:flex-row">
       <aside
         className={`flex h-full min-h-0 w-full shrink-0 flex-col border-border lg:w-[22rem] lg:border-l ${
           showListOnMobile ? 'flex' : 'hidden lg:flex'
         }`}
       >
-        <div className="shrink-0 border-b border-border bg-white px-4 pb-3 pt-4 lg:pt-3">
+        <div className="shrink-0 border-b border-border bg-surface-elevated px-4 pb-3 pt-4 lg:pt-3">
           <h1 className="mb-3 text-lg font-extrabold text-navy">پیام‌ها</h1>
           <input
             value={query}

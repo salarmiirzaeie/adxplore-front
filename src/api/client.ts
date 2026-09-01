@@ -35,16 +35,32 @@ api.interceptors.response.use(
   },
 )
 
+function isLatinHeavy(text: string): boolean {
+  const latin = (text.match(/[A-Za-z]/g) ?? []).length
+  const arabic = (text.match(/[\u0600-\u06FF]/g) ?? []).length
+  return latin > 0 && latin >= arabic
+}
+
+function persianOrFallback(
+  message: string | string[] | undefined,
+  fallback: string,
+): string {
+  const parts = (Array.isArray(message) ? message : [message])
+    .filter((item): item is string => typeof item === 'string' && Boolean(item.trim()))
+    .map((item) => item.trim())
+    .filter((item) => !isLatinHeavy(item))
+  return parts.length > 0 ? parts.join('، ') : fallback
+}
+
 export function getApiErrorMessage(error: unknown, fallback = 'خطایی رخ داد'): string {
   if (!axios.isAxiosError(error)) {
-    if (error instanceof Error) return error.message
+    if (error instanceof Error) return persianOrFallback(error.message, fallback)
     return fallback
   }
 
   const data = error.response?.data as ApiErrorBody | undefined
-  const msg = data?.message
-  if (Array.isArray(msg)) return msg.join('، ')
-  if (typeof msg === 'string' && msg.trim()) return msg
+  const fromApi = persianOrFallback(data?.message, '')
+  if (fromApi) return fromApi
 
   if (error.response?.status === 429) {
     return 'لطفاً کمی صبر کنید و دوباره تلاش کنید'

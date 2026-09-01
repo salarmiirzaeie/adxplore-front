@@ -17,8 +17,9 @@ import {
 import {
   brandCategoriesLabel,
   dealStatusLabel,
-  deliverableLabel,
+  deliverablesLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 import type { DealStatus } from '../types/api'
 
 function DetailRow({
@@ -47,6 +48,7 @@ function statusClass(status: DealStatus) {
   if (status === 'COMPLETED') return 'bg-emerald-50 text-emerald-700'
   if (status === 'DELIVERED') return 'bg-blue-50 text-blue-700'
   if (status === 'REVISION_REQUESTED') return 'bg-amber-50 text-amber-700'
+  if (status === 'PENDING_PAYMENT') return 'bg-orange-50 text-orange-700'
   if (status === 'CANCELLED') return 'bg-slate-100 text-slate-600'
   return 'bg-purple-soft/60 text-purple-deep'
 }
@@ -57,7 +59,7 @@ const deliverableSchema = z.object({
     .trim()
     .url('آدرس معتبر وارد کنید')
     .min(1, 'لینک محتوا الزامی است'),
-  note: z.string().trim().max(2000),
+  note: z.string().trim().max(2000, 'توضیح حداکثر ۲۰۰۰ کاراکتر باشد'),
 })
 
 type DeliverableForm = z.infer<typeof deliverableSchema>
@@ -165,9 +167,15 @@ export function DealDetailPage() {
           <DetailRow label="مبلغ توافقی" value={`${fee} تومان`} dir="ltr" />
           <DetailRow
             label="نوع محتوا"
-            value={deliverableLabel(deal.campaign.deliverable) ?? '—'}
+            value={
+              deliverablesLabel(deal.campaign.deliverables, deal.campaign.deliverable) ??
+              '—'
+            }
           />
-          <DetailRow label="شهر" value={deal.campaign.city || '—'} />
+          <DetailRow
+            label="شهر"
+            value={formatLocation(deal.campaign.city, deal.campaign.province) || '—'}
+          />
           {deal.contentUrl ? (
             <DetailRow label="لینک محتوا" value={deal.contentUrl} dir="ltr" />
           ) : null}

@@ -2,7 +2,32 @@
 @import 'tailwindcss';
 
 :root {
+  color-scheme: dark;
   --ink: #0b1120;
+  --navy: #f1f5f9;
+  --navy-light: #cbd5e1;
+  --navy-muted: #94a3b8;
+  --surface: #0b1120;
+  --surface-elevated: #131a2e;
+  --purple: #8b5cf6;
+  --purple-deep: #ddd6fe;
+  --purple-soft: rgba(139, 92, 246, 0.22);
+  --purple-muted: #a78bfa;
+  --accent: #34d399;
+  --accent-deep: #6ee7b7;
+  --muted: #94a3b8;
+  --border: rgba(148, 163, 184, 0.16);
+  --border-violet: rgba(139, 92, 246, 0.28);
+  --background: var(--surface);
+  --foreground: var(--navy);
+  --font-vazirmatn: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
+  --font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --sidebar-width: 16.5rem;
+  --sidebar-width-collapsed: 4.25rem;
+}
+
+html.light {
+  color-scheme: light;
   --navy: #0f172a;
   --navy-light: #1e293b;
   --navy-muted: #334155;
@@ -17,12 +42,6 @@
   --muted: #64748b;
   --border: #e2e8f0;
   --border-violet: rgba(124, 58, 237, 0.18);
-  --background: var(--surface);
-  --foreground: var(--navy);
-  --font-vazirmatn: 'Vazirmatn', ui-sans-serif, system-ui, sans-serif;
-  --font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --sidebar-width: 16.5rem;
-  --sidebar-width-collapsed: 4.25rem;
 }
 
 @theme inline {
@@ -44,6 +63,46 @@
   --color-border: var(--border);
   --font-sans: var(--font-vazirmatn);
   --font-display: var(--font-inter), var(--font-vazirmatn);
+}
+
+html:not(.light) {
+  --color-red-50: rgba(248, 113, 113, 0.12);
+  --color-red-100: rgba(248, 113, 113, 0.16);
+  --color-red-200: rgba(248, 113, 113, 0.32);
+  --color-red-500: #f87171;
+  --color-red-600: #f87171;
+  --color-emerald-50: rgba(52, 211, 153, 0.12);
+  --color-emerald-200: rgba(52, 211, 153, 0.32);
+  --color-emerald-700: #6ee7b7;
+  --color-amber-50: rgba(251, 191, 36, 0.12);
+  --color-amber-700: #fbbf24;
+  --color-amber-800: #fbbf24;
+  --color-amber-900: #fcd34d;
+  --color-blue-50: rgba(96, 165, 250, 0.12);
+  --color-blue-200: rgba(96, 165, 250, 0.32);
+  --color-blue-700: #93c5fd;
+  --color-slate-100: rgba(148, 163, 184, 0.12);
+  --color-slate-600: #94a3b8;
+}
+
+html.light {
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-200: #fecaca;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-700: #047857;
+  --color-amber-50: #fffbeb;
+  --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
+  --color-amber-900: #78350f;
+  --color-blue-50: #eff6ff;
+  --color-blue-200: #bfdbfe;
+  --color-blue-700: #1d4ed8;
+  --color-slate-100: #f1f5f9;
+  --color-slate-600: #475569;
 }
 
 @layer base {
@@ -122,7 +181,22 @@
 }
 
 .card-glass {
+  --navy: #0f172a;
+  --navy-light: #1e293b;
+  --navy-muted: #334155;
+  --surface: #f8f7ff;
+  --surface-elevated: #ffffff;
+  --purple: #7c3aed;
+  --purple-deep: #5b21b6;
+  --purple-soft: #ddd6fe;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --color-red-50: #fef2f2;
+  --color-red-200: #fecaca;
+  --color-red-500: #ef4444;
+  --color-red-600: #dc2626;
   background: rgba(255, 255, 255, 0.97);
+  color: var(--navy);
   border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow:
     0 0 0 1px rgba(124, 58, 237, 0.06),
@@ -206,4 +280,52 @@ select.input-brand {
 
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.adx-datepicker {
+  display: block;
+  width: 100%;
+}
+
+.adx-datepicker .input-brand {
+  width: 100%;
+}
+
+.adx-datepicker-invalid {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15) !important;
+}
+
+.adx-datepicker-calendar.rmdp-wrapper,
+.adx-datepicker-calendar .rmdp-calendar {
+  background: var(--surface-elevated);
+  color: var(--navy);
+  font-family: inherit;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+
+.adx-datepicker-calendar .rmdp-header-values,
+.adx-datepicker-calendar .rmdp-week-day,
+.adx-datepicker-calendar .rmdp-day span {
+  color: var(--navy);
+}
+
+.adx-datepicker-calendar .rmdp-arrow {
+  border-color: var(--navy);
+}
+
+.adx-datepicker-calendar .rmdp-day.rmdp-today span {
+  background: var(--purple-soft);
+  color: var(--navy);
+}
+
+.adx-datepicker-calendar .rmdp-day.rmdp-selected span:not(.highlight) {
+  background: var(--purple);
+  color: #fff;
+}
+
+.adx-datepicker-calendar .rmdp-toolbar div {
+  background: var(--purple);
+  border-radius: 0.5rem;
 }

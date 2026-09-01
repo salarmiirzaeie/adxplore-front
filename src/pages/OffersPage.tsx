@@ -5,9 +5,10 @@ import { useMe } from '../hooks/useAuth'
 import { useDeals } from '../hooks/useDeals'
 import { useOffers } from '../hooks/useOffers'
 import {
-  deliverableLabel,
+  deliverablesLabel,
   offerPipelineLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 import type { Deal, DealStatus, Offer, OfferStatus } from '../types/api'
 
 type StatusFilter = 'ALL' | 'PENDING' | 'IN_PROGRESS' | 'DONE' | 'CLOSED'
@@ -72,7 +73,7 @@ function OfferCard({
   return (
     <Link
       to={href}
-      className="flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-4 transition hover:border-purple/25 hover:bg-surface"
+      className="flex items-center gap-3 rounded-2xl border border-border bg-surface-elevated px-4 py-4 transition hover:border-purple/25 hover:bg-surface"
     >
       <Avatar src={party.photoUrl} name={party.name} size="md" />
       <div className="min-w-0 flex-1">
@@ -92,8 +93,8 @@ function OfferCard({
           </span>
         </div>
         <p className="mt-2 truncate text-xs text-navy-muted">
-          پیشنهاد {fee} تومان · {deliverableLabel(offer.campaign.deliverable)} ·{' '}
-          {offer.campaign.city}
+          پیشنهاد {fee} تومان · {deliverablesLabel(offer.campaign.deliverables, offer.campaign.deliverable)} ·{' '}
+          {formatLocation(offer.campaign.city, offer.campaign.province)}
         </p>
         <p className="mt-1 text-xs font-bold text-purple">باز کردن گفتگو</p>
       </div>

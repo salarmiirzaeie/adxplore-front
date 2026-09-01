@@ -10,6 +10,10 @@ const EVENT_LABELS: Record<string, string> = {
   OFFER_REJECTED: 'پیشنهاد رد شد',
   OFFER_CANCELLED: 'پیشنهاد لغو شد',
   OFFER_AFTER_INVITATION: 'پاسخ به دعوت',
+  PAYMENT_REQUIRED: 'پرداخت لازم است',
+  PAYMENT_HELD: 'پرداخت موفق',
+  PAYMENT_RELEASED: 'آزادسازی مبلغ',
+  PAYMENT_FAILED: 'پرداخت ناموفق',
 }
 
 export function ChatSystemMessage({
@@ -26,7 +30,7 @@ export function ChatSystemMessage({
 
   return (
     <div className="flex justify-center py-1">
-      <div className="max-w-md rounded-2xl border border-border bg-white px-4 py-3 text-center shadow-sm">
+      <div className="max-w-md rounded-2xl border border-border bg-surface-elevated px-4 py-3 text-center shadow-sm">
         <p className="text-xs font-bold text-purple">{label}</p>
         {body !== label ? (
           <p className="mt-1 text-sm leading-6 text-navy">{body}</p>
@@ -64,7 +68,7 @@ export function ChatDeliverableCard({
 
   return (
     <div className="flex justify-center py-1">
-      <article className="w-full max-w-md rounded-2xl border border-blue-200/80 bg-white p-4 shadow-sm">
+      <article className="w-full max-w-md rounded-2xl border border-blue-200/80 bg-surface-elevated p-4 shadow-sm">
         <p className="text-[11px] font-bold text-blue-700">تحویل محتوا</p>
         <p className="mt-1 text-sm font-extrabold text-navy">{body}</p>
         {contentUrl ? (

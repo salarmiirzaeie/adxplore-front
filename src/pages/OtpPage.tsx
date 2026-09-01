@@ -14,20 +14,21 @@ import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/ui/Button'
 import { resolveLoginRole, useRequestOtp, useVerifyOtp } from '../hooks/useAuth'
 import { getLoginPhone } from '../lib/auth-storage'
+import { extractDigits } from '../lib/digits'
 import { formatPhoneDisplay } from '../lib/phone'
 import type { UserRole } from '../types/api'
+
+const RESEND_SECONDS = 60
+const DIGITS = 5
 
 const schema = z.object({
   code: z
     .string()
     .min(1, 'کد تأیید را وارد کنید')
-    .regex(/^\d{5}$/, 'کد باید ۵ رقم باشد'),
+    .refine((v) => extractDigits(v).length === DIGITS, 'کد باید ۵ رقم باشد'),
 })
 
 type FormValues = z.infer<typeof schema>
-
-const RESEND_SECONDS = 60
-const DIGITS = 5
 
 const roleLabel: Record<UserRole, string> = {
   INFLUENCER: 'اینفلوئنسر',
@@ -77,12 +78,12 @@ export function OtpPage() {
   const digits = Array.from({ length: DIGITS }, (_, i) => code?.[i] ?? '')
 
   const writeDigits = (nextDigits: string[]) => {
-    const next = nextDigits.join('').replace(/\D/g, '').slice(0, DIGITS)
+    const next = extractDigits(nextDigits.join('')).slice(0, DIGITS)
     setValue('code', next, { shouldValidate: next.length === DIGITS })
   }
 
   const onDigitChange = (index: number, raw: string) => {
-    const digit = raw.replace(/\D/g, '').slice(-1)
+    const digit = extractDigits(raw).slice(-1)
     const nextDigits = [...digits]
     nextDigits[index] = digit || ''
     writeDigits(nextDigits)
@@ -109,7 +110,7 @@ export function OtpPage() {
 
   const onPaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault()
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, DIGITS)
+    const pasted = extractDigits(e.clipboardData.getData('text')).slice(0, DIGITS)
     if (!pasted) return
     setValue('code', pasted, { shouldValidate: pasted.length === DIGITS })
     const focusAt = Math.min(pasted.length, DIGITS - 1)
@@ -117,7 +118,7 @@ export function OtpPage() {
   }
 
   const onSubmit = handleSubmit((values) => {
-    verify.mutate({ phone, code: values.code, role })
+    verify.mutate({ phone, code: extractDigits(values.code), role })
   })
 
   const handleResend = () => {
@@ -150,7 +151,7 @@ export function OtpPage() {
       backTo="/login"
       backLabel="تغییر شماره"
     >
-      <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
         <Controller
           name="code"
           control={control}

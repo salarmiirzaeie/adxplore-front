@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { Avatar } from '../components/ui/Avatar'
+import { IranCitySelect } from '../components/IranCitySelect'
 import { useMe } from '../hooks/useAuth'
 import { useBrowseCampaigns, useCampaigns } from '../hooks/useCampaigns'
 import {
   BRAND_CATEGORIES,
-  IRAN_CITIES,
   brandCategoriesLabel,
   campaignStatusLabel,
-  deliverableLabel,
+  deliverablesLabel,
   formatBudgetRange,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 import type {
   BrandCategory,
   BrowseCampaignsParams,
@@ -48,9 +49,11 @@ function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
           <span className="rounded-lg bg-surface px-2 py-1">
             {brandCategoriesLabel(campaign.categories, campaign.category)}
           </span>
-          <span className="rounded-lg bg-surface px-2 py-1">{campaign.city}</span>
           <span className="rounded-lg bg-surface px-2 py-1">
-            {deliverableLabel(campaign.deliverable)}
+            {formatLocation(campaign.city, campaign.province)}
+          </span>
+          <span className="rounded-lg bg-surface px-2 py-1">
+            {deliverablesLabel(campaign.deliverables, campaign.deliverable)}
           </span>
         </div>
       </div>
@@ -89,9 +92,11 @@ function MarketplaceCampaignCard({ campaign }: { campaign: Campaign }) {
           <span className="rounded-lg bg-surface px-2 py-1">
             {brandCategoriesLabel(campaign.categories, campaign.category)}
           </span>
-          <span className="rounded-lg bg-surface px-2 py-1">{campaign.city}</span>
           <span className="rounded-lg bg-surface px-2 py-1">
-            {deliverableLabel(campaign.deliverable)}
+            {formatLocation(campaign.city, campaign.province)}
+          </span>
+          <span className="rounded-lg bg-surface px-2 py-1">
+            {deliverablesLabel(campaign.deliverables, campaign.deliverable)}
           </span>
           {budget ? (
             <span className="rounded-lg bg-surface px-2 py-1" dir="ltr">
@@ -168,6 +173,7 @@ function BrandCampaigns() {
 function InfluencerCampaigns() {
   const { data: user } = useMe()
   const [category, setCategory] = useState<BrandCategory | ''>('')
+  const [province, setProvince] = useState('')
   const [city, setCity] = useState('')
   const [q, setQ] = useState('')
   const [searchInput, setSearchInput] = useState('')
@@ -178,11 +184,12 @@ function InfluencerCampaigns() {
     const next: BrowseCampaignsParams = {}
     if (category) next.category = category
     if (city) next.city = city
+    if (province) next.province = province
     if (q.trim()) next.q = q.trim()
     if (forMe) next.forMe = true
     if (invited) next.invited = true
     return next
-  }, [category, city, q, forMe, invited])
+  }, [category, city, province, q, forMe, invited])
 
   const { data: campaigns, isLoading, isError, isFetching } = useBrowseCampaigns(
     params,
@@ -216,7 +223,7 @@ function InfluencerCampaigns() {
             onChange={(e) => setSearchInput(e.target.value)}
           />
         </form>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <select
             className="input-brand py-2.5 text-sm"
             value={category}
@@ -229,18 +236,17 @@ function InfluencerCampaigns() {
               </option>
             ))}
           </select>
-          <select
-            className="input-brand py-2.5 text-sm"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          >
-            <option value="">همه شهرها</option>
-            {IRAN_CITIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+          <IranCitySelect
+            variant="filter"
+            optional
+            allowNationwide
+            province={province}
+            city={city}
+            onChange={({ province: nextProvince, city: nextCity }) => {
+              setProvince(nextProvince)
+              setCity(nextCity)
+            }}
+          />
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           <button

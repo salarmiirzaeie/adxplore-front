@@ -3,9 +3,10 @@ import { Avatar } from '../components/ui/Avatar'
 import { useMe } from '../hooks/useAuth'
 import { useInvitations } from '../hooks/useInvitations'
 import {
-  deliverableLabel,
+  deliverablesLabel,
   invitationStatusLabel,
 } from '../lib/brand-options'
+import { formatLocation } from '../lib/iran-locations'
 import type { Invitation, InvitationStatus } from '../types/api'
 
 function statusClass(status: InvitationStatus) {
@@ -19,7 +20,7 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
   return (
     <Link
       to={`/app/campaigns/${invitation.campaignId}`}
-      className="flex items-center gap-4 rounded-2xl border border-border bg-white px-5 py-4 transition hover:border-purple/25 hover:bg-surface sm:px-6 sm:py-5"
+      className="flex items-center gap-4 rounded-2xl border border-border bg-surface-elevated px-5 py-4 transition hover:border-purple/25 hover:bg-surface sm:px-6 sm:py-5"
     >
       <Avatar src={party.photoUrl} name={party.name} size="md" />
       <div className="min-w-0 flex-1">
@@ -38,10 +39,13 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
         </p>
         <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
           <span className="rounded-lg bg-surface px-2.5 py-1">
-            {deliverableLabel(invitation.campaign.deliverable)}
+            {deliverablesLabel(
+              invitation.campaign.deliverables,
+              invitation.campaign.deliverable,
+            )}
           </span>
           <span className="rounded-lg bg-surface px-2.5 py-1">
-            {invitation.campaign.city}
+            {formatLocation(invitation.campaign.city, invitation.campaign.province)}
           </span>
         </div>
         {invitation.message ? (
@@ -96,7 +100,7 @@ export function InvitationsPage() {
       ) : null}
 
       {!isLoading && !isError && invitations?.length === 0 ? (
-        <section className="rounded-2xl border border-border bg-white px-6 py-14 text-center">
+        <section className="rounded-2xl border border-border bg-surface-elevated px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">هنوز دعوتی نیست</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
             وقتی برندی شما را دعوت کند اینجا می‌آید. می‌توانید از کمپین‌های باز هم

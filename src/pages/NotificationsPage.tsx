@@ -73,7 +73,7 @@ function NotificationRow({
       className={`flex w-full items-start gap-4 rounded-2xl border px-5 py-4 text-right transition hover:border-purple/25 sm:px-6 sm:py-5 ${
         unread
           ? 'border-purple/20 bg-purple-soft/25'
-          : 'border-border bg-white hover:bg-surface'
+          : 'border-border bg-surface-elevated hover:bg-surface'
       }`}
     >
       <span
@@ -134,7 +134,7 @@ export function NotificationsPage() {
             type="button"
             onClick={() => markAll.mutate()}
             disabled={markAll.isPending}
-            className="shrink-0 rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-semibold text-purple transition hover:border-purple/30 disabled:opacity-50"
+            className="shrink-0 rounded-xl border border-border bg-surface-elevated px-4 py-2.5 text-sm font-semibold text-purple transition hover:border-purple/30 disabled:opacity-50"
           >
             خواندن همه
           </button>
@@ -154,7 +154,7 @@ export function NotificationsPage() {
       ) : null}
 
       {!isLoading && !isError && items?.length === 0 ? (
-        <section className="rounded-2xl border border-border bg-white px-6 py-14 text-center">
+        <section className="rounded-2xl border border-border bg-surface-elevated px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">اعلانی ندارید</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
             دعوت‌ها، پیشنهادها و پیام‌های جدید اینجا اعلام می‌شوند.

@@ -4,6 +4,8 @@ import { Logo } from './brand/Logo'
 import { Avatar } from './ui/Avatar'
 import { useLogout, useMe } from '../hooks/useAuth'
 import { useUnreadCount } from '../hooks/useNotifications'
+import { useTheme } from '../hooks/useTheme'
+import { useMyWallet } from '../hooks/useWallets'
 import { formatPhoneDisplay } from '../lib/phone'
 
 interface AppShellProps {
@@ -159,7 +161,7 @@ const influencerNav: NavItem[] = [
     to: '/app/profile',
     label: 'پروفایل',
     tabLabel: 'پروفایل',
-    icon: brandNav[4].icon,
+    icon: brandNav[brandNav.length - 1].icon,
   },
 ]
 
@@ -378,14 +380,109 @@ function SidebarBody({
   )
 }
 
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme()
+  const isLight = theme === 'light'
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="inline-flex size-10 items-center justify-center rounded-xl border border-border text-navy transition hover:bg-surface"
+      aria-label={isLight ? 'فعال‌سازی حالت تیره' : 'فعال‌سازی حالت روشن'}
+      title={isLight ? 'حالت تیره' : 'حالت روشن'}
+    >
+      {isLight ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path
+            d="M12 3a6.4 6.4 0 0 0 9 9 9 9 0 1 1-9-9z"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <circle cx="12" cy="12" r="4.25" stroke="currentColor" strokeWidth="1.75" />
+          <path
+            d="M12 3.5v1.5M12 19v1.5M4.9 4.9l1.1 1.1M18 18l1.1 1.1M3.5 12H5M19 12h1.5M4.9 19.1L6 18M18 6l1.1-1.1"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
+    </button>
+  )
+}
+
+function WalletButton() {
+  const { pathname } = useLocation()
+  const isActive = pathname.startsWith('/app/wallet')
+  const { data: wallet, isLoading } = useMyWallet()
+  const amount = wallet?.availableToman
+  const label =
+    amount == null
+      ? 'کیف پول'
+      : `${amount.toLocaleString('fa-IR')} تومان`
+
+  return (
+    <Link
+      to="/app/wallet"
+      className={`inline-flex h-10 items-center gap-2 rounded-xl border px-2.5 transition sm:px-3 ${
+        isActive
+          ? 'border-purple/40 bg-purple-soft/70 text-purple-deep'
+          : 'border-border bg-surface text-navy hover:bg-surface/80'
+      }`}
+      aria-label={label}
+      title="کیف پول"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <path
+          d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5v-9z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+        />
+        <path
+          d="M16 12.5h4V9h-4a1.5 1.5 0 0 0 0 3z"
+          stroke="currentColor"
+          strokeWidth="1.75"
+          strokeLinejoin="round"
+        />
+        <circle cx="18.25" cy="10.75" r="1.1" fill="var(--purple)" />
+      </svg>
+      {isLoading && amount == null ? (
+        <span className="h-3 w-16 animate-pulse rounded bg-border" />
+      ) : (
+        <span className="text-sm font-bold whitespace-nowrap">
+          {amount == null ? '—' : amount.toLocaleString('fa-IR')}
+          <span
+            className={`ms-1 text-xs font-semibold ${
+              isActive ? 'text-purple-deep/70' : 'text-muted'
+            }`}
+          >
+            تومان
+          </span>
+        </span>
+      )}
+    </Link>
+  )
+}
+
 function NotificationBell() {
   const { data } = useUnreadCount()
   const count = data?.count ?? 0
+  const { pathname } = useLocation()
+  const isActive = pathname.startsWith('/app/notifications')
 
   return (
     <Link
       to="/app/notifications"
-      className="relative inline-flex size-10 items-center justify-center rounded-xl border border-border text-navy transition hover:bg-surface"
+      className={`relative inline-flex size-10 items-center justify-center rounded-xl border transition hover:bg-surface ${
+        isActive
+          ? 'border-purple/40 bg-purple-soft/70 text-purple-deep'
+          : 'border-border text-navy'
+      }`}
       aria-label="اعلان‌ها"
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -469,8 +566,10 @@ export function AppShell({ children }: AppShellProps) {
             <Logo variant="icon" className="h-8 w-8" />
           </div>
 
-          <div className="ms-auto flex items-center gap-3">
+          <div className="ms-auto flex items-center gap-2 sm:gap-3">
+            <WalletButton />
             <NotificationBell />
+            <ThemeToggle />
             <div className="hidden text-left sm:block">
               <p className="text-sm font-bold text-navy">{user?.name || '…'}</p>
               {user ? (

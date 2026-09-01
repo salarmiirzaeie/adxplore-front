@@ -53,7 +53,7 @@ export function OptionGrid<T extends string>({
               className={`rounded-xl border px-3 py-3 text-right text-sm font-semibold transition ${
                 selected
                   ? 'border-purple bg-purple-soft/50 text-navy shadow-[0_0_0_1px_var(--purple)]'
-                  : 'border-border bg-white text-navy-muted hover:border-purple/40 hover:bg-surface'
+                  : 'border-border bg-surface-elevated text-navy-muted hover:border-purple/40 hover:bg-surface'
               }`}
             >
               {opt.label}
