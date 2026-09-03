@@ -19,6 +19,7 @@ import {
   offerPipelineLabel,
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
+import { canSendOffers } from '../lib/auth-storage'
 
 function DetailRow({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
   return (
@@ -333,6 +334,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
 }
 
 function InfluencerCampaignDetail({ id }: { id: string }) {
+  const { data: user } = useMe()
   const { data: campaign, isLoading, isError } = useCampaign(id, true)
   const { data: invitations } = useInvitations(undefined, true)
   const { data: offers, isLoading: offersLoading } = useOffers(id, true)
@@ -438,6 +440,11 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
         >
           باز کردن گفتگو و پیشنهاد
         </Link>
+      ) : campaign.status === 'OPEN' && user && !canSendOffers(user) ? (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm leading-7 text-amber-800">
+          منتظر تأیید ادمین بمانید. پس از بررسی فالو و دایرکت می‌توانید پیشنهاد
+          بفرستید.
+        </p>
       ) : campaign.status === 'OPEN' ? (
         <Link
           to={`/app/offers/new?campaignId=${campaign.id}`}

@@ -69,7 +69,16 @@ export function InstagramApprovalPage() {
     mutationFn: confirmInstagramDmSent,
     onSuccess: (data) => {
       queryClient.setQueryData(instagramApprovalQueryKey, data)
-      void queryClient.invalidateQueries({ queryKey: meQueryKey })
+      if (user) {
+        queryClient.setQueryData(meQueryKey, {
+          ...user,
+          canAccessPanel: true,
+          canSendOffers: false,
+          nextScreen: 'PANEL' as const,
+          approvalStatus: user.approvalStatus ?? 'PENDING',
+        })
+      }
+      navigate('/app', { replace: true })
     },
   })
 
@@ -78,17 +87,6 @@ export function InstagramApprovalPage() {
     const t = window.setTimeout(() => setCopied(null), 2000)
     return () => window.clearTimeout(t)
   }, [copied])
-
-  useEffect(() => {
-    if (!approval.data?.canAccessPanel || !user) return
-    queryClient.setQueryData(meQueryKey, {
-      ...user,
-      canAccessPanel: true,
-      nextScreen: 'PANEL' as const,
-      approvalStatus: 'APPROVED' as const,
-    })
-    navigate('/app', { replace: true })
-  }, [approval.data?.canAccessPanel, navigate, queryClient, user])
 
   if (!token) {
     return <Navigate to="/login" replace />
@@ -99,9 +97,11 @@ export function InstagramApprovalPage() {
   }
 
   if (!userLoading && user) {
-    const next = postAuthPath(user)
-    if (next !== '/instagram-approval') {
-      return <Navigate to={next} replace />
+    if (postAuthPath(user) === '/onboarding') {
+      return <Navigate to="/onboarding" replace />
+    }
+    if (user.approvalStatus === 'APPROVED') {
+      return <Navigate to="/app" replace />
     }
   }
 
@@ -167,7 +167,8 @@ export function InstagramApprovalPage() {
         <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm leading-6 text-emerald-700">
           <p className="font-bold">دایرکت شما ثبت شد</p>
           <p className="mt-1">
-            فالو و پیام را بررسی می‌کنیم. معمولاً تا چند ساعت طول می‌کشد. اگر اپ را ببندید، بعد از ورود دوباره همین صفحه را می‌بینید.
+            می‌توانید وارد پنل شوید و کمپین‌ها را ببینید. ارسال پیشنهاد بعد از
+            تأیید ادمین فعال می‌شود.
           </p>
         </div>
       ) : null}
@@ -265,6 +266,12 @@ export function InstagramApprovalPage() {
           {instagramMark}
           {data.actions.openDm.label}
         </Button>
+
+        {waiting || data.canAccessPanel ? (
+          <Button type="button" onClick={() => navigate('/app', { replace: true })}>
+            ورود به پنل
+          </Button>
+        ) : null}
 
         {data.actions.confirmSent.enabled ? (
           <Button

@@ -134,3 +134,13 @@ export function postAuthPath(user: {
   }
   return '/app'
 }
+
+export function canSendOffers(user: {
+  role: UserRole
+  canSendOffers?: boolean
+  approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED' | null
+}): boolean {
+  if (user.role !== 'INFLUENCER') return true
+  if (user.canSendOffers === true) return true
+  return user.approvalStatus === 'APPROVED'
+}

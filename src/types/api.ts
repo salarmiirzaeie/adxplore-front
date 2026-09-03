@@ -69,6 +69,7 @@ export interface AuthUser {
   followerRange: FollowerRange | null
   approvalStatus?: InfluencerApprovalStatus | null
   canAccessPanel?: boolean
+  canSendOffers?: boolean
   nextScreen?: NextScreen
 }
 
@@ -96,6 +97,7 @@ export interface UserProfile {
   followerRange: FollowerRange | null
   approvalStatus?: InfluencerApprovalStatus | null
   canAccessPanel?: boolean
+  canSendOffers?: boolean
   nextScreen?: NextScreen
   createdAt: string
   updatedAt: string
@@ -137,6 +139,7 @@ export interface InstagramApprovalResponse {
   uiStatus: InstagramApprovalUiStatus
   onboardingComplete: boolean
   canAccessPanel: boolean
+  canSendOffers: boolean
   verifyCode: string | null
   dmMessage: string | null
   influencerInstagram: string | null

@@ -17,6 +17,8 @@ import {
   formatBudgetRange,
 } from '../lib/brand-options'
 import { parseNumber } from '../lib/digits'
+import { canSendOffers } from '../lib/auth-storage'
+import { ApprovalWaitBanner } from '../components/ApprovalWaitBanner'
 
 const schema = z.object({
   fee: z
@@ -109,9 +111,11 @@ export function CreateOfferPage() {
   const budget =
     formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ?? '—'
   const backTo = `/app/campaigns/${campaign.id}`
+  const offersLocked = !canSendOffers(user)
 
   return (
     <div>
+      <ApprovalWaitBanner />
       <section className="mb-6 sm:mb-8">
         <Link
           to={backTo}
@@ -163,13 +167,20 @@ export function CreateOfferPage() {
           )}
         />
 
+        {offersLocked ? (
+          <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm leading-7 text-amber-800">
+            منتظر تأیید ادمین بمانید. پس از بررسی فالو و دایرکت می‌توانید پیشنهاد
+            بفرستید.
+          </p>
+        ) : null}
+
         {create.isError ? (
           <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
             {getApiErrorMessage(create.error, 'ارسال پیشنهاد ناموفق بود')}
           </p>
         ) : null}
 
-        <Button type="submit" loading={create.isPending}>
+        <Button type="submit" loading={create.isPending} disabled={offersLocked}>
           ارسال پیشنهاد
         </Button>
       </form>

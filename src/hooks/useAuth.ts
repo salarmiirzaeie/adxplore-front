@@ -84,6 +84,7 @@ export function useVerifyOtp() {
         followerRange: data.user.followerRange,
         approvalStatus: data.user.approvalStatus ?? null,
         canAccessPanel: data.user.canAccessPanel,
+        canSendOffers: data.user.canSendOffers,
         nextScreen: data.user.nextScreen,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

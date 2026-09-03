@@ -12,6 +12,7 @@ import {
   formatBudgetRange,
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
+import { ApprovalWaitBanner } from '../components/ApprovalWaitBanner'
 import type {
   BrandCategory,
   BrowseCampaignsParams,
@@ -224,6 +225,7 @@ function InfluencerCampaigns() {
 
   return (
     <div>
+      <ApprovalWaitBanner />
       <section className="mb-6 sm:mb-8">
         <p className="mb-1 text-sm font-medium text-purple">کمپین‌ها</p>
         <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">

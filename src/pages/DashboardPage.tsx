@@ -6,6 +6,7 @@ import { useDeals } from '../hooks/useDeals'
 import { useInvitations } from '../hooks/useInvitations'
 import { useOffers } from '../hooks/useOffers'
 import { formatPhoneDisplay } from '../lib/phone'
+import { ApprovalWaitBanner } from '../components/ApprovalWaitBanner'
 
 type PipelineItem = {
   label: string
@@ -234,7 +235,12 @@ export function DashboardPage() {
         </p>
       </section>
 
-      {isBrand ? <BrandDashboard /> : <InfluencerDashboard />}
+      {isBrand ? <BrandDashboard /> : (
+        <>
+          <ApprovalWaitBanner />
+          <InfluencerDashboard />
+        </>
+      )}
     </div>
   )
 }
