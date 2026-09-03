@@ -18,7 +18,7 @@ import {
   useMessages,
   useSendMessage,
 } from '../hooks/useChat'
-import { useOffer, useUpdateOfferStatus } from '../hooks/useOffers'
+import { useOffer, useUpdateOfferStatus, offerQueryKey, offersQueryKey } from '../hooks/useOffers'
 import { dealStatusLabel } from '../lib/brand-options'
 import { connectChatSocket } from '../lib/chat-socket'
 import type { ChatMessage } from '../types/api'
@@ -111,6 +111,17 @@ export function ChatThread({ offerId }: ChatThreadProps) {
         return [...prev, message]
       })
       if (message.senderId !== me.id) markRead.mutate()
+      const event = message.metadata?.event
+      if (
+        event === 'OFFER_UPDATED' ||
+        event === 'OFFER_REJECTED' ||
+        event === 'OFFER_CANCELLED' ||
+        event === 'OFFER_ACCEPTED'
+      ) {
+        qc.invalidateQueries({ queryKey: offerQueryKey(offerId) })
+        qc.invalidateQueries({ queryKey: offersQueryKey })
+        qc.invalidateQueries({ queryKey: ['conversations'] })
+      }
     }
 
     socket.on('message:new', onNew)
@@ -120,7 +131,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
       })
       socket.off('message:new', onNew)
     }
-  }, [conversation?.id, me?.id, qc])
+  }, [conversation?.id, me?.id, offerId, qc])
 
   if (loadingOffer || loadingConv) {
     return (
@@ -238,6 +249,10 @@ export function ChatThread({ offerId }: ChatThreadProps) {
         <OfferProposalCard
           offer={offer}
           dealStatus={relatedDeal?.status}
+          canEdit={
+            offer.canEdit ?? (!isBrand && offer.status === 'PENDING')
+          }
+          onUpdated={refreshTimeline}
         />
 
         <div className="mt-3 space-y-3">
@@ -335,7 +350,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
           <p className="min-w-0 flex-1 text-xs leading-6 text-muted">
             {isBrand
               ? 'برای شروع همکاری، این پیشنهاد را قبول یا رد کنید.'
-              : 'در انتظار پاسخ برند هستید؛ در صورت نیاز پیشنهاد را لغو کنید.'}
+              : 'در انتظار پاسخ برند هستید؛ می‌توانید پیشنهاد را ویرایش یا لغو کنید.'}
           </p>
           <div className="flex shrink-0 gap-2">
             {isBrand ? (

@@ -3,6 +3,7 @@ import type {
   CreateOfferBody,
   Offer,
   UpdateOfferStatusBody,
+  UpdateOfferTermsBody,
 } from '../types/api'
 
 export async function listOffers(campaignId?: string): Promise<Offer[]> {
@@ -27,5 +28,13 @@ export async function updateOfferStatus(
   body: UpdateOfferStatusBody,
 ): Promise<Offer> {
   const { data } = await api.patch<Offer>(`/v1/offers/${id}`, body)
+  return data
+}
+
+export async function updateOfferTerms(
+  id: string,
+  body: UpdateOfferTermsBody,
+): Promise<Offer> {
+  const { data } = await api.patch<Offer>(`/v1/offers/${id}/terms`, body)
   return data
 }

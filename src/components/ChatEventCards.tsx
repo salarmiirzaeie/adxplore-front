@@ -11,6 +11,7 @@ const EVENT_LABELS: Record<string, string> = {
   OFFER_REJECTED: 'پیشنهاد رد شد',
   OFFER_CANCELLED: 'پیشنهاد لغو شد',
   OFFER_AFTER_INVITATION: 'پاسخ به دعوت',
+  OFFER_UPDATED: 'پیشنهاد ویرایش شد',
 }
 
 function formatFee(fee?: number, body?: string) {
@@ -95,8 +96,12 @@ export function ChatSystemMessage({
   const letter = event ? paymentLetter(event, isBrand) : null
   const title = letter?.title ?? (event && EVENT_LABELS[event]) ?? body
   const description = letter?.description ?? null
-  const amount = letter ? formatFee(fee, body) : null
-  const showRawBody = !letter && body !== title
+  const amount = letter
+    ? formatFee(fee, body)
+    : event === 'OFFER_UPDATED'
+      ? formatFee(metadata?.fee ?? fee, body)
+      : null
+  const showRawBody = !letter && event !== 'OFFER_UPDATED' && body !== title
 
   return (
     <div className="flex justify-center py-1">

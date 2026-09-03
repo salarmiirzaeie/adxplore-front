@@ -6,18 +6,24 @@ import {
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
 import type { DealStatus, Offer } from '../types/api'
+import { EditOfferModal } from './EditOfferModal'
 
 interface OfferProposalCardProps {
   offer: Offer
   dealStatus?: DealStatus | null
+  canEdit?: boolean
+  onUpdated?: () => void
 }
 
 /** Structured offer card shown inside the chat thread (Karlancer-style). */
 export function OfferProposalCard({
   offer,
   dealStatus,
+  canEdit = false,
+  onUpdated,
 }: OfferProposalCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [editing, setEditing] = useState(false)
   const fee = offer.fee.toLocaleString('fa-IR')
   const longMessage =
     offer.message != null && offer.message.trim().length > 120
@@ -85,14 +91,44 @@ export function OfferProposalCard({
         </div>
       ) : null}
 
-      <div className="mt-3 border-t border-border pt-3">
+      <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-3">
         <Link
           to={`/app/campaigns/${offer.campaignId}`}
           className="text-xs font-bold text-purple hover:underline"
         >
           مشاهده کمپین
         </Link>
+        {canEdit ? (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-800 transition hover:bg-emerald-100"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path
+                d="M4 20h4l10.5-10.5a2.12 2.12 0 0 0-3-3L5 17v3z"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M13.5 6.5l3 3"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+            </svg>
+            ویرایش
+          </button>
+        ) : null}
       </div>
+
+      <EditOfferModal
+        offer={offer}
+        open={editing}
+        onClose={() => setEditing(false)}
+        onUpdated={onUpdated}
+      />
     </article>
   )
 }

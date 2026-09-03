@@ -289,6 +289,7 @@ export type OfferStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
 export type NotificationType =
   | 'INVITATION_RECEIVED'
   | 'OFFER_RECEIVED'
+  | 'OFFER_UPDATED'
   | 'OFFER_ACCEPTED'
   | 'OFFER_REJECTED'
   | 'OFFER_CANCELLED'
@@ -316,6 +317,12 @@ export interface ChatMessageMetadata {
   brandFeedback?: string | null
   mediaUrl?: string
   mimeType?: string
+  fee?: number
+  message?: string | null
+  deadline?: string | null
+  previousFee?: number
+  previousMessage?: string | null
+  previousDeadline?: string | null
 }
 
 export interface ChatMessage {
@@ -343,6 +350,17 @@ export interface Conversation {
   lastMessage: ChatMessage | null
   unreadCount: number
   createdAt: string
+  updatedAt: string
+  offer?: ConversationOffer
+}
+
+export interface ConversationOffer {
+  id: string
+  fee: number
+  message: string | null
+  deadline: string | null
+  status: OfferStatus
+  canEdit: boolean
   updatedAt: string
 }
 
@@ -582,6 +600,7 @@ export interface Offer {
   message: string | null
   deadline: string | null
   status: OfferStatus
+  canEdit?: boolean
   campaign: OfferCampaign
   brand: OfferParty
   influencer: OfferParty
@@ -598,6 +617,12 @@ export interface CreateOfferBody {
 
 export interface UpdateOfferStatusBody {
   status: 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
+}
+
+export interface UpdateOfferTermsBody {
+  fee?: number
+  message?: string | null
+  deadline?: string | null
 }
 
 export interface AppNotification {

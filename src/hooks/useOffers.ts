@@ -5,9 +5,14 @@ import {
   getOffer,
   listOffers,
   updateOfferStatus,
+  updateOfferTerms,
 } from '../api/offers'
 import { getAccessToken } from '../lib/auth-storage'
-import type { CreateOfferBody, UpdateOfferStatusBody } from '../types/api'
+import type {
+  CreateOfferBody,
+  UpdateOfferStatusBody,
+  UpdateOfferTermsBody,
+} from '../types/api'
 
 export const offersQueryKey = ['offers'] as const
 
@@ -62,6 +67,19 @@ export function useUpdateOfferStatus(id: string) {
       if (body.status === 'ACCEPTED') {
         queryClient.invalidateQueries({ queryKey: ['deals'] })
       }
+    },
+  })
+}
+
+export function useUpdateOfferTerms(id: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (body: UpdateOfferTermsBody) => updateOfferTerms(id, body),
+    onSuccess: (offer) => {
+      queryClient.setQueryData(offerQueryKey(id), offer)
+      queryClient.invalidateQueries({ queryKey: offersQueryKey })
+      queryClient.invalidateQueries({ queryKey: ['conversations'] })
     },
   })
 }
