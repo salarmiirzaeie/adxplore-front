@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { getApiErrorMessage } from '../api/client'
 import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
+import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { Input } from '../components/ui/Input'
 import { Textarea } from '../components/ui/Textarea'
 import { useMe } from '../hooks/useAuth'
@@ -73,10 +74,14 @@ export function DealDetailPage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [proof, setProof] = useState<File | null>(null)
   const [feedback, setFeedback] = useState('')
+  const [confirm, setConfirm] = useState<
+    'submit' | 'complete' | 'revision' | 'cancel' | null
+  >(null)
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<DeliverableForm>({
     resolver: zodResolver(deliverableSchema),
@@ -206,13 +211,7 @@ export function DealDetailPage() {
       {canSubmit ? (
         <form
           className="card-elevated mb-4 space-y-4 rounded-2xl px-5 py-6 sm:px-7"
-          onSubmit={handleSubmit((values) => {
-            submit.mutate({
-              contentUrl: values.contentUrl,
-              note: values.note || undefined,
-              proof: proof ?? undefined,
-            })
-          })}
+          onSubmit={handleSubmit(() => setConfirm('submit'))}
         >
           <h2 className="text-base font-extrabold text-navy">تحویل محتوا</h2>
           {deal.status === 'REVISION_REQUESTED' && deal.brandFeedback ? (
@@ -252,7 +251,7 @@ export function DealDetailPage() {
               {proof ? proof.name : 'انتخاب تصویر'}
             </button>
           </div>
-          <Button type="submit" loading={submit.isPending}>
+          <Button type="submit" disabled={submit.isPending}>
             ارسال تحویل
           </Button>
         </form>
@@ -261,8 +260,8 @@ export function DealDetailPage() {
       {canReview ? (
         <div className="mb-4 space-y-3">
           <Button
-            loading={update.isPending}
-            onClick={() => update.mutate({ status: 'COMPLETED' })}
+            disabled={update.isPending}
+            onClick={() => setConfirm('complete')}
           >
             تأیید تحویل و تکمیل
           </Button>
@@ -275,14 +274,8 @@ export function DealDetailPage() {
           />
           <Button
             variant="outline"
-            loading={update.isPending}
-            disabled={!feedback.trim()}
-            onClick={() =>
-              update.mutate({
-                status: 'REVISION_REQUESTED',
-                brandFeedback: feedback.trim(),
-              })
-            }
+            disabled={update.isPending || !feedback.trim()}
+            onClick={() => setConfirm('revision')}
           >
             درخواست اصلاح
           </Button>
@@ -292,8 +285,8 @@ export function DealDetailPage() {
       {canCancel ? (
         <Button
           variant="outline"
-          loading={update.isPending}
-          onClick={() => update.mutate({ status: 'CANCELLED' })}
+          disabled={update.isPending}
+          onClick={() => setConfirm('cancel')}
         >
           لغو پیشنهاد پذیرفته‌شده
         </Button>
@@ -304,6 +297,100 @@ export function DealDetailPage() {
           این پیشنهاد با موفقیت تکمیل شد.
         </p>
       ) : null}
+
+      <ConfirmModal
+        open={confirm === 'submit'}
+        title="ثبت تحویل؟"
+        description="لینک محتوا برای برند ارسال می‌شود تا بررسی کند."
+        confirmLabel="ارسال تحویل"
+        loading={submit.isPending}
+        error={
+          submit.isError
+            ? getApiErrorMessage(submit.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() => {
+          const values = getValues()
+          submit.mutate(
+            {
+              contentUrl: values.contentUrl,
+              note: values.note || undefined,
+              proof: proof ?? undefined,
+            },
+            { onSuccess: () => setConfirm(null) },
+          )
+        }}
+        onClose={() => {
+          if (!submit.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'complete'}
+        title="تأیید تحویل؟"
+        description="با تأیید، مبلغ از امانت آزاد و به اینفلوئنسر واریز می‌شود. این کار قابل برگشت نیست."
+        confirmLabel="تأیید و تکمیل"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            { status: 'COMPLETED' },
+            { onSuccess: () => setConfirm(null) },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'revision'}
+        title="ارسال درخواست اصلاح؟"
+        description="اینفلوئنسر باید محتوا را بر اساس بازخورد شما دوباره ارسال کند."
+        confirmLabel="ارسال درخواست"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            {
+              status: 'REVISION_REQUESTED',
+              brandFeedback: feedback.trim(),
+            },
+            { onSuccess: () => setConfirm(null) },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'cancel'}
+        title="لغو همکاری؟"
+        description="همکاری لغو می‌شود و در صورت پرداخت، مبلغ به کیف پول برند برمی‌گردد."
+        confirmLabel="لغو همکاری"
+        tone="danger"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            { status: 'CANCELLED' },
+            { onSuccess: () => setConfirm(null) },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
     </div>
   )
 }

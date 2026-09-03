@@ -29,6 +29,10 @@ export type FollowerRange =
   | 'FROM_100K_500K'
   | 'OVER_500K'
 
+export type InfluencerApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
+
+export type NextScreen = 'ONBOARDING' | 'INSTAGRAM_APPROVAL' | 'PANEL'
+
 export type CampaignStatus = 'DRAFT' | 'OPEN' | 'CLOSED'
 
 export type DeliverableType = 'STORY' | 'POST' | 'REEL'
@@ -63,6 +67,9 @@ export interface AuthUser {
   goal: BrandGoal | null
   businessSize: BusinessSize | null
   followerRange: FollowerRange | null
+  approvalStatus?: InfluencerApprovalStatus | null
+  canAccessPanel?: boolean
+  nextScreen?: NextScreen
 }
 
 export interface VerifyOtpResponse {
@@ -87,6 +94,9 @@ export interface UserProfile {
   goal: BrandGoal | null
   businessSize: BusinessSize | null
   followerRange: FollowerRange | null
+  approvalStatus?: InfluencerApprovalStatus | null
+  canAccessPanel?: boolean
+  nextScreen?: NextScreen
   createdAt: string
   updatedAt: string
 }
@@ -101,6 +111,68 @@ export interface UpdateProfileBody {
   goal?: BrandGoal | null
   businessSize?: BusinessSize | null
   followerRange?: FollowerRange | null
+}
+
+export type InstagramApprovalUiStatus =
+  | 'ONBOARDING'
+  | 'ACTION_REQUIRED'
+  | 'WAITING_REVIEW'
+  | 'APPROVED'
+  | 'REJECTED'
+
+export interface InstagramActionLink {
+  label: string
+  url: string
+  appUrl: string
+  androidIntent: string
+}
+
+export interface InstagramCopyAction {
+  label: string
+  text: string
+}
+
+export interface InstagramApprovalResponse {
+  approvalStatus: InfluencerApprovalStatus | null
+  uiStatus: InstagramApprovalUiStatus
+  onboardingComplete: boolean
+  canAccessPanel: boolean
+  verifyCode: string | null
+  dmMessage: string | null
+  influencerInstagram: string | null
+  rejectionReason: string | null
+  markedSentAt: string | null
+  approvedAt: string | null
+  pollIntervalSeconds: number
+  page: {
+    username: string
+    profileUrl: string
+    followUrl: string
+    dmUrl: string
+    appProfileUrl: string
+    appDmUrl: string
+    androidProfileIntent: string
+    androidDmIntent: string
+  }
+  copy: {
+    headline: string
+    subtitle: string
+    waitingHint: string
+  }
+  actions: {
+    copyMessage: InstagramCopyAction | null
+    copyCode: InstagramCopyAction | null
+    follow: InstagramActionLink
+    openDm: InstagramActionLink
+    confirmSent: { label: string; enabled: boolean }
+  }
+  steps: Array<{
+    id: string
+    title: string
+    body: string
+    action: string
+    done: boolean
+  }>
 }
 
 export interface CampaignImage {
@@ -161,8 +233,8 @@ export interface UpdateCampaignBody {
   province?: string | null
   deliverable?: DeliverableType
   deliverables?: DeliverableType[]
-  budgetMin?: number
-  budgetMax?: number
+  budgetMin?: number | null
+  budgetMax?: number | null
   status?: CampaignStatus
 }
 
@@ -201,6 +273,8 @@ export type NotificationType =
   | 'DEAL_COMPLETED'
   | 'DEAL_CANCELLED'
   | 'CHAT_MESSAGE'
+  | 'INFLUENCER_APPROVED'
+  | 'INFLUENCER_REJECTED'
 
 export type MessageKind = 'TEXT' | 'SYSTEM' | 'DELIVERABLE'
 
@@ -331,12 +405,24 @@ export type WalletTxType =
   | 'WITHDRAW_DONE'
   | 'WITHDRAW_CANCEL'
 
+export interface BankCard {
+  holderName: string
+  cardNumber: string
+  cardMasked: string
+  cardLast4: string
+  sheba: string
+  bankName: string
+  updatedAt?: string
+}
+
 export interface Wallet {
   id: string
   userId: string
   availableToman: number
   heldToman: number
   totalToman: number
+  hasBankCard?: boolean
+  bankCard?: BankCard | null
   createdAt: string
   updatedAt: string
 }
@@ -351,7 +437,14 @@ export interface WalletTransaction {
   dealId: string | null
   paymentId: string | null
   description: string | null
+  bankCard?: BankCard | null
   createdAt: string
+}
+
+export interface UpsertBankCardBody {
+  holderName: string
+  cardNumber: string
+  sheba: string
 }
 
 export interface SubmitDeliverableBody {

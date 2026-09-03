@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { getApiErrorMessage } from '../api/client'
+import { BankCardSection } from '../components/BankCardSection'
 import { Button } from '../components/ui/Button'
+import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { Input } from '../components/ui/Input'
 import { useMe } from '../hooks/useAuth'
 import {
@@ -8,6 +10,7 @@ import {
   useRequestWithdraw,
   useWalletTransactions,
 } from '../hooks/useWallets'
+import { formatMaskedCard } from '../lib/bank-card'
 import { parseNumber } from '../lib/digits'
 import type { WalletTxType } from '../types/api'
 
@@ -32,8 +35,11 @@ export function WalletPage() {
   const { data: txs = [], isLoading: loadingTx } = useWalletTransactions()
   const withdraw = useRequestWithdraw()
   const [amount, setAmount] = useState('')
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const isInfluencer = me?.role === 'INFLUENCER'
   const isBrand = me?.role === 'BRAND'
+  const bankCard = wallet?.bankCard ?? null
+  const hasBankCard = Boolean(bankCard)
 
   const parsedAmount = useMemo(() => {
     const n = parseNumber(amount)
@@ -41,9 +47,12 @@ export function WalletPage() {
   }, [amount])
 
   const onWithdraw = () => {
-    if (parsedAmount < 10_000) return
+    if (parsedAmount < 10_000 || !hasBankCard) return
     withdraw.mutate(parsedAmount, {
-      onSuccess: () => setAmount(''),
+      onSuccess: () => {
+        setAmount('')
+        setConfirmOpen(false)
+      },
     })
   }
 
@@ -62,6 +71,10 @@ export function WalletPage() {
       </p>
     )
   }
+
+  const withdrawDescription = bankCard
+    ? `درخواست برداشت ${parsedAmount.toLocaleString('fa-IR')} تومان به کارت ${bankCard.bankName} ${formatMaskedCard(bankCard.cardMasked)} ثبت می‌شود.`
+    : `درخواست برداشت ${parsedAmount.toLocaleString('fa-IR')} تومان ثبت می‌شود و پس از بررسی، واریز دستی انجام می‌شود.`
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
@@ -108,12 +121,19 @@ export function WalletPage() {
         </div>
       ) : null}
 
+      {isInfluencer ? <BankCardSection card={bankCard} /> : null}
+
       {isInfluencer ? (
         <div className="rounded-2xl border border-border bg-surface-elevated p-4">
           <h2 className="text-sm font-extrabold text-navy">درخواست برداشت</h2>
           <p className="mt-1 text-xs text-muted">
-            حداقل ۱۰٬۰۰۰ تومان. پس از بررسی، واریز دستی انجام می‌شود.
+            حداقل ۱۰٬۰۰۰ تومان. پس از بررسی، به کارت ثبت‌شده واریز می‌شود.
           </p>
+          {!hasBankCard ? (
+            <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              برای برداشت ابتدا کارت بانکی را ثبت کنید.
+            </p>
+          ) : null}
           <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
             <div className="min-w-0 flex-1">
               <Input
@@ -123,15 +143,17 @@ export function WalletPage() {
                 inputMode="numeric"
                 dir="ltr"
                 placeholder="500000"
+                disabled={!hasBankCard}
               />
             </div>
             <Button
               type="button"
               fullWidth={false}
               className="px-5"
-              loading={withdraw.isPending}
-              disabled={parsedAmount < 10_000}
-              onClick={onWithdraw}
+              disabled={
+                !hasBankCard || parsedAmount < 10_000 || withdraw.isPending
+              }
+              onClick={() => setConfirmOpen(true)}
             >
               ثبت درخواست
             </Button>
@@ -148,6 +170,23 @@ export function WalletPage() {
           ) : null}
         </div>
       ) : null}
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="ثبت درخواست برداشت؟"
+        description={withdrawDescription}
+        confirmLabel="ثبت درخواست"
+        loading={withdraw.isPending}
+        error={
+          withdraw.isError
+            ? getApiErrorMessage(withdraw.error, 'برداشت ناموفق بود')
+            : null
+        }
+        onConfirm={onWithdraw}
+        onClose={() => {
+          if (!withdraw.isPending) setConfirmOpen(false)
+        }}
+      />
 
       <div className="rounded-2xl border border-border bg-surface-elevated">
         <div className="border-b border-border px-4 py-3">
@@ -173,6 +212,11 @@ export function WalletPage() {
                   {tx.description ? (
                     <p className="mt-0.5 truncate text-xs text-muted">
                       {tx.description}
+                    </p>
+                  ) : null}
+                  {tx.bankCard ? (
+                    <p className="mt-0.5 text-xs text-muted" dir="ltr">
+                      {tx.bankCard.bankName} {formatMaskedCard(tx.bankCard.cardMasked)}
                     </p>
                   ) : null}
                   <p className="mt-1 text-[10px] text-muted">

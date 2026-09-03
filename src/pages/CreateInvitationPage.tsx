@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 import { getApiErrorMessage } from '../api/client'
 import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
+import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { Select } from '../components/ui/Select'
 import { Textarea } from '../components/ui/Textarea'
 import { useMe } from '../hooks/useAuth'
@@ -34,6 +35,7 @@ export function CreateInvitationPage() {
     user?.role === 'BRAND',
   )
   const create = useCreateInvitation()
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const openCampaigns = useMemo(
     () => (campaigns ?? []).filter((c) => c.status === 'OPEN'),
@@ -44,6 +46,7 @@ export function CreateInvitationPage() {
     register,
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -120,15 +123,10 @@ export function CreateInvitationPage() {
           </Link>
         </section>
       ) : (
+        <>
         <form
           className="card-elevated space-y-5 rounded-2xl px-5 py-6 sm:px-7"
-          onSubmit={handleSubmit((values) => {
-            create.mutate({
-              campaignId: values.campaignId,
-              influencerId: influencer.id,
-              message: values.message || undefined,
-            })
-          })}
+          onSubmit={handleSubmit(() => setConfirmOpen(true))}
         >
           <Controller
             name="campaignId"
@@ -164,6 +162,31 @@ export function CreateInvitationPage() {
             ارسال دعوت
           </Button>
         </form>
+
+        <ConfirmModal
+          open={confirmOpen}
+          title="ارسال دعوت؟"
+          description={`${influencer.name ?? 'اینفلوئنسر'} به کمپین دعوت می‌شود.`}
+          confirmLabel="ارسال دعوت"
+          loading={create.isPending}
+          error={
+            create.isError
+              ? getApiErrorMessage(create.error, 'ارسال دعوت ناموفق بود')
+              : null
+          }
+          onConfirm={() => {
+            const values = getValues()
+            create.mutate({
+              campaignId: values.campaignId,
+              influencerId: influencer.id,
+              message: values.message || undefined,
+            })
+          }}
+          onClose={() => {
+            if (!create.isPending) setConfirmOpen(false)
+          }}
+        />
+        </>
       )}
     </div>
   )

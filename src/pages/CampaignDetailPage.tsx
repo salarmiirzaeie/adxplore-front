@@ -1,24 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { getApiErrorMessage } from '../api/client'
-import { CampaignImagesEditor } from '../components/CampaignImagesEditor'
+import { CampaignImageGallery } from '../components/CampaignImageGallery'
 import { InviteInfluencersModal } from '../components/InviteInfluencersModal'
 import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
+import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { useMe } from '../hooks/useAuth'
 import { useCampaign, useUpdateCampaign } from '../hooks/useCampaigns'
 import { useDeals } from '../hooks/useDeals'
-import {
-  useInvitations,
-  useUpdateInvitationStatus,
-} from '../hooks/useInvitations'
+import { useInvitations } from '../hooks/useInvitations'
 import { useOffers } from '../hooks/useOffers'
 import {
   brandCategoriesLabel,
   campaignStatusLabel,
   deliverablesLabel,
   formatBudgetRange,
-  invitationStatusLabel,
   offerPipelineLabel,
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
@@ -34,28 +31,81 @@ function DetailRow({ label, value, dir }: { label: string; value: string; dir?: 
   )
 }
 
-function CancelInvitationButton({ invitationId }: { invitationId: string }) {
-  const update = useUpdateInvitationStatus(invitationId)
+function MetaChip({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
   return (
-    <button
-      type="button"
-      disabled={update.isPending}
-      onClick={() => update.mutate({ status: 'CANCELLED' })}
-      className="shrink-0 text-xs font-bold text-red-600 transition hover:underline disabled:opacity-50"
+    <div className="rounded-xl border border-border bg-surface-elevated px-4 py-3">
+      <p className="text-[11px] font-semibold text-muted">{label}</p>
+      <p className="mt-1 text-sm font-extrabold text-navy" dir={dir}>
+        {value}
+      </p>
+    </div>
+  )
+}
+
+function ChevronIcon() {
+  return (
+    <svg
+      className="size-4 shrink-0 text-muted"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
     >
-      لغو
-    </button>
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  )
+}
+
+function CampaignNavCard({
+  to,
+  count,
+  label,
+  hint,
+}: {
+  to: string
+  count: number
+  label: string
+  hint: string
+}) {
+  const hasItems = count > 0
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-3 rounded-2xl border px-4 py-4 transition hover:border-purple/30 ${
+        hasItems
+          ? 'border-purple/20 bg-purple-soft/25'
+          : 'border-border bg-surface-elevated hover:bg-surface'
+      }`}
+    >
+      <div className="min-w-0 flex-1">
+        <p
+          className={`text-2xl font-extrabold tabular-nums ${
+            hasItems ? 'text-purple-deep' : 'text-navy'
+          }`}
+        >
+          {count.toLocaleString('fa-IR')}
+        </p>
+        <p className="mt-0.5 text-sm font-extrabold text-navy">{label}</p>
+        <p className="mt-1 text-xs text-muted">{hint}</p>
+      </div>
+      <ChevronIcon />
+    </Link>
   )
 }
 
 function BrandCampaignDetail({ id }: { id: string }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [inviteOpen, setInviteOpen] = useState(false)
+  const [confirm, setConfirm] = useState<'open' | 'close' | 'reopen' | null>(
+    null,
+  )
   const { data: campaign, isLoading, isError } = useCampaign(id, true)
   const update = useUpdateCampaign(id)
   const { data: invitations } = useInvitations(id, true)
   const { data: offers } = useOffers(id, true)
-  const { data: deals } = useDeals(id, true)
 
   useEffect(() => {
     if (searchParams.get('invite') === '1' && campaign?.status === 'OPEN') {
@@ -86,6 +136,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
   }
 
   const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ?? '—'
+  const images = campaign.images ?? []
 
   return (
     <div>
@@ -96,42 +147,58 @@ function BrandCampaignDetail({ id }: { id: string }) {
         >
           ← بازگشت به کمپین‌های من
         </Link>
-        <p className="mb-1 text-sm font-medium text-purple">
-          {campaignStatusLabel(campaign.status)}
-        </p>
-        <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">{campaign.title}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="mb-1 text-sm font-medium text-purple">
+              {campaignStatusLabel(campaign.status)}
+            </p>
+            <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
+              {campaign.title}
+            </h1>
+          </div>
+          <Link
+            to={`/app/campaigns/${campaign.id}/edit`}
+            className="inline-flex shrink-0 items-center justify-center rounded-xl border border-border bg-surface-elevated px-4 py-2.5 text-sm font-bold text-navy transition hover:border-purple/40 hover:bg-surface"
+          >
+            ویرایش
+          </Link>
+        </div>
       </section>
 
-      <section className="card-elevated mb-4 rounded-2xl px-5 py-2 sm:px-7">
-        <dl>
-          <DetailRow label="بریف" value={campaign.brief} />
-          <DetailRow
+      {images.length > 0 ? (
+        <div className="mb-4">
+          <CampaignImageGallery images={images} />
+        </div>
+      ) : null}
+
+      <section className="mb-4">
+        <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <MetaChip
             label="دسته"
             value={
               brandCategoriesLabel(campaign.categories, campaign.category) ?? '—'
             }
           />
-          <DetailRow
+          <MetaChip
             label="شهر"
             value={formatLocation(campaign.city, campaign.province) ?? '—'}
           />
-          <DetailRow
+          <MetaChip
             label="نوع محتوا"
             value={
               deliverablesLabel(campaign.deliverables, campaign.deliverable) ??
               '—'
             }
           />
-          <DetailRow label="بودجه" value={budget} dir="ltr" />
-        </dl>
+          <MetaChip label="بودجه" value={budget} dir="ltr" />
+        </div>
+        <div className="card-elevated rounded-2xl px-5 py-5 sm:px-7">
+          <p className="text-xs font-semibold text-muted">بریف</p>
+          <p className="mt-2 text-sm leading-7 text-navy whitespace-pre-wrap">
+            {campaign.brief}
+          </p>
+        </div>
       </section>
-
-      <div className="mb-4">
-        <CampaignImagesEditor
-          campaignId={campaign.id}
-          images={campaign.images ?? []}
-        />
-      </div>
 
       {update.isError ? (
         <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
@@ -139,16 +206,26 @@ function BrandCampaignDetail({ id }: { id: string }) {
         </p>
       ) : null}
 
+      <div className="mb-4 grid gap-3 sm:grid-cols-2">
+        <CampaignNavCard
+          to={`/app/campaigns/${campaign.id}/invitations`}
+          count={invitations?.length ?? 0}
+          label="دعوت‌ها"
+          hint="مشاهده و مدیریت دعوت‌ها"
+        />
+        <CampaignNavCard
+          to={`/app/campaigns/${campaign.id}/offers`}
+          count={offers?.length ?? 0}
+          label="پیشنهادها"
+          hint="مشاهده پیشنهادها و گفتگو"
+        />
+      </div>
+
       <div className="mb-8 flex flex-col gap-3 sm:flex-row">
         {campaign.status === 'DRAFT' ? (
           <Button
-            loading={update.isPending}
-            onClick={() =>
-              update.mutate(
-                { status: 'OPEN' },
-                { onSuccess: () => setInviteOpen(true) },
-              )
-            }
+            disabled={update.isPending}
+            onClick={() => setConfirm('open')}
           >
             فعال‌سازی و دعوت
           </Button>
@@ -158,8 +235,8 @@ function BrandCampaignDetail({ id }: { id: string }) {
             <Button onClick={() => setInviteOpen(true)}>دعوت اینفلوئنسر</Button>
             <Button
               variant="outline"
-              loading={update.isPending}
-              onClick={() => update.mutate({ status: 'CLOSED' })}
+              disabled={update.isPending}
+              onClick={() => setConfirm('close')}
             >
               بستن کمپین
             </Button>
@@ -168,113 +245,88 @@ function BrandCampaignDetail({ id }: { id: string }) {
         {campaign.status === 'CLOSED' ? (
           <Button
             variant="outline"
-            loading={update.isPending}
-            onClick={() => update.mutate({ status: 'OPEN' })}
+            disabled={update.isPending}
+            onClick={() => setConfirm('reopen')}
           >
             بازگشایی کمپین
           </Button>
         ) : null}
       </div>
 
-      <section className="mb-8">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-extrabold text-navy">دعوت‌ها</h2>
-          <span className="text-xs font-semibold text-muted">
-            {invitations?.length ?? 0} مورد
-          </span>
-        </div>
-        {invitations && invitations.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {invitations.map((inv) => (
-              <div
-                key={inv.id}
-                className="flex items-center gap-3 rounded-xl border border-border bg-surface-elevated px-4 py-3"
-              >
-                <Avatar
-                  src={inv.influencer.photoUrl}
-                  name={inv.influencer.name}
-                  size="sm"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold text-navy">
-                    {inv.influencer.name ?? '—'}
-                  </p>
-                  <p className="text-xs text-muted">
-                    {invitationStatusLabel(inv.status)}
-                  </p>
-                </div>
-                {inv.status === 'PENDING' ? (
-                  <CancelInvitationButton invitationId={inv.id} />
-                ) : null}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="rounded-xl bg-surface px-4 py-6 text-center text-sm text-muted">
-            هنوز کسی را دعوت نکرده‌اید.
-          </p>
-        )}
-      </section>
-
-      <section className="mb-8">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-extrabold text-navy">پیشنهادها</h2>
-          <span className="text-xs font-semibold text-muted">
-            {offers?.length ?? 0} مورد
-          </span>
-        </div>
-        {offers && offers.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {offers.map((offer) => {
-              const deal = deals?.find((d) => d.offerId === offer.id)
-              const href = `/app/messages/${offer.id}`
-              return (
-                <Link
-                  key={offer.id}
-                  to={href}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-surface-elevated px-4 py-3.5 transition hover:border-purple/25 hover:bg-surface"
-                >
-                  <Avatar
-                    src={offer.influencer.photoUrl}
-                    name={offer.influencer.name}
-                    size="md"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="truncate text-sm font-extrabold text-navy">
-                        {offer.influencer.name ?? '—'}
-                      </p>
-                      <span className="shrink-0 text-[10px] font-semibold text-muted">
-                        {new Date(offer.createdAt).toLocaleDateString('fa-IR', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 truncate text-xs text-muted">
-                      پیشنهاد روی این کمپین ·{' '}
-                      {offer.fee.toLocaleString('fa-IR')} تومان
-                    </p>
-                    <p className="mt-1 text-xs font-bold text-purple">
-                      {offerPipelineLabel(offer.status, deal?.status)} · باز کردن گفتگو
-                    </p>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        ) : (
-          <p className="rounded-xl bg-surface px-4 py-6 text-center text-sm text-muted">
-            هنوز پیشنهادی نیامده است.
-          </p>
-        )}
-      </section>
-
       <InviteInfluencersModal
         campaignId={campaign.id}
         campaignTitle={campaign.title}
         open={inviteOpen}
         onClose={() => setInviteOpen(false)}
+      />
+      <ConfirmModal
+        open={confirm === 'open'}
+        title="فعال‌سازی کمپین؟"
+        description="کمپین برای اینفلوئنسرها قابل مشاهده می‌شود و می‌توانید دعوت بفرستید."
+        confirmLabel="فعال کن"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'به‌روزرسانی کمپین ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            { status: 'OPEN' },
+            {
+              onSuccess: () => {
+                setConfirm(null)
+                setInviteOpen(true)
+              },
+            },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'close'}
+        title="بستن کمپین؟"
+        description="کمپین از لیست کمپین‌های باز حذف می‌شود و پیشنهاد جدید نمی‌پذیرد."
+        confirmLabel="بستن کمپین"
+        tone="danger"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'به‌روزرسانی کمپین ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            { status: 'CLOSED' },
+            { onSuccess: () => setConfirm(null) },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'reopen'}
+        title="بازگشایی کمپین؟"
+        description="کمپین دوباره برای اینفلوئنسرها باز می‌شود."
+        confirmLabel="بازگشایی"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'به‌روزرسانی کمپین ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            { status: 'OPEN' },
+            { onSuccess: () => setConfirm(null) },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
       />
     </div>
   )

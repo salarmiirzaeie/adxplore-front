@@ -9,6 +9,7 @@ import {
   getAccessToken,
   getLoginRole,
   isProfileComplete,
+  postAuthPath,
   setAccessToken,
   setLoginPhone,
   setLoginRole,
@@ -81,12 +82,18 @@ export function useVerifyOtp() {
         goal: data.user.goal,
         businessSize: data.user.businessSize,
         followerRange: data.user.followerRange,
+        approvalStatus: data.user.approvalStatus ?? null,
+        canAccessPanel: data.user.canAccessPanel,
+        nextScreen: data.user.nextScreen,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })
 
       const needsOnboarding = data.isNewUser || !isProfileComplete(data.user)
-      navigate(needsOnboarding ? '/onboarding' : '/app', { replace: true })
+      const path = needsOnboarding
+        ? '/onboarding'
+        : postAuthPath({ ...data.user, name: data.user.name })
+      navigate(path, { replace: true })
     },
   })
 }
@@ -101,7 +108,8 @@ export function useUpdateProfile(options?: { redirectTo?: string | null }) {
     onSuccess: (user) => {
       queryClient.setQueryData(meQueryKey, user)
       if (redirectTo) {
-        navigate(redirectTo, { replace: true })
+        const path = redirectTo === '/app' ? postAuthPath(user) : redirectTo
+        navigate(path, { replace: true })
       }
     },
   })

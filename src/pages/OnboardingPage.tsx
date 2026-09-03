@@ -20,7 +20,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { OptionGrid } from '../components/ui/OptionGrid'
 import { useMe, useUpdateProfile } from '../hooks/useAuth'
-import { getAccessToken, isProfileComplete } from '../lib/auth-storage'
+import { getAccessToken, isProfileComplete, postAuthPath } from '../lib/auth-storage'
 import {
   BRAND_CATEGORIES,
   BRAND_GOALS,
@@ -197,7 +197,7 @@ function InfluencerOnboarding({
             </Button>
           ) : (
             <Button type="submit" loading={update.isPending}>
-              ورود به داشبورد
+              ادامه برای تأیید اینستاگرام
             </Button>
           )}
 
@@ -451,7 +451,7 @@ export function OnboardingPage() {
   }
 
   if (!isLoading && user && isProfileComplete(user)) {
-    return <Navigate to="/app" replace />
+    return <Navigate to={postAuthPath(user)} replace />
   }
 
   if (isError) {

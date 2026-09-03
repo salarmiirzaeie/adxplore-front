@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { AppShell } from './AppShell'
 import { PageContainer } from './ui/PageContainer'
 import { useMe } from '../hooks/useAuth'
-import { isProfileComplete } from '../lib/auth-storage'
+import { isProfileComplete, postAuthPath } from '../lib/auth-storage'
 
 export function AppLayout() {
   const { data: user, isLoading, isError } = useMe()
@@ -15,6 +15,10 @@ export function AppLayout() {
 
   if (!isLoading && user && !isProfileComplete(user)) {
     return <Navigate to="/onboarding" replace />
+  }
+
+  if (!isLoading && user && postAuthPath(user) === '/instagram-approval') {
+    return <Navigate to="/instagram-approval" replace />
   }
 
   return (

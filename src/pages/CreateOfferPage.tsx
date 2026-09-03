@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Controller, useForm } from 'react-hook-form'
+import { useState } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { z } from 'zod'
 import { getApiErrorMessage } from '../api/client'
 import { Button } from '../components/ui/Button'
+import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { Input } from '../components/ui/Input'
 import { JalaliDatePicker } from '../components/ui/JalaliDatePicker'
 import { Textarea } from '../components/ui/Textarea'
@@ -56,11 +58,13 @@ export function CreateOfferPage() {
     user?.role === 'INFLUENCER' && Boolean(campaignId),
   )
   const create = useCreateOffer()
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const {
     register,
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -127,14 +131,7 @@ export function CreateOfferPage() {
 
       <form
         className="card-elevated space-y-5 rounded-2xl px-5 py-6 sm:px-7"
-        onSubmit={handleSubmit((values) => {
-          create.mutate({
-            campaignId,
-            fee: parseNumber(values.fee),
-            message: values.message || undefined,
-            deadline: toDeadlineIso(values.deadline),
-          })
-        })}
+        onSubmit={handleSubmit(() => setConfirmOpen(true))}
       >
         <Input
           label="مبلغ پیشنهادی (تومان)"
@@ -176,6 +173,31 @@ export function CreateOfferPage() {
           ارسال پیشنهاد
         </Button>
       </form>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="ارسال پیشنهاد؟"
+        description="پیشنهاد قیمت برای برند ارسال می‌شود و گفتگو باز می‌شود."
+        confirmLabel="ارسال پیشنهاد"
+        loading={create.isPending}
+        error={
+          create.isError
+            ? getApiErrorMessage(create.error, 'ارسال پیشنهاد ناموفق بود')
+            : null
+        }
+        onConfirm={() => {
+          const values = getValues()
+          create.mutate({
+            campaignId,
+            fee: parseNumber(values.fee),
+            message: values.message || undefined,
+            deadline: toDeadlineIso(values.deadline),
+          })
+        }}
+        onClose={() => {
+          if (!create.isPending) setConfirmOpen(false)
+        }}
+      />
     </div>
   )
 }

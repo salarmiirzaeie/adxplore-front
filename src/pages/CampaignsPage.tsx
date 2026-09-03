@@ -25,39 +25,65 @@ function statusClass(status: CampaignStatus) {
   return 'bg-amber-50 text-amber-700'
 }
 
+function PencilIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  )
+}
+
 function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
   const cover = campaign.images?.[0]?.url
   return (
-    <Link
-      to={`/app/campaigns/${campaign.id}`}
-      className="card-elevated block overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md"
-    >
-      {cover ? (
-        <img src={cover} alt="" className="h-36 w-full object-cover" />
-      ) : null}
-      <div className="px-5 py-5">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
-          <span
-            className={`shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold ${statusClass(campaign.status)}`}
-          >
-            {campaignStatusLabel(campaign.status)}
-          </span>
+    <article className="card-elevated overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md">
+      <Link to={`/app/campaigns/${campaign.id}`} className="block">
+        {cover ? (
+          <img src={cover} alt="" className="h-36 w-full object-cover" />
+        ) : null}
+        <div className="px-5 pt-5">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
+            <span
+              className={`shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold ${statusClass(campaign.status)}`}
+            >
+              {campaignStatusLabel(campaign.status)}
+            </span>
+          </div>
+          <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
+            <span className="rounded-lg bg-surface px-2 py-1">
+              {brandCategoriesLabel(campaign.categories, campaign.category)}
+            </span>
+            <span className="rounded-lg bg-surface px-2 py-1">
+              {formatLocation(campaign.city, campaign.province)}
+            </span>
+            <span className="rounded-lg bg-surface px-2 py-1">
+              {deliverablesLabel(campaign.deliverables, campaign.deliverable)}
+            </span>
+          </div>
         </div>
-        <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
-          <span className="rounded-lg bg-surface px-2 py-1">
-            {brandCategoriesLabel(campaign.categories, campaign.category)}
-          </span>
-          <span className="rounded-lg bg-surface px-2 py-1">
-            {formatLocation(campaign.city, campaign.province)}
-          </span>
-          <span className="rounded-lg bg-surface px-2 py-1">
-            {deliverablesLabel(campaign.deliverables, campaign.deliverable)}
-          </span>
-        </div>
+      </Link>
+      <div className="mt-4 flex justify-end border-t border-border px-4 py-2.5">
+        <Link
+          to={`/app/campaigns/${campaign.id}/edit`}
+          className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold text-navy-muted transition hover:bg-surface hover:text-purple"
+        >
+          <PencilIcon className="size-3.5" />
+          ویرایش
+        </Link>
       </div>
-    </Link>
+    </article>
   )
 }
 

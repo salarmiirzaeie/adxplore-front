@@ -1,7 +1,8 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { getApiErrorMessage } from '../api/client'
 import { useDeletePhoto, useUploadPhoto } from '../hooks/useAuth'
 import { Avatar } from './ui/Avatar'
+import { ConfirmModal } from './ui/ConfirmModal'
 
 interface ProfilePhotoEditorProps {
   photoUrl?: string | null
@@ -19,6 +20,7 @@ export function ProfilePhotoEditor({
   const inputRef = useRef<HTMLInputElement>(null)
   const upload = useUploadPhoto()
   const remove = useDeletePhoto()
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const busy = upload.isPending || remove.isPending
 
   return (
@@ -47,7 +49,7 @@ export function ProfilePhotoEditor({
             <button
               type="button"
               disabled={busy}
-              onClick={() => remove.mutate()}
+              onClick={() => setConfirmOpen(true)}
               className="rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
             >
               حذف
@@ -71,6 +73,25 @@ export function ProfilePhotoEditor({
           }}
         />
       </div>
+      <ConfirmModal
+        open={confirmOpen}
+        title="حذف عکس پروفایل؟"
+        description="عکس پروفایل شما حذف می‌شود."
+        confirmLabel="حذف"
+        tone="danger"
+        loading={remove.isPending}
+        error={
+          remove.isError
+            ? getApiErrorMessage(remove.error, 'آپلود ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          remove.mutate(undefined, { onSuccess: () => setConfirmOpen(false) })
+        }
+        onClose={() => {
+          if (!remove.isPending) setConfirmOpen(false)
+        }}
+      />
     </div>
   )
 }

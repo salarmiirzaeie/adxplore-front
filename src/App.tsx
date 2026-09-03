@@ -2,8 +2,11 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { GuestRoute, ProtectedRoute } from './components/ProtectedRoute'
 import { CampaignDetailPage } from './pages/CampaignDetailPage'
+import { CampaignInvitationsPage } from './pages/CampaignInvitationsPage'
+import { CampaignOffersPage } from './pages/CampaignOffersPage'
 import { CampaignsPage } from './pages/CampaignsPage'
 import { CreateCampaignPage } from './pages/CreateCampaignPage'
+import { EditCampaignPage } from './pages/EditCampaignPage'
 import { CreateInvitationPage } from './pages/CreateInvitationPage'
 import { CreateOfferPage } from './pages/CreateOfferPage'
 import { DashboardPage } from './pages/DashboardPage'
@@ -22,6 +25,7 @@ import { NotificationsPage } from './pages/NotificationsPage'
 import { OfferDetailPage } from './pages/OfferDetailPage'
 import { OffersPage } from './pages/OffersPage'
 import { OnboardingPage } from './pages/OnboardingPage'
+import { InstagramApprovalPage } from './pages/InstagramApprovalPage'
 import { OtpPage } from './pages/OtpPage'
 import { PaymentResultPage } from './pages/PaymentResultPage'
 import { ProfilePage } from './pages/ProfilePage'
@@ -44,10 +48,20 @@ export default function App() {
 
       <Route element={<ProtectedRoute />}>
         <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route path="/instagram-approval" element={<InstagramApprovalPage />} />
         <Route path="/app" element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="campaigns" element={<CampaignsPage />} />
           <Route path="campaigns/new" element={<CreateCampaignPage />} />
+          <Route path="campaigns/:id/edit" element={<EditCampaignPage />} />
+          <Route
+            path="campaigns/:id/invitations"
+            element={<CampaignInvitationsPage />}
+          />
+          <Route
+            path="campaigns/:id/offers"
+            element={<CampaignOffersPage />}
+          />
           <Route path="campaigns/:id" element={<CampaignDetailPage />} />
           <Route path="influencers" element={<InfluencersPage />} />
           <Route path="influencers/:id" element={<InfluencerDetailPage />} />

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { LogoutButton } from '../components/LogoutButton'
 import { Avatar } from '../components/ui/Avatar'
 import { useMe } from '../hooks/useAuth'
 import {
@@ -128,6 +129,10 @@ export function ProfilePage() {
         ) : (
           <InfluencerProfileView user={user} />
         )}
+      </section>
+
+      <section className="mt-6 lg:hidden">
+        <LogoutButton />
       </section>
     </div>
   )

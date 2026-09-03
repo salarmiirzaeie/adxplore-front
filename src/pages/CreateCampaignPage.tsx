@@ -1,120 +1,28 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Link, Navigate } from 'react-router-dom'
-import { z } from 'zod'
 import { getApiErrorMessage } from '../api/client'
+import { CampaignFormFields } from '../components/CampaignFormFields'
 import { Button } from '../components/ui/Button'
-import { Input } from '../components/ui/Input'
-import { OptionGrid } from '../components/ui/OptionGrid'
-import { IranCitySelect } from '../components/IranCitySelect'
-import { Textarea } from '../components/ui/Textarea'
+import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { useMe } from '../hooks/useAuth'
 import { useCreateCampaign } from '../hooks/useCampaigns'
+import { normalizeCategories } from '../lib/brand-options'
 import {
-  BRAND_CATEGORIES,
-  DELIVERABLE_TYPES,
-  normalizeCategories,
-} from '../lib/brand-options'
-import { parseNumber } from '../lib/digits'
-import { NATIONWIDE_CITY, refineIranLocation } from '../lib/iran-locations'
-import type {
-  BrandCategory,
-  CreateCampaignBody,
-  DeliverableType,
-  UserProfile,
-} from '../types/api'
+  campaignFormSchema,
+  toCreateCampaignBody,
+  type CampaignFormValues,
+} from '../lib/campaign-form'
+import type { UserProfile } from '../types/api'
 
 const MAX_IMAGES = 8
-
-const schema = z
-  .object({
-    title: z
-      .string()
-      .trim()
-      .min(3, 'عنوان حداقل ۳ کاراکتر باشد')
-      .max(120, 'عنوان حداکثر ۱۲۰ کاراکتر باشد'),
-    brief: z
-      .string()
-      .trim()
-      .min(10, 'توضیح حداقل ۱۰ کاراکتر باشد')
-      .max(2000, 'توضیح حداکثر ۲۰۰۰ کاراکتر باشد'),
-    categories: z
-      .array(
-        z.enum(
-          [
-            'BEAUTY',
-            'FASHION',
-            'FOOD',
-            'HEALTH',
-            'TECH',
-            'EDUCATION',
-            'TRAVEL',
-            'SPORTS',
-            'HOME',
-            'FINANCE',
-            'ENTERTAINMENT',
-            'OTHER',
-          ],
-          { error: 'دسته را انتخاب کنید' },
-        ),
-        { error: 'حداقل یک دسته انتخاب کنید' },
-      )
-      .min(1, 'حداقل یک دسته انتخاب کنید'),
-    city: z
-      .string()
-      .trim()
-      .min(2, 'شهر را انتخاب کنید')
-      .max(80, 'شهر حداکثر ۸۰ کاراکتر باشد'),
-    province: z.string(),
-    deliverables: z
-      .array(z.enum(['STORY', 'POST', 'REEL'], { error: 'نوع محتوا را انتخاب کنید' }), {
-        error: 'حداقل یک نوع محتوا انتخاب کنید',
-      })
-      .min(1, 'حداقل یک نوع محتوا انتخاب کنید'),
-    budgetMin: z.string().trim(),
-    budgetMax: z.string().trim(),
-    publish: z.boolean(),
-  })
-  .superRefine((values, ctx) => {
-    const min = values.budgetMin ? parseNumber(values.budgetMin) : null
-    const max = values.budgetMax ? parseNumber(values.budgetMax) : null
-    if (values.budgetMin && Number.isNaN(min)) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['budgetMin'],
-        message: 'عدد معتبر وارد کنید',
-      })
-    }
-    if (values.budgetMax && Number.isNaN(max)) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['budgetMax'],
-        message: 'عدد معتبر وارد کنید',
-      })
-    }
-    if (
-      min != null &&
-      max != null &&
-      !Number.isNaN(min) &&
-      !Number.isNaN(max) &&
-      min > max
-    ) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['budgetMax'],
-        message: 'حداکثر باید بزرگ‌تر یا مساوی حداقل باشد',
-      })
-    }
-    refineIranLocation(values, ctx, { allowNationwide: true })
-  })
-
-type FormValues = z.infer<typeof schema>
 
 function CreateCampaignForm({ user }: { user: UserProfile }) {
   const create = useCreateCampaign()
   const inputRef = useRef<HTMLInputElement>(null)
   const [files, setFiles] = useState<File[]>([])
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const previews = useMemo(
     () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
@@ -133,9 +41,10 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
     handleSubmit,
     setValue,
     watch,
+    getValues,
     formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<CampaignFormValues>({
+    resolver: zodResolver(campaignFormSchema),
     defaultValues: {
       title: '',
       brief: '',
@@ -149,27 +58,10 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
     },
   })
 
-  const onSubmit = handleSubmit((values) => {
-    const body: CreateCampaignBody = {
-      title: values.title.trim(),
-      brief: values.brief.trim(),
-      categories: values.categories,
-      category: values.categories[0] as BrandCategory,
-      city: values.city.trim(),
-      province:
-        values.city.trim() === NATIONWIDE_CITY
-          ? null
-          : values.province.trim() || null,
-      deliverables: values.deliverables as DeliverableType[],
-      deliverable: values.deliverables[0] as DeliverableType,
-      status: values.publish ? 'OPEN' : 'DRAFT',
-    }
-    if (values.budgetMin) body.budgetMin = parseNumber(values.budgetMin)
-    if (values.budgetMax) body.budgetMax = parseNumber(values.budgetMax)
-    create.mutate({ body, files })
-  })
+  const onSubmit = handleSubmit(() => setConfirmOpen(true))
 
   const remaining = MAX_IMAGES - files.length
+  const publish = watch('publish')
 
   return (
     <div>
@@ -188,152 +80,78 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
 
       <section className="card-elevated rounded-2xl px-5 py-6 sm:px-7 sm:py-8">
         <form onSubmit={onSubmit} className="flex flex-col gap-5">
-          <Input
-            label="عنوان کمپین"
-            placeholder="مثلاً لانچ محصول تابستانی"
-            error={errors.title?.message}
-            {...register('title')}
-          />
-
-          <Textarea
-            label="بریف / توضیح"
-            placeholder="هدف کمپین، پیام کلیدی و انتظارات از اینفلوئنسر را بنویسید."
-            error={errors.brief?.message}
-            {...register('brief')}
-          />
-
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-navy">تصاویر کمپین</p>
-                <p className="mt-1 text-xs text-muted">
-                  اختیاری · تا {MAX_IMAGES} تصویر · JPEG، PNG یا WebP
-                </p>
-              </div>
-              {remaining > 0 ? (
-                <button
-                  type="button"
-                  onClick={() => inputRef.current?.click()}
-                  className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs font-bold text-navy transition hover:border-purple/40 hover:bg-surface"
-                >
-                  افزودن تصویر
-                </button>
-              ) : null}
-            </div>
-
-            {previews.length === 0 ? (
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                className="rounded-xl border border-dashed border-border bg-surface px-4 py-8 text-sm font-semibold text-muted transition hover:border-purple/40 hover:text-navy"
-              >
-                برای افزودن تصویر کلیک کنید
-              </button>
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {previews.map(({ file, url }, index) => (
-                  <div
-                    key={`${file.name}-${index}`}
-                    className="group relative overflow-hidden rounded-xl border border-border bg-surface"
-                  >
-                    <img src={url} alt="" className="aspect-square w-full object-cover" />
+          <CampaignFormFields
+            register={register}
+            control={control}
+            errors={errors}
+            watch={watch}
+            setValue={setValue}
+            afterBrief={
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-navy">تصاویر کمپین</p>
+                    <p className="mt-1 text-xs text-muted">
+                      اختیاری · تا {MAX_IMAGES} تصویر · JPEG، PNG یا WebP
+                    </p>
+                  </div>
+                  {remaining > 0 ? (
                     <button
                       type="button"
-                      onClick={() =>
-                        setFiles((prev) => prev.filter((_, i) => i !== index))
-                      }
-                      className="absolute left-2 top-2 rounded-lg bg-ink/70 px-2 py-1 text-[10px] font-bold text-white"
+                      onClick={() => inputRef.current?.click()}
+                      className="rounded-xl border border-border bg-surface-elevated px-3 py-2 text-xs font-bold text-navy transition hover:border-purple/40 hover:bg-surface"
                     >
-                      حذف
+                      افزودن تصویر
                     </button>
+                  ) : null}
+                </div>
+
+                {previews.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => inputRef.current?.click()}
+                    className="rounded-xl border border-dashed border-border bg-surface px-4 py-8 text-sm font-semibold text-muted transition hover:border-purple/40 hover:text-navy"
+                  >
+                    برای افزودن تصویر کلیک کنید
+                  </button>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {previews.map(({ file, url }, index) => (
+                      <div
+                        key={`${file.name}-${index}`}
+                        className="group relative overflow-hidden rounded-xl border border-border bg-surface"
+                      >
+                        <img src={url} alt="" className="aspect-square w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFiles((prev) => prev.filter((_, i) => i !== index))
+                          }
+                          className="absolute left-2 top-2 rounded-lg bg-ink/70 px-2 py-1 text-[10px] font-bold text-white"
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
+
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const next = Array.from(e.target.files ?? [])
+                    e.target.value = ''
+                    if (!next.length) return
+                    setFiles((prev) => [...prev, ...next].slice(0, MAX_IMAGES))
+                  }}
+                />
               </div>
-            )}
-
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                const next = Array.from(e.target.files ?? [])
-                e.target.value = ''
-                if (!next.length) return
-                setFiles((prev) => [...prev, ...next].slice(0, MAX_IMAGES))
-              }}
-            />
-          </div>
-
-          <Controller
-            name="categories"
-            control={control}
-            render={({ field }) => (
-              <OptionGrid
-                label="دسته"
-                options={BRAND_CATEGORIES}
-                value={field.value}
-                onChange={(v) =>
-                  field.onChange(Array.isArray(v) ? v : v ? [v] : [])
-                }
-                error={errors.categories?.message}
-                multiple
-              />
-            )}
+            }
           />
-
-          <IranCitySelect
-            allowNationwide
-            province={watch('province')}
-            city={watch('city')}
-            provinceError={errors.province?.message}
-            cityError={errors.city?.message}
-            onChange={({ province, city }) => {
-              setValue('province', province, { shouldValidate: true })
-              setValue('city', city, { shouldValidate: true })
-            }}
-          />
-
-          <Controller
-            name="deliverables"
-            control={control}
-            render={({ field }) => (
-              <OptionGrid
-                label="نوع محتوا"
-                options={DELIVERABLE_TYPES}
-                value={field.value}
-                onChange={(v) =>
-                  field.onChange(Array.isArray(v) ? v : v ? [v] : [])
-                }
-                error={errors.deliverables?.message}
-                multiple
-              />
-            )}
-          />
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              label="حداقل بودجه (تومان)"
-              inputMode="numeric"
-              dir="ltr"
-              className="text-left"
-              placeholder="اختیاری"
-              hint="اختیاری"
-              error={errors.budgetMin?.message}
-              {...register('budgetMin')}
-            />
-            <Input
-              label="حداکثر بودجه (تومان)"
-              inputMode="numeric"
-              dir="ltr"
-              className="text-left"
-              placeholder="اختیاری"
-              hint="اختیاری"
-              error={errors.budgetMax?.message}
-              {...register('budgetMax')}
-            />
-          </div>
 
           <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3">
             <input
@@ -365,6 +183,29 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
           </div>
         </form>
       </section>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="ذخیره کمپین؟"
+        description={
+          publish
+            ? 'کمپین ساخته و فوراً فعال می‌شود تا اینفلوئنسرها آن را ببینند.'
+            : 'کمپین به‌صورت پیش‌نویس ذخیره می‌شود و بعداً می‌توانید آن را فعال کنید.'
+        }
+        confirmLabel="ذخیره کمپین"
+        loading={create.isPending}
+        error={
+          create.isError
+            ? getApiErrorMessage(create.error, 'ساخت کمپین ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          create.mutate({ body: toCreateCampaignBody(getValues()), files })
+        }
+        onClose={() => {
+          if (!create.isPending) setConfirmOpen(false)
+        }}
+      />
     </div>
   )
 }

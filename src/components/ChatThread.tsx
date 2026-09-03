@@ -7,6 +7,7 @@ import { DealChatActions } from './DealChatActions'
 import { OfferProposalCard } from './OfferProposalCard'
 import { Avatar } from './ui/Avatar'
 import { Button } from './ui/Button'
+import { ConfirmModal } from './ui/ConfirmModal'
 import { useMe } from '../hooks/useAuth'
 import { useDeals, useDeal } from '../hooks/useDeals'
 import {
@@ -71,6 +72,9 @@ export function ChatThread({ offerId }: ChatThreadProps) {
   const send = useSendMessage(conversation?.id ?? '')
   const markRead = useMarkConversationRead(conversation?.id)
   const [text, setText] = useState('')
+  const [offerConfirm, setOfferConfirm] = useState<
+    'accept' | 'reject' | 'cancel' | null
+  >(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const markedRef = useRef<string | null>(null)
 
@@ -153,6 +157,33 @@ export function ChatThread({ offerId }: ChatThreadProps) {
     send.mutate(body, { onSuccess: () => setText('') })
   }
 
+  const offerConfirmCopy =
+    offerConfirm === 'accept'
+      ? {
+          title: 'قبول پیشنهاد؟',
+          description: `با قبول این پیشنهاد همکاری شروع می‌شود و باید ${offer.fee.toLocaleString('fa-IR')} تومان را پرداخت کنید.`,
+          confirmLabel: 'قبول پیشنهاد',
+          tone: 'primary' as const,
+          status: 'ACCEPTED' as const,
+        }
+      : offerConfirm === 'reject'
+        ? {
+            title: 'رد پیشنهاد؟',
+            description: 'این پیشنهاد رد می‌شود و اینفلوئنسر مطلع خواهد شد.',
+            confirmLabel: 'رد پیشنهاد',
+            tone: 'danger' as const,
+            status: 'REJECTED' as const,
+          }
+        : offerConfirm === 'cancel'
+          ? {
+              title: 'لغو پیشنهاد؟',
+              description: 'پیشنهاد شما لغو می‌شود و برند دیگر آن را نمی‌بیند.',
+              confirmLabel: 'لغو پیشنهاد',
+              tone: 'danger' as const,
+              status: 'CANCELLED' as const,
+            }
+          : null
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-surface-elevated">
       <div className="shrink-0">
@@ -171,10 +202,8 @@ export function ChatThread({ offerId }: ChatThreadProps) {
               type="button"
               fullWidth={false}
               className="px-3 py-2 text-xs sm:px-4"
-              loading={update.isPending}
-              onClick={() =>
-                update.mutate({ status: 'ACCEPTED' }, { onSuccess: refreshTimeline })
-              }
+              disabled={update.isPending}
+              onClick={() => setOfferConfirm('accept')}
             >
               <span className="sm:hidden">قبول</span>
               <span className="hidden sm:inline">قبول پیشنهاد</span>
@@ -184,8 +213,8 @@ export function ChatThread({ offerId }: ChatThreadProps) {
               variant="outline"
               fullWidth={false}
               className="hidden px-3 py-2 text-xs sm:inline-flex"
-              loading={update.isPending}
-              onClick={() => update.mutate({ status: 'REJECTED' }, { onSuccess: refreshTimeline })}
+              disabled={update.isPending}
+              onClick={() => setOfferConfirm('reject')}
             >
               رد
             </Button>
@@ -218,9 +247,9 @@ export function ChatThread({ offerId }: ChatThreadProps) {
           isBrand={Boolean(isBrand)}
           pending={Boolean(pending)}
           updating={update.isPending}
-          onAccept={() => update.mutate({ status: 'ACCEPTED' }, { onSuccess: refreshTimeline })}
-          onReject={() => update.mutate({ status: 'REJECTED' }, { onSuccess: refreshTimeline })}
-          onCancel={() => update.mutate({ status: 'CANCELLED' }, { onSuccess: refreshTimeline })}
+          onAccept={() => setOfferConfirm('accept')}
+          onReject={() => setOfferConfirm('reject')}
+          onCancel={() => setOfferConfirm('cancel')}
         />
 
         <div className="mt-3 space-y-3">
@@ -330,6 +359,36 @@ export function ChatThread({ offerId }: ChatThreadProps) {
           </Button>
         </form>
       </footer>
+
+      {offerConfirmCopy ? (
+        <ConfirmModal
+          open
+          title={offerConfirmCopy.title}
+          description={offerConfirmCopy.description}
+          confirmLabel={offerConfirmCopy.confirmLabel}
+          tone={offerConfirmCopy.tone}
+          loading={update.isPending}
+          error={
+            update.isError
+              ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+              : null
+          }
+          onConfirm={() =>
+            update.mutate(
+              { status: offerConfirmCopy.status },
+              {
+                onSuccess: () => {
+                  setOfferConfirm(null)
+                  refreshTimeline()
+                },
+              },
+            )
+          }
+          onClose={() => {
+            if (!update.isPending) setOfferConfirm(null)
+          }}
+        />
+      ) : null}
     </div>
   )
 }

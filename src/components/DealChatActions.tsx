@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { getApiErrorMessage } from '../api/client'
 import { Button } from './ui/Button'
+import { ConfirmModal } from './ui/ConfirmModal'
 import { Input } from './ui/Input'
 import { Textarea } from './ui/Textarea'
 import {
@@ -28,6 +29,9 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
   const [feedback, setFeedback] = useState('')
   const [showSubmit, setShowSubmit] = useState(false)
   const [showRevision, setShowRevision] = useState(false)
+  const [confirm, setConfirm] = useState<
+    'pay' | 'submit' | 'complete' | 'revision' | 'cancel' | null
+  >(null)
 
   const needsPayment = deal.status === 'PENDING_PAYMENT'
   const canSubmit =
@@ -59,6 +63,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
       { contentUrl: url, note: note.trim() || undefined, proof: proof ?? undefined },
       {
         onSuccess: () => {
+          setConfirm(null)
           setShowSubmit(false)
           setNote('')
           setProof(null)
@@ -102,8 +107,8 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
                 type="button"
                 fullWidth={false}
                 className="w-full"
-                loading={pay.isPending}
-                onClick={onPay}
+                disabled={busy}
+                onClick={() => setConfirm('pay')}
               >
                 پرداخت امن · {deal.fee.toLocaleString('fa-IR')} تومان
               </Button>
@@ -172,8 +177,8 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
               type="button"
               fullWidth={false}
               className="flex-1"
-              loading={submit.isPending}
-              onClick={onSubmitDeliverable}
+              disabled={!contentUrl.trim() || busy}
+              onClick={() => setConfirm('submit')}
             >
               ثبت تحویل
             </Button>
@@ -198,10 +203,8 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
                 type="button"
                 fullWidth={false}
                 className="flex-1"
-                loading={update.isPending}
-                onClick={() =>
-                  update.mutate({ status: 'COMPLETED' }, { onSuccess: onUpdated })
-                }
+                disabled={busy}
+                onClick={() => setConfirm('complete')}
               >
                 تأیید تحویل
               </Button>
@@ -228,23 +231,8 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
                   type="button"
                   fullWidth={false}
                   className="flex-1"
-                  loading={update.isPending}
-                  disabled={!feedback.trim()}
-                  onClick={() =>
-                    update.mutate(
-                      {
-                        status: 'REVISION_REQUESTED',
-                        brandFeedback: feedback.trim(),
-                      },
-                      {
-                        onSuccess: () => {
-                          setShowRevision(false)
-                          setFeedback('')
-                          onUpdated?.()
-                        },
-                      },
-                    )
-                  }
+                  disabled={!feedback.trim() || busy}
+                  onClick={() => setConfirm('revision')}
                 >
                   ارسال درخواست
                 </Button>
@@ -267,14 +255,129 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
         <button
           type="button"
           disabled={busy}
-          onClick={() =>
-            update.mutate({ status: 'CANCELLED' }, { onSuccess: onUpdated })
-          }
+          onClick={() => setConfirm('cancel')}
           className="mt-2 w-full text-center text-xs font-semibold text-red-600 disabled:opacity-50"
         >
           لغو همکاری
         </button>
       ) : null}
+
+      <ConfirmModal
+        open={confirm === 'pay'}
+        title="پرداخت امن؟"
+        description={`به درگاه زرین‌پال منتقل می‌شوید. مبلغ ${deal.fee.toLocaleString('fa-IR')} تومان تا تأیید تحویل در حساب امانی می‌ماند.`}
+        confirmLabel="ادامه به پرداخت"
+        loading={pay.isPending}
+        error={
+          pay.isError
+            ? getApiErrorMessage(pay.error, 'خطا در اتصال به درگاه')
+            : null
+        }
+        onConfirm={onPay}
+        onClose={() => {
+          if (!pay.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'submit'}
+        title="ثبت تحویل؟"
+        description="لینک محتوا برای برند ارسال می‌شود تا بررسی کند."
+        confirmLabel="ثبت تحویل"
+        loading={submit.isPending}
+        error={
+          submit.isError
+            ? getApiErrorMessage(submit.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={onSubmitDeliverable}
+        onClose={() => {
+          if (!submit.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'complete'}
+        title="تأیید تحویل؟"
+        description="با تأیید، مبلغ از امانت آزاد و به اینفلوئنسر واریز می‌شود. این کار قابل برگشت نیست."
+        confirmLabel="تأیید و تکمیل"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            { status: 'COMPLETED' },
+            {
+              onSuccess: () => {
+                setConfirm(null)
+                onUpdated?.()
+              },
+            },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'revision'}
+        title="ارسال درخواست اصلاح؟"
+        description="اینفلوئنسر باید محتوا را بر اساس بازخورد شما دوباره ارسال کند."
+        confirmLabel="ارسال درخواست"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            {
+              status: 'REVISION_REQUESTED',
+              brandFeedback: feedback.trim(),
+            },
+            {
+              onSuccess: () => {
+                setConfirm(null)
+                setShowRevision(false)
+                setFeedback('')
+                onUpdated?.()
+              },
+            },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'cancel'}
+        title="لغو همکاری؟"
+        description="همکاری لغو می‌شود و در صورت پرداخت، مبلغ به کیف پول برند برمی‌گردد."
+        confirmLabel="لغو همکاری"
+        tone="danger"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            { status: 'CANCELLED' },
+            {
+              onSuccess: () => {
+                setConfirm(null)
+                onUpdated?.()
+              },
+            },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
     </div>
   )
 }

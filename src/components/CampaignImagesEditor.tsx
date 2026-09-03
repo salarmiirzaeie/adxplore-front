@@ -1,10 +1,11 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { getApiErrorMessage } from '../api/client'
 import {
   useDeleteCampaignImage,
   useUploadCampaignImages,
 } from '../hooks/useCampaigns'
 import type { CampaignImage } from '../types/api'
+import { ConfirmModal } from './ui/ConfirmModal'
 
 const MAX_IMAGES = 8
 
@@ -20,6 +21,7 @@ export function CampaignImagesEditor({
   const inputRef = useRef<HTMLInputElement>(null)
   const upload = useUploadCampaignImages(campaignId)
   const remove = useDeleteCampaignImage(campaignId)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const remaining = MAX_IMAGES - images.length
   const busy = upload.isPending || remove.isPending
 
@@ -61,7 +63,7 @@ export function CampaignImagesEditor({
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => remove.mutate(img.id)}
+                onClick={() => setPendingDeleteId(img.id)}
                 className="absolute left-2 top-2 rounded-lg bg-ink/70 px-2 py-1 text-[10px] font-bold text-white opacity-100 transition hover:bg-red-600 sm:opacity-0 sm:group-hover:opacity-100"
               >
                 حذف
@@ -87,6 +89,29 @@ export function CampaignImagesEditor({
           const files = Array.from(e.target.files ?? []).slice(0, remaining)
           e.target.value = ''
           if (files.length) upload.mutate(files)
+        }}
+      />
+
+      <ConfirmModal
+        open={pendingDeleteId != null}
+        title="حذف تصویر؟"
+        description="این تصویر از کمپین حذف می‌شود."
+        confirmLabel="حذف"
+        tone="danger"
+        loading={remove.isPending}
+        error={
+          remove.isError
+            ? getApiErrorMessage(remove.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() => {
+          if (!pendingDeleteId) return
+          remove.mutate(pendingDeleteId, {
+            onSuccess: () => setPendingDeleteId(null),
+          })
+        }}
+        onClose={() => {
+          if (!remove.isPending) setPendingDeleteId(null)
         }}
       />
     </section>

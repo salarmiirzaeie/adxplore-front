@@ -18,6 +18,7 @@ import type {
 import { IranCitySelect } from './IranCitySelect'
 import { Avatar } from './ui/Avatar'
 import { Button } from './ui/Button'
+import { ConfirmModal } from './ui/ConfirmModal'
 
 interface InviteInfluencersModalProps {
   campaignId: string
@@ -37,6 +38,7 @@ export function InviteInfluencersModal({
   const [city, setCity] = useState('')
   const [followerRange, setFollowerRange] = useState<FollowerRange | ''>('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const params = useMemo<ListInfluencersParams>(() => {
     const next: ListInfluencersParams = {}
@@ -63,6 +65,7 @@ export function InviteInfluencersModal({
 
   const close = () => {
     setSelected(new Set())
+    setConfirmOpen(false)
     bulk.reset()
     onClose()
   }
@@ -88,7 +91,7 @@ export function InviteInfluencersModal({
     )
   }
 
-  return createPortal(
+  const modal = createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-6"
       role="dialog"
@@ -229,7 +232,7 @@ export function InviteInfluencersModal({
             <Button
               loading={bulk.isPending}
               disabled={selected.size === 0}
-              onClick={send}
+              onClick={() => setConfirmOpen(true)}
             >
               ارسال دعوت ({selected.size.toLocaleString('fa-IR')})
             </Button>
@@ -241,5 +244,27 @@ export function InviteInfluencersModal({
       </div>
     </div>,
     document.body,
+  )
+
+  return (
+    <>
+      {modal}
+      <ConfirmModal
+        open={confirmOpen}
+        title="ارسال دعوت؟"
+        description={`${selected.size.toLocaleString('fa-IR')} اینفلوئنسر به این کمپین دعوت می‌شوند.`}
+        confirmLabel="ارسال دعوت"
+        loading={bulk.isPending}
+        error={
+          bulk.isError
+            ? getApiErrorMessage(bulk.error, 'ارسال دعوت ناموفق بود')
+            : null
+        }
+        onConfirm={send}
+        onClose={() => {
+          if (!bulk.isPending) setConfirmOpen(false)
+        }}
+      />
+    </>
   )
 }

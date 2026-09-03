@@ -9,6 +9,7 @@ interface AuthLayoutProps {
   backTo?: string
   backLabel?: string
   step?: string
+  wide?: boolean
 }
 
 export function AuthLayout({
@@ -18,9 +19,10 @@ export function AuthLayout({
   backTo,
   backLabel = 'بازگشت',
   step,
+  wide = false,
 }: AuthLayoutProps) {
   return (
-    <div className="bg-brand-hero bg-brand-mesh relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10 sm:px-6">
+    <div className="bg-brand-hero bg-brand-mesh relative flex min-h-dvh items-start justify-center overflow-x-hidden overflow-y-auto px-4 py-10 sm:items-center sm:px-6">
       <div
         aria-hidden
         className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-purple/20 blur-[100px]"
@@ -30,7 +32,9 @@ export function AuthLayout({
         className="animate-pulse-glow pointer-events-none absolute -right-16 bottom-8 h-56 w-56 rounded-full bg-purple-deep/30 blur-[80px]"
       />
 
-      <div className="relative z-10 w-full max-w-[420px] animate-fade-slide-in">
+      <div
+        className={`relative z-10 w-full animate-fade-slide-in ${wide ? 'max-w-[460px]' : 'max-w-[420px]'}`}
+      >
         <div className="mb-8 flex flex-col items-center text-center">
           <Logo theme="light" />
           <p className="mt-4 text-sm text-slate-300/80">پنل برند و اینفلوئنسر</p>

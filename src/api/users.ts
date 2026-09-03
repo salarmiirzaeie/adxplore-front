@@ -1,5 +1,9 @@
 import { api } from './client'
-import type { UpdateProfileBody, UserProfile } from '../types/api'
+import type {
+  InstagramApprovalResponse,
+  UpdateProfileBody,
+  UserProfile,
+} from '../types/api'
 
 export async function getMe(): Promise<UserProfile> {
   const { data } = await api.get<UserProfile>('/v1/users/me')
@@ -22,5 +26,19 @@ export async function uploadMyPhoto(file: File): Promise<UserProfile> {
 
 export async function deleteMyPhoto(): Promise<UserProfile> {
   const { data } = await api.delete<UserProfile>('/v1/users/me/photo')
+  return data
+}
+
+export async function getInstagramApproval(): Promise<InstagramApprovalResponse> {
+  const { data } = await api.get<InstagramApprovalResponse>(
+    '/v1/users/me/instagram-approval',
+  )
+  return data
+}
+
+export async function confirmInstagramDmSent(): Promise<InstagramApprovalResponse> {
+  const { data } = await api.post<InstagramApprovalResponse>(
+    '/v1/users/me/instagram-approval/confirm-sent',
+  )
   return data
 }

@@ -111,3 +111,26 @@ export function isProfileComplete(user: {
   }
   return true
 }
+
+export function postAuthPath(user: {
+  role: UserRole
+  nextScreen?: 'ONBOARDING' | 'INSTAGRAM_APPROVAL' | 'PANEL' | null
+  canAccessPanel?: boolean
+  name: string | null
+  category?: string | null
+  categories?: string[] | null
+  city?: string | null
+  province?: string | null
+  website?: string | null
+  followerRange?: string | null
+}): string {
+  if (user.nextScreen === 'ONBOARDING') return '/onboarding'
+  if (user.nextScreen === 'INSTAGRAM_APPROVAL') return '/instagram-approval'
+  if (user.nextScreen === 'PANEL') return '/app'
+
+  if (!isProfileComplete(user)) return '/onboarding'
+  if (user.role === 'INFLUENCER' && user.canAccessPanel === false) {
+    return '/instagram-approval'
+  }
+  return '/app'
+}
