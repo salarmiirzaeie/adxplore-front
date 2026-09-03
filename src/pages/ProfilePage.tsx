@@ -25,7 +25,7 @@ function ProfileField({
     <div className="border-b border-border py-4 last:border-b-0">
       <dt className="text-xs font-semibold text-muted">{label}</dt>
       <dd
-        className={`mt-1.5 text-sm font-bold text-navy ${!value ? 'font-medium text-muted' : ''}`}
+        className={`mt-1.5 text-sm font-bold text-navy whitespace-pre-wrap ${!value ? 'font-medium text-muted' : ''}`}
         dir={dir}
       >
         {value || '—'}
@@ -43,6 +43,7 @@ function BrandProfileView({ user }: { user: UserProfile }) {
         value={user.website}
         dir="ltr"
       />
+      <ProfileField label="درباره برند" value={user.bio} />
       <ProfileField
         label="دسته فعالیت"
         value={brandCategoriesLabel(user.categories, user.category)}
@@ -70,6 +71,7 @@ function InfluencerProfileView({ user }: { user: UserProfile }) {
     <dl>
       <ProfileField label="نام نمایشی" value={user.name} />
       <ProfileField label="اینستاگرام" value={user.website} dir="ltr" />
+      <ProfileField label="درباره شما" value={user.bio} />
       <ProfileField
         label="دسته‌بندی محتوا"
         value={brandCategoriesLabel(user.categories, user.category)}

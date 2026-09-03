@@ -33,7 +33,7 @@ export type InfluencerApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
 
 export type NextScreen = 'ONBOARDING' | 'INSTAGRAM_APPROVAL' | 'PANEL'
 
-export type CampaignStatus = 'DRAFT' | 'OPEN' | 'CLOSED'
+export type CampaignStatus = 'DRAFT' | 'PENDING_REVIEW' | 'OPEN' | 'CLOSED'
 
 export type DeliverableType = 'STORY' | 'POST' | 'REEL'
 
@@ -64,6 +64,7 @@ export interface AuthUser {
   city: string | null
   province: string | null
   website: string | null
+  bio: string | null
   goal: BrandGoal | null
   businessSize: BusinessSize | null
   followerRange: FollowerRange | null
@@ -92,6 +93,7 @@ export interface UserProfile {
   city: string | null
   province: string | null
   website: string | null
+  bio: string | null
   goal: BrandGoal | null
   businessSize: BusinessSize | null
   followerRange: FollowerRange | null
@@ -103,6 +105,22 @@ export interface UserProfile {
   updatedAt: string
 }
 
+export interface PublicProfile {
+  id: string
+  name: string | null
+  role: UserRole
+  photoUrl: string | null
+  category: BrandCategory | null
+  categories: BrandCategory[]
+  city: string | null
+  province: string | null
+  website: string | null
+  bio: string | null
+  goal: BrandGoal | null
+  businessSize: BusinessSize | null
+  followerRange: FollowerRange | null
+}
+
 export interface UpdateProfileBody {
   name?: string
   category?: BrandCategory
@@ -110,6 +128,7 @@ export interface UpdateProfileBody {
   city?: string
   province?: string
   website?: string | null
+  bio?: string | null
   goal?: BrandGoal | null
   businessSize?: BusinessSize | null
   followerRange?: FollowerRange | null
@@ -198,6 +217,8 @@ export interface Campaign {
   budgetMin: number | null
   budgetMax: number | null
   status: CampaignStatus
+  rejectionReason?: string | null
+  rejectedAt?: string | null
   images: CampaignImage[]
   brand?: OfferParty
   createdAt: string
@@ -251,6 +272,7 @@ export interface InfluencerCard {
   city: string
   province: string | null
   followerRange: FollowerRange
+  bio: string | null
 }
 
 export interface ListInfluencersParams {
@@ -278,16 +300,22 @@ export type NotificationType =
   | 'CHAT_MESSAGE'
   | 'INFLUENCER_APPROVED'
   | 'INFLUENCER_REJECTED'
+  | 'CAMPAIGN_REJECTED'
 
-export type MessageKind = 'TEXT' | 'SYSTEM' | 'DELIVERABLE'
+export type MessageKind = 'TEXT' | 'SYSTEM' | 'DELIVERABLE' | 'IMAGE' | 'VIDEO'
+
+export type DealContentKind = 'LINK' | 'IMAGE' | 'VIDEO'
 
 export interface ChatMessageMetadata {
   event?: string
   dealId?: string
+  contentKind?: DealContentKind
   contentUrl?: string
   note?: string | null
   proofUrl?: string | null
   brandFeedback?: string | null
+  mediaUrl?: string
+  mimeType?: string
 }
 
 export interface ChatMessage {
@@ -308,8 +336,10 @@ export interface Conversation {
   brandId: string
   influencerId: string
   campaignTitle: string | null
+  peerId?: string | null
   peerName: string | null
   peerPhotoUrl: string | null
+  peerBio?: string | null
   lastMessage: ChatMessage | null
   unreadCount: number
   createdAt: string
@@ -317,7 +347,8 @@ export interface Conversation {
 }
 
 export interface SendChatMessageBody {
-  body: string
+  body?: string
+  file?: File
 }
 
 export type DealStatus =
@@ -343,6 +374,7 @@ export interface Deal {
   influencerId: string
   fee: number
   status: DealStatus
+  contentKind: DealContentKind | null
   contentUrl: string | null
   note: string | null
   proofUrl: string | null
@@ -451,8 +483,10 @@ export interface UpsertBankCardBody {
 }
 
 export interface SubmitDeliverableBody {
-  contentUrl: string
+  kind: DealContentKind
+  contentUrl?: string
   note?: string
+  file?: File
   proof?: File
 }
 
@@ -471,6 +505,7 @@ export interface OfferParty {
   city: string | null
   province: string | null
   followerRange: FollowerRange | null
+  bio: string | null
 }
 
 export interface InvitationCampaign {

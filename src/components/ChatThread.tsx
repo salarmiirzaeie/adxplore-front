@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { getApiErrorMessage } from '../api/client'
 import { ChatDeliverableCard, ChatSystemMessage } from './ChatEventCards'
+import { MediaPreview } from './MediaPreview'
 import { DealChatActions } from './DealChatActions'
 import { OfferProposalCard } from './OfferProposalCard'
 import { Avatar } from './ui/Avatar'
@@ -72,6 +73,8 @@ export function ChatThread({ offerId }: ChatThreadProps) {
   const send = useSendMessage(conversation?.id ?? '')
   const markRead = useMarkConversationRead(conversation?.id)
   const [text, setText] = useState('')
+  const [attach, setAttach] = useState<File | null>(null)
+  const attachRef = useRef<HTMLInputElement>(null)
   const [offerConfirm, setOfferConfirm] = useState<
     'accept' | 'reject' | 'cancel' | null
   >(null)
@@ -153,8 +156,17 @@ export function ChatThread({ offerId }: ChatThreadProps) {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const body = text.trim()
-    if (!body || send.isPending) return
-    send.mutate(body, { onSuccess: () => setText('') })
+    if ((!body && !attach) || send.isPending) return
+    send.mutate(
+      { body: body || undefined, file: attach ?? undefined },
+      {
+        onSuccess: () => {
+          setText('')
+          setAttach(null)
+          if (attachRef.current) attachRef.current.value = ''
+        },
+      },
+    )
   }
 
   const offerConfirmCopy =
@@ -189,37 +201,19 @@ export function ChatThread({ offerId }: ChatThreadProps) {
       <div className="shrink-0">
         <header className="flex items-center gap-2 border-b border-border bg-surface-elevated px-2 py-2 max-lg:pt-[max(0.5rem,env(safe-area-inset-top))] sm:gap-3 sm:px-4 sm:py-3 lg:px-5">
         <BackButton onClick={() => navigate('/app/messages')} />
-        <Avatar src={peer?.photoUrl} name={peer?.name} size="sm" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-extrabold text-navy">
-            {peer?.name ?? 'طرف مقابل'}
-          </p>
-          <p className="truncate text-xs text-muted">{offer.campaign.title}</p>
-        </div>
-        {pending && isBrand ? (
-          <div className="flex shrink-0 gap-1.5 sm:gap-2">
-            <Button
-              type="button"
-              fullWidth={false}
-              className="px-3 py-2 text-xs sm:px-4"
-              disabled={update.isPending}
-              onClick={() => setOfferConfirm('accept')}
-            >
-              <span className="sm:hidden">قبول</span>
-              <span className="hidden sm:inline">قبول پیشنهاد</span>
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              fullWidth={false}
-              className="hidden px-3 py-2 text-xs sm:inline-flex"
-              disabled={update.isPending}
-              onClick={() => setOfferConfirm('reject')}
-            >
-              رد
-            </Button>
+        <Link
+          to={peer?.id ? `/app/profiles/${peer.id}` : '#'}
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-xl py-1 transition hover:bg-surface sm:gap-3"
+        >
+          <Avatar src={peer?.photoUrl} name={peer?.name} size="sm" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-extrabold text-navy">
+              {peer?.name ?? 'طرف مقابل'}
+            </p>
+            <p className="truncate text-xs text-muted">{offer.campaign.title}</p>
           </div>
-        ) : relatedDeal ? (
+        </Link>
+        {relatedDeal ? (
           <span className="shrink-0 rounded-xl bg-purple-soft/70 px-3 py-2 text-xs font-bold text-purple-deep">
             {dealStatusLabel(relatedDeal.status)}
           </span>
@@ -244,12 +238,6 @@ export function ChatThread({ offerId }: ChatThreadProps) {
         <OfferProposalCard
           offer={offer}
           dealStatus={relatedDeal?.status}
-          isBrand={Boolean(isBrand)}
-          pending={Boolean(pending)}
-          updating={update.isPending}
-          onAccept={() => setOfferConfirm('accept')}
-          onReject={() => setOfferConfirm('reject')}
-          onCancel={() => setOfferConfirm('cancel')}
         />
 
         <div className="mt-3 space-y-3">
@@ -269,6 +257,8 @@ export function ChatThread({ offerId }: ChatThreadProps) {
                   body={m.body}
                   metadata={m.metadata}
                   createdAt={m.createdAt}
+                  isBrand={Boolean(isBrand)}
+                  fee={offer.fee}
                 />
               )
             }
@@ -283,21 +273,46 @@ export function ChatThread({ offerId }: ChatThreadProps) {
               )
             }
             const mine = m.senderId === me?.id
+            const mediaUrl = m.metadata?.mediaUrl
+            const showCaption =
+              m.body &&
+              !(m.kind === 'IMAGE' && m.body === 'تصویر') &&
+              !(m.kind === 'VIDEO' && m.body === 'ویدیو')
             return (
               <div
                 key={m.id}
                 className={`flex ${mine ? 'justify-start' : 'justify-end'}`}
               >
                 <div
-                  className={`w-fit max-w-[min(85%,20rem)] rounded-2xl px-3.5 py-2 text-sm leading-6 shadow-sm ${
+                  className={`w-fit max-w-[min(85%,20rem)] overflow-hidden rounded-2xl text-sm leading-6 shadow-sm ${
                     mine
                       ? 'rounded-br-md bg-purple text-white'
                       : 'rounded-bl-md border border-border bg-surface text-navy'
-                  }`}
+                  } ${mediaUrl ? 'p-1.5' : 'px-3.5 py-2'}`}
                 >
-                  <p className="whitespace-pre-wrap break-words">{m.body}</p>
+                  {m.kind === 'IMAGE' || m.kind === 'VIDEO' ? (
+                    <MediaPreview
+                      kind={m.kind}
+                      url={mediaUrl}
+                      alt={m.body}
+                      className={
+                        m.kind === 'VIDEO'
+                          ? 'max-h-64 w-full rounded-xl bg-black'
+                          : 'max-h-64 w-full rounded-xl object-cover'
+                      }
+                    />
+                  ) : null}
+                  {showCaption ? (
+                    <p
+                      className={`whitespace-pre-wrap break-words ${
+                        mediaUrl ? 'px-2 pt-2' : ''
+                      }`}
+                    >
+                      {m.body}
+                    </p>
+                  ) : null}
                   <p
-                    className={`mt-1 text-[10px] ${
+                    className={`mt-1 text-[10px] ${mediaUrl ? 'px-2 pb-1' : ''} ${
                       mine ? 'text-white/65' : 'text-muted'
                     }`}
                   >
@@ -315,6 +330,52 @@ export function ChatThread({ offerId }: ChatThreadProps) {
       </div>
 
       <footer className="shrink-0 border-t border-border bg-surface-elevated pb-[env(safe-area-inset-bottom)]">
+      {pending ? (
+        <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-3 sm:px-4">
+          <p className="min-w-0 flex-1 text-xs leading-6 text-muted">
+            {isBrand
+              ? 'برای شروع همکاری، این پیشنهاد را قبول یا رد کنید.'
+              : 'در انتظار پاسخ برند هستید؛ در صورت نیاز پیشنهاد را لغو کنید.'}
+          </p>
+          <div className="flex shrink-0 gap-2">
+            {isBrand ? (
+              <>
+                <Button
+                  type="button"
+                  fullWidth={false}
+                  className="px-3 py-2 text-xs"
+                  loading={update.isPending}
+                  onClick={() => setOfferConfirm('accept')}
+                >
+                  قبول
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  fullWidth={false}
+                  className="px-3 py-2 text-xs"
+                  loading={update.isPending}
+                  onClick={() => setOfferConfirm('reject')}
+                >
+                  رد
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                fullWidth={false}
+                className="px-3 py-2 text-xs"
+                loading={update.isPending}
+                onClick={() => setOfferConfirm('cancel')}
+              >
+                لغو پیشنهاد
+              </Button>
+            )}
+          </div>
+        </div>
+      ) : null}
+
       {relatedDeal ? (
         <DealChatActions
           deal={relatedDeal}
@@ -331,8 +392,49 @@ export function ChatThread({ offerId }: ChatThreadProps) {
 
         <form
           onSubmit={onSubmit}
-          className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-2 px-3 py-2 sm:px-4 sm:py-3"
+          className="shrink-0 px-3 py-2 sm:px-4 sm:py-3"
         >
+          {attach ? (
+            <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3 py-2">
+              <p className="min-w-0 truncate text-xs font-semibold text-navy">
+                {attach.name}
+              </p>
+              <button
+                type="button"
+                className="shrink-0 text-xs font-bold text-red-600"
+                onClick={() => {
+                  setAttach(null)
+                  if (attachRef.current) attachRef.current.value = ''
+                }}
+              >
+                حذف
+              </button>
+            </div>
+          ) : null}
+          <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-2">
+          <input
+            ref={attachRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+            className="hidden"
+            onChange={(e) => setAttach(e.target.files?.[0] ?? null)}
+          />
+          <button
+            type="button"
+            onClick={() => attachRef.current?.click()}
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl text-navy transition hover:bg-surface"
+            aria-label="ارسال تصویر یا ویدیو"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path
+                d="M21 15V8a5 5 0 0 0-10 0v8a3 3 0 0 0 6 0V9"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -352,11 +454,12 @@ export function ChatThread({ offerId }: ChatThreadProps) {
             fullWidth={false}
             className="self-end px-3 py-2.5 text-xs sm:px-5 sm:text-sm"
             loading={send.isPending}
-            disabled={!text.trim()}
+            disabled={!text.trim() && !attach}
           >
             <span className="hidden sm:inline">ارسال پیام</span>
             <span className="sm:hidden">ارسال</span>
           </Button>
+          </div>
         </form>
       </footer>
 

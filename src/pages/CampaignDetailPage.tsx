@@ -16,6 +16,7 @@ import {
   campaignStatusLabel,
   deliverablesLabel,
   formatBudgetRange,
+  isCampaignAcceptingInvites,
   offerPipelineLabel,
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
@@ -109,7 +110,10 @@ function BrandCampaignDetail({ id }: { id: string }) {
   const { data: offers } = useOffers(id, true)
 
   useEffect(() => {
-    if (searchParams.get('invite') === '1' && campaign?.status === 'OPEN') {
+    if (
+      searchParams.get('invite') === '1' &&
+      isCampaignAcceptingInvites(campaign?.status)
+    ) {
       setInviteOpen(true)
       const next = new URLSearchParams(searchParams)
       next.delete('invite')
@@ -201,6 +205,12 @@ function BrandCampaignDetail({ id }: { id: string }) {
         </div>
       </section>
 
+      {campaign.rejectionReason ? (
+        <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-7 text-red-700">
+          {campaign.rejectionReason}
+        </p>
+      ) : null}
+
       {update.isError ? (
         <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
           {getApiErrorMessage(update.error, 'به‌روزرسانی کمپین ناموفق بود')}
@@ -231,7 +241,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
             فعال‌سازی و دعوت
           </Button>
         ) : null}
-        {campaign.status === 'OPEN' ? (
+        {isCampaignAcceptingInvites(campaign.status) ? (
           <>
             <Button onClick={() => setInviteOpen(true)}>دعوت اینفلوئنسر</Button>
             <Button
@@ -391,20 +401,25 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
         ) : null}
         <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">{campaign.title}</h1>
         <div className="mt-4 flex items-center gap-3">
-          <Avatar
-            src={campaign.brand?.photoUrl}
-            name={campaign.brand?.name}
-            size="md"
-          />
-          <div>
-            <p className="text-sm font-bold text-navy">
-              {campaign.brand?.name ?? 'برند'}
-            </p>
-            <p className="text-xs text-muted">
-              {brandCategoriesLabel(campaign.categories, campaign.category)} ·{' '}
-              {formatLocation(campaign.city, campaign.province)}
-            </p>
-          </div>
+          <Link
+            to={`/app/profiles/${campaign.brandId}`}
+            className="flex min-w-0 items-center gap-3 rounded-xl transition hover:opacity-80"
+          >
+            <Avatar
+              src={campaign.brand?.photoUrl}
+              name={campaign.brand?.name}
+              size="md"
+            />
+            <div>
+              <p className="text-sm font-bold text-navy">
+                {campaign.brand?.name ?? 'برند'}
+              </p>
+              <p className="text-xs text-muted">
+                {brandCategoriesLabel(campaign.categories, campaign.category)} ·{' '}
+                {formatLocation(campaign.city, campaign.province)}
+              </p>
+            </div>
+          </Link>
         </div>
       </section>
 

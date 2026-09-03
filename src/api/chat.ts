@@ -1,6 +1,8 @@
 import { api } from './client'
 import type { ChatMessage, Conversation, SendChatMessageBody } from '../types/api'
 
+const MEDIA_TIMEOUT_MS = 180_000
+
 export async function listConversations(): Promise<Conversation[]> {
   const { data } = await api.get<Conversation[]>('/v1/conversations')
   return data
@@ -33,9 +35,24 @@ export async function sendMessage(
   conversationId: string,
   body: SendChatMessageBody,
 ): Promise<ChatMessage> {
+  if (body.file) {
+    const form = new FormData()
+    if (body.body?.trim()) form.append('body', body.body.trim())
+    form.append('file', body.file)
+    const { data } = await api.post<ChatMessage>(
+      `/v1/conversations/${conversationId}/messages`,
+      form,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: MEDIA_TIMEOUT_MS,
+      },
+    )
+    return data
+  }
+
   const { data } = await api.post<ChatMessage>(
     `/v1/conversations/${conversationId}/messages`,
-    body,
+    { body: body.body ?? '' },
   )
   return data
 }

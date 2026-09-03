@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { requestOtp, verifyOtp } from '../api/auth'
-import { deleteMyPhoto, getMe, updateMe, uploadMyPhoto } from '../api/users'
+import { deleteMyPhoto, getMe, getPublicProfile, updateMe, uploadMyPhoto } from '../api/users'
 import {
   clearAccessToken,
   clearLoginPhone,
@@ -18,6 +18,20 @@ import { normalizeIranPhone } from '../lib/phone'
 import type { UpdateProfileBody, UserRole } from '../types/api'
 
 export const meQueryKey = ['users', 'me'] as const
+
+export function publicProfileQueryKey(id: string) {
+  return ['users', 'profile', id] as const
+}
+
+export function usePublicProfile(id: string | undefined) {
+  return useQuery({
+    queryKey: publicProfileQueryKey(id ?? ''),
+    queryFn: () => getPublicProfile(id!),
+    enabled: Boolean(id) && Boolean(getAccessToken()),
+    staleTime: 30_000,
+    retry: false,
+  })
+}
 
 export function useMe(enabled = true) {
   return useQuery({
@@ -79,6 +93,7 @@ export function useVerifyOtp() {
         city: data.user.city,
         province: data.user.province,
         website: data.user.website,
+        bio: data.user.bio,
         goal: data.user.goal,
         businessSize: data.user.businessSize,
         followerRange: data.user.followerRange,

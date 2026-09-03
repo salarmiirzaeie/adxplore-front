@@ -38,6 +38,11 @@ function InfluencerCardView({ influencer }: { influencer: InfluencerCard }) {
           <p className="mt-1 truncate text-sm text-muted" dir="ltr">
             {influencer.website}
           </p>
+          {influencer.bio ? (
+            <p className="mt-2 line-clamp-2 text-xs leading-6 text-navy-muted">
+              {influencer.bio}
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="mt-auto flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">

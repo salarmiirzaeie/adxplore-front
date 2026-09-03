@@ -13,6 +13,7 @@ import {
   brandCategoriesLabel,
   followerRangeLabel,
   invitationStatusLabel,
+  isCampaignAcceptingInvites,
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
 import type { Invitation, InvitationStatus } from '../types/api'
@@ -154,7 +155,7 @@ export function CampaignInvitationsPage() {
             </h1>
             <p className="mt-2 truncate text-sm text-muted">{campaign.title}</p>
           </div>
-          {campaign.status === 'OPEN' ? (
+          {isCampaignAcceptingInvites(campaign.status) ? (
             <button
               type="button"
               onClick={() => setInviteOpen(true)}
@@ -178,7 +179,7 @@ export function CampaignInvitationsPage() {
           <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
             اینفلوئنسرهای مناسب را دعوت کنید تا پیشنهاد قیمت بفرستند.
           </p>
-          {campaign.status === 'OPEN' ? (
+          {isCampaignAcceptingInvites(campaign.status) ? (
             <button
               type="button"
               onClick={() => setInviteOpen(true)}

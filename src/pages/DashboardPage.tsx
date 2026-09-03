@@ -6,6 +6,7 @@ import { useDeals } from '../hooks/useDeals'
 import { useInvitations } from '../hooks/useInvitations'
 import { useOffers } from '../hooks/useOffers'
 import { formatPhoneDisplay } from '../lib/phone'
+import { isCampaignAcceptingInvites } from '../lib/brand-options'
 import { ApprovalWaitBanner } from '../components/ApprovalWaitBanner'
 
 type PipelineItem = {
@@ -48,7 +49,7 @@ function BrandDashboard() {
 
   const items = useMemo<PipelineItem[]>(() => {
     const openCampaigns =
-      campaigns?.filter((c) => c.status === 'OPEN').length ?? 0
+      campaigns?.filter((c) => isCampaignAcceptingInvites(c.status)).length ?? 0
     const pendingOffers =
       offers?.filter((o) => o.status === 'PENDING').length ?? 0
     const inDelivery =

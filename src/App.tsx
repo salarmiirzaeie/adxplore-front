@@ -29,6 +29,7 @@ import { InstagramApprovalPage } from './pages/InstagramApprovalPage'
 import { OtpPage } from './pages/OtpPage'
 import { PaymentResultPage } from './pages/PaymentResultPage'
 import { ProfilePage } from './pages/ProfilePage'
+import { PublicProfilePage } from './pages/PublicProfilePage'
 import { WalletPage } from './pages/WalletPage'
 import { getAccessToken } from './lib/auth-storage'
 
@@ -83,6 +84,7 @@ export default function App() {
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/edit" element={<EditProfilePage />} />
+          <Route path="profiles/:id" element={<PublicProfilePage />} />
         </Route>
       </Route>
 

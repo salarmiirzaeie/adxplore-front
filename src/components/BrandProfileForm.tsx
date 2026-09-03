@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { getApiErrorMessage } from '../api/client'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
+import { Textarea } from './ui/Textarea'
 import { OptionGrid } from './ui/OptionGrid'
 import { IranCitySelect } from './IranCitySelect'
 import {
@@ -47,6 +48,7 @@ export const brandProfileSchema = z
       .min(2, 'نام برند حداقل ۲ کاراکتر باشد')
       .max(80, 'نام برند حداکثر ۸۰ کاراکتر باشد'),
     website: z.string().trim().max(200, 'آدرس حداکثر ۲۰۰ کاراکتر باشد'),
+    bio: z.string().max(1000, 'معرفی حداکثر ۱۰۰۰ کاراکتر باشد'),
     categories: z
       .array(categoryEnum, { error: 'حداقل یک دسته انتخاب کنید' })
       .min(1, 'حداقل یک دسته انتخاب کنید'),
@@ -84,11 +86,13 @@ export function toBrandProfileFormValues(
     | 'province'
     | 'goal'
     | 'businessSize'
+    | 'bio'
   >,
 ): BrandProfileFormValues {
   return {
     name: user.name ?? '',
     website: user.website ?? '',
+    bio: user.bio ?? '',
     categories: normalizeCategories(user.categories, user.category),
     province: user.province ?? '',
     city: user.city ?? '',
@@ -107,6 +111,7 @@ export function brandFormToUpdateBody(
     city: values.city.trim(),
     province: values.province.trim(),
     website: values.website.trim() ? values.website.trim() : null,
+    bio: values.bio.trim() ? values.bio.trim() : null,
     goal: values.goal ? (values.goal as BrandGoal) : null,
     businessSize: values.businessSize
       ? (values.businessSize as BusinessSize)
@@ -166,6 +171,14 @@ export function BrandProfileForm({
           hint="اختیاری"
           error={errors.website?.message}
           {...register('website')}
+        />
+        <Textarea
+          label="درباره برند"
+          placeholder="چند خط درباره برند، محصولات و مخاطب‌تان بنویسید."
+          hint="اختیاری — در پروفایل عمومی نمایش داده می‌شود"
+          maxLength={1000}
+          error={errors.bio?.message}
+          {...register('bio')}
         />
       </section>
 

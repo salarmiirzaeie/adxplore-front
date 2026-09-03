@@ -77,6 +77,11 @@ export function InfluencerDetailPage() {
               {brandCategoriesLabel(influencer.categories, influencer.category)} ·{' '}
               {formatLocation(influencer.city, influencer.province)}
             </p>
+            {influencer.bio ? (
+              <p className="mt-4 text-sm leading-7 text-navy whitespace-pre-wrap">
+                {influencer.bio}
+              </p>
+            ) : null}
           </div>
           <span className="shrink-0 rounded-xl bg-purple-soft/60 px-4 py-2 text-sm font-bold text-purple-deep">
             {followerRangeLabel(influencer.followerRange)}

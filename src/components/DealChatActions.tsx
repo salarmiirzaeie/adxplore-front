@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { getApiErrorMessage } from '../api/client'
 import { Button } from './ui/Button'
 import { ConfirmModal } from './ui/ConfirmModal'
@@ -10,7 +10,8 @@ import {
 } from '../hooks/useDeals'
 import { useRequestDealPayment } from '../hooks/usePayments'
 import { dealStatusLabel } from '../lib/brand-options'
-import type { Deal } from '../types/api'
+import { MediaPicker } from './MediaPicker'
+import type { Deal, DealContentKind } from '../types/api'
 
 interface DealChatActionsProps {
   deal: Deal
@@ -22,10 +23,10 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
   const submit = useSubmitDeliverable(deal.id)
   const update = useUpdateDealStatus(deal.id)
   const pay = useRequestDealPayment(deal.id)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const [kind, setKind] = useState<DealContentKind>('LINK')
   const [contentUrl, setContentUrl] = useState(deal.contentUrl ?? '')
   const [note, setNote] = useState('')
-  const [proof, setProof] = useState<File | null>(null)
+  const [contentFile, setContentFile] = useState<File | null>(null)
   const [feedback, setFeedback] = useState('')
   const [showSubmit, setShowSubmit] = useState(false)
   const [showRevision, setShowRevision] = useState(false)
@@ -38,10 +39,17 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
     !isBrand &&
     (deal.status === 'IN_PROGRESS' || deal.status === 'REVISION_REQUESTED')
   const canReview = isBrand && deal.status === 'DELIVERED'
-  const canCancel =
-    deal.status === 'PENDING_PAYMENT' ||
-    deal.status === 'IN_PROGRESS' ||
+  const contentPublished =
+    Boolean(deal.contentUrl) ||
+    Boolean(deal.submittedAt) ||
+    deal.status === 'DELIVERED' ||
     deal.status === 'REVISION_REQUESTED'
+  const canCancel = isBrand
+    ? (deal.status === 'PENDING_PAYMENT' || deal.status === 'IN_PROGRESS') &&
+      !contentPublished
+    : deal.status === 'PENDING_PAYMENT' ||
+      deal.status === 'IN_PROGRESS' ||
+      deal.status === 'REVISION_REQUESTED'
   const busy = submit.isPending || update.isPending || pay.isPending
 
   if (deal.status === 'COMPLETED' || deal.status === 'CANCELLED') {
@@ -57,17 +65,33 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
   if (!needsPayment && !canSubmit && !canReview && !canCancel) return null
 
   const onSubmitDeliverable = () => {
-    const url = contentUrl.trim()
-    if (!url) return
+    const caption = note.trim() || undefined
+    if (kind === 'LINK') {
+      const url = contentUrl.trim()
+      if (!url) return
+      submit.mutate(
+        { kind: 'LINK', contentUrl: url, note: caption },
+        {
+          onSuccess: () => {
+            setConfirm(null)
+            setShowSubmit(false)
+            setNote('')
+            setContentFile(null)
+            onUpdated?.()
+          },
+        },
+      )
+      return
+    }
+    if (!contentFile) return
     submit.mutate(
-      { contentUrl: url, note: note.trim() || undefined, proof: proof ?? undefined },
+      { kind, file: contentFile, note: caption },
       {
         onSuccess: () => {
           setConfirm(null)
           setShowSubmit(false)
           setNote('')
-          setProof(null)
-          if (fileRef.current) fileRef.current.value = ''
+          setContentFile(null)
           onUpdated?.()
         },
       },
@@ -141,29 +165,54 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
 
       {canSubmit && showSubmit ? (
         <div className="space-y-3 rounded-xl border border-border bg-surface-elevated p-3">
-          <Input
-            label="لینک محتوا"
-            value={contentUrl}
-            onChange={(e) => setContentUrl(e.target.value)}
-            placeholder="https://instagram.com/p/..."
-            dir="ltr"
-          />
+          <div className="grid grid-cols-3 gap-1 rounded-xl bg-surface p-1">
+            {(
+              [
+                ['LINK', 'لینک'],
+                ['IMAGE', 'تصویر'],
+                ['VIDEO', 'ویدیو'],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setKind(value)
+                  setContentFile(null)
+                }}
+                className={`rounded-lg px-2 py-1.5 text-xs font-bold ${
+                  kind === value
+                    ? 'bg-surface-elevated text-purple shadow-sm'
+                    : 'text-muted'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {kind === 'LINK' ? (
+            <Input
+              label="لینک محتوا"
+              value={contentUrl}
+              onChange={(e) => setContentUrl(e.target.value)}
+              placeholder="https://instagram.com/p/..."
+              dir="ltr"
+            />
+          ) : (
+            <MediaPicker
+              key={kind}
+              kind={kind}
+              file={contentFile}
+              onChange={setContentFile}
+              compact
+            />
+          )}
           <Textarea
             label="یادداشت (اختیاری)"
             rows={2}
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
-          <label className="block text-xs font-semibold text-muted">
-            تصویر مدرک (اختیاری)
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              className="mt-1 block w-full text-xs"
-              onChange={(e) => setProof(e.target.files?.[0] ?? null)}
-            />
-          </label>
           {(submit.isError || update.isError) && (
             <p className="text-xs text-red-600">
               {getApiErrorMessage(
@@ -177,7 +226,10 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
               type="button"
               fullWidth={false}
               className="flex-1"
-              disabled={!contentUrl.trim() || busy}
+              disabled={
+                busy ||
+                (kind === 'LINK' ? !contentUrl.trim() : !contentFile)
+              }
               onClick={() => setConfirm('submit')}
             >
               ثبت تحویل
@@ -281,7 +333,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
       <ConfirmModal
         open={confirm === 'submit'}
         title="ثبت تحویل؟"
-        description="لینک محتوا برای برند ارسال می‌شود تا بررسی کند."
+        description="محتوا برای برند ارسال می‌شود تا بررسی کند."
         confirmLabel="ثبت تحویل"
         loading={submit.isPending}
         error={

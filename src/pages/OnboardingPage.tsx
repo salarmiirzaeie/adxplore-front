@@ -19,6 +19,7 @@ import { IranCitySelect } from '../components/IranCitySelect'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { OptionGrid } from '../components/ui/OptionGrid'
+import { Textarea } from '../components/ui/Textarea'
 import { useMe, useUpdateProfile } from '../hooks/useAuth'
 import { getAccessToken, isProfileComplete, postAuthPath } from '../lib/auth-storage'
 import {
@@ -58,6 +59,7 @@ function InfluencerOnboarding({
     defaultValues: {
       name: defaults.name ?? '',
       website: defaults.website ?? '',
+      bio: defaults.bio ?? '',
       categories: defaults.categories ?? [],
       province: defaults.province ?? '',
       city: defaults.city ?? '',
@@ -66,7 +68,7 @@ function InfluencerOnboarding({
   })
 
   const stepFields: Array<(keyof InfluencerValues)[]> = [
-    ['name', 'website'],
+    ['name', 'website', 'bio'],
     ['categories', 'province', 'city'],
     ['followerRange'],
   ]
@@ -92,7 +94,7 @@ function InfluencerOnboarding({
   const titles = [
     {
       title: 'معرفی شما',
-      subtitle: 'نام، اینستاگرام و در صورت تمایل عکس پروفایل را وارد کنید.',
+      subtitle: 'نام، اینستاگرام و چند خط درباره خودتان را وارد کنید.',
     },
     {
       title: 'نیچ و شهر',
@@ -133,6 +135,14 @@ function InfluencerOnboarding({
               className="text-left"
               error={errors.website?.message}
               {...register('website')}
+            />
+            <Textarea
+              label="درباره شما"
+              placeholder="چند خط درباره خودتان، سبک محتوا و مخاطب‌تان بنویسید."
+              hint="اختیاری — در پروفایل عمومی نمایش داده می‌شود"
+              maxLength={1000}
+              error={errors.bio?.message}
+              {...register('bio')}
             />
           </>
         ) : null}
@@ -241,6 +251,7 @@ function BrandOnboarding({
     defaultValues: {
       name: defaults.name ?? '',
       website: defaults.website ?? '',
+      bio: defaults.bio ?? '',
       categories: defaults.categories ?? [],
       province: defaults.province ?? '',
       city: defaults.city ?? '',
@@ -250,7 +261,7 @@ function BrandOnboarding({
   })
 
   const stepFields: Array<(keyof BrandValues)[]> = [
-    ['name', 'website'],
+    ['name', 'website', 'bio'],
     ['categories', 'province', 'city'],
     ['goal', 'businessSize'],
   ]
@@ -296,7 +307,7 @@ function BrandOnboarding({
   const titles = [
     {
       title: 'معرفی برند',
-      subtitle: 'نام برند، لینک و در صورت تمایل لوگو یا عکس پروفایل را وارد کنید.',
+      subtitle: 'نام برند، لینک و چند خط درباره برند را وارد کنید.',
     },
     { title: 'دسته و شهر', subtitle: 'برای پیشنهاد اینفلوئنسرهای مرتبط، دسته و شهر را مشخص کنید.' },
     { title: 'هدف کمپین', subtitle: 'اختیاری — می‌توانید بعداً هم تکمیل کنید.' },
@@ -332,6 +343,14 @@ function BrandOnboarding({
               hint="اختیاری"
               error={errors.website?.message}
               {...register('website')}
+            />
+            <Textarea
+              label="درباره برند"
+              placeholder="چند خط درباره برند، محصولات و مخاطب‌تان بنویسید."
+              hint="اختیاری — در پروفایل عمومی نمایش داده می‌شود"
+              maxLength={1000}
+              error={errors.bio?.message}
+              {...register('bio')}
             />
           </>
         ) : null}
@@ -475,6 +494,7 @@ export function OnboardingPage() {
         defaults={{
           name: user.name ?? '',
           website: user.website ?? '',
+          bio: user.bio ?? '',
           categories: user.categories?.length
             ? user.categories
             : user.category
@@ -495,6 +515,7 @@ export function OnboardingPage() {
       defaults={{
         name: user.name ?? '',
         website: user.website ?? '',
+        bio: user.bio ?? '',
         categories: user.categories?.length
           ? user.categories
           : user.category

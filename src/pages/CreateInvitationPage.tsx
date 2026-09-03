@@ -13,7 +13,7 @@ import { useMe } from '../hooks/useAuth'
 import { useCampaigns } from '../hooks/useCampaigns'
 import { useInfluencer } from '../hooks/useInfluencers'
 import { useCreateInvitation } from '../hooks/useInvitations'
-import { deliverablesLabel } from '../lib/brand-options'
+import { deliverablesLabel, isCampaignAcceptingInvites } from '../lib/brand-options'
 
 const schema = z.object({
   campaignId: z.string().min(1, 'کمپین را انتخاب کنید'),
@@ -38,7 +38,7 @@ export function CreateInvitationPage() {
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const openCampaigns = useMemo(
-    () => (campaigns ?? []).filter((c) => c.status === 'OPEN'),
+    () => (campaigns ?? []).filter((c) => isCampaignAcceptingInvites(c.status)),
     [campaigns],
   )
 

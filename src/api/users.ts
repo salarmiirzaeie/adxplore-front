@@ -1,9 +1,15 @@
 import { api } from './client'
 import type {
   InstagramApprovalResponse,
+  PublicProfile,
   UpdateProfileBody,
   UserProfile,
 } from '../types/api'
+
+export async function getPublicProfile(id: string): Promise<PublicProfile> {
+  const { data } = await api.get<PublicProfile>(`/v1/users/${id}/profile`)
+  return data
+}
 
 export async function getMe(): Promise<UserProfile> {
   const { data } = await api.get<UserProfile>('/v1/users/me')

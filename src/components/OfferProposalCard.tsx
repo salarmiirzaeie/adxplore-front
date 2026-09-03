@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Button } from './ui/Button'
 import {
   deliverablesLabel,
   offerPipelineLabel,
@@ -11,24 +10,12 @@ import type { DealStatus, Offer } from '../types/api'
 interface OfferProposalCardProps {
   offer: Offer
   dealStatus?: DealStatus | null
-  isBrand: boolean
-  pending: boolean
-  updating?: boolean
-  onAccept?: () => void
-  onReject?: () => void
-  onCancel?: () => void
 }
 
 /** Structured offer card shown inside the chat thread (Karlancer-style). */
 export function OfferProposalCard({
   offer,
   dealStatus,
-  isBrand,
-  pending,
-  updating,
-  onAccept,
-  onReject,
-  onCancel,
 }: OfferProposalCardProps) {
   const [expanded, setExpanded] = useState(false)
   const fee = offer.fee.toLocaleString('fa-IR')
@@ -98,51 +85,13 @@ export function OfferProposalCard({
         </div>
       ) : null}
 
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
+      <div className="mt-3 border-t border-border pt-3">
         <Link
           to={`/app/campaigns/${offer.campaignId}`}
           className="text-xs font-bold text-purple hover:underline"
         >
           مشاهده کمپین
         </Link>
-        {pending ? (
-          <div className="flex gap-2">
-            {isBrand ? (
-              <>
-                <Button
-                  type="button"
-                  fullWidth={false}
-                  className="px-3 py-2 text-xs"
-                  loading={updating}
-                  onClick={onAccept}
-                >
-                  قبول
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  fullWidth={false}
-                  className="px-3 py-2 text-xs"
-                  loading={updating}
-                  onClick={onReject}
-                >
-                  رد
-                </Button>
-              </>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                fullWidth={false}
-                className="px-3 py-2 text-xs"
-                loading={updating}
-                onClick={onCancel}
-              >
-                لغو پیشنهاد
-              </Button>
-            )}
-          </div>
-        ) : null}
       </div>
     </article>
   )

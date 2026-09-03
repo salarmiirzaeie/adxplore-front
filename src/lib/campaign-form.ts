@@ -119,7 +119,8 @@ export function campaignToFormValues(campaign: Campaign): CampaignFormValues {
     deliverables: normalizeDeliverables(campaign.deliverables, campaign.deliverable),
     budgetMin: campaign.budgetMin != null ? String(campaign.budgetMin) : '',
     budgetMax: campaign.budgetMax != null ? String(campaign.budgetMax) : '',
-    publish: campaign.status === 'OPEN',
+    publish:
+      campaign.status === 'OPEN' || campaign.status === 'PENDING_REVIEW',
   }
 }
 

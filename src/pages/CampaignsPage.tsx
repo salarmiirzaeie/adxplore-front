@@ -21,7 +21,9 @@ import type {
 } from '../types/api'
 
 function statusClass(status: CampaignStatus) {
-  if (status === 'OPEN') return 'bg-emerald-50 text-emerald-700'
+  if (status === 'OPEN' || status === 'PENDING_REVIEW') {
+    return 'bg-emerald-50 text-emerald-700'
+  }
   if (status === 'CLOSED') return 'bg-slate-100 text-slate-600'
   return 'bg-amber-50 text-amber-700'
 }
@@ -62,6 +64,11 @@ function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
             </span>
           </div>
           <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
+          {campaign.rejectionReason ? (
+            <p className="mt-2 line-clamp-2 text-xs leading-5 text-red-600">
+              {campaign.rejectionReason}
+            </p>
+          ) : null}
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
             <span className="rounded-lg bg-surface px-2 py-1">
               {brandCategoriesLabel(campaign.categories, campaign.category)}

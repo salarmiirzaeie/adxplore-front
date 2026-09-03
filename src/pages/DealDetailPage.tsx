@@ -1,14 +1,13 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import { getApiErrorMessage } from '../api/client'
 import { Avatar } from '../components/ui/Avatar'
 import { Button } from '../components/ui/Button'
 import { ConfirmModal } from '../components/ui/ConfirmModal'
 import { Input } from '../components/ui/Input'
 import { Textarea } from '../components/ui/Textarea'
+import { MediaPicker } from '../components/MediaPicker'
+import { MediaPreview } from '../components/MediaPreview'
 import { useMe } from '../hooks/useAuth'
 import {
   useDeal,
@@ -21,7 +20,7 @@ import {
   deliverablesLabel,
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
-import type { DealStatus } from '../types/api'
+import type { DealContentKind, DealStatus } from '../types/api'
 
 function DetailRow({
   label,
@@ -54,39 +53,20 @@ function statusClass(status: DealStatus) {
   return 'bg-purple-soft/60 text-purple-deep'
 }
 
-const deliverableSchema = z.object({
-  contentUrl: z
-    .string()
-    .trim()
-    .url('آدرس معتبر وارد کنید')
-    .min(1, 'لینک محتوا الزامی است'),
-  note: z.string().trim().max(2000, 'توضیح حداکثر ۲۰۰۰ کاراکتر باشد'),
-})
-
-type DeliverableForm = z.infer<typeof deliverableSchema>
-
 export function DealDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: user } = useMe()
   const { data: deal, isLoading, isError } = useDeal(id)
   const submit = useSubmitDeliverable(id ?? '')
   const update = useUpdateDealStatus(id ?? '')
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [proof, setProof] = useState<File | null>(null)
+  const [kind, setKind] = useState<DealContentKind>('LINK')
+  const [contentUrl, setContentUrl] = useState('')
+  const [note, setNote] = useState('')
+  const [contentFile, setContentFile] = useState<File | null>(null)
   const [feedback, setFeedback] = useState('')
   const [confirm, setConfirm] = useState<
     'submit' | 'complete' | 'revision' | 'cancel' | null
   >(null)
-
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    formState: { errors },
-  } = useForm<DeliverableForm>({
-    resolver: zodResolver(deliverableSchema),
-    defaultValues: { contentUrl: '', note: '' },
-  })
 
   if (!user) return null
 
@@ -119,8 +99,14 @@ export function DealDetailPage() {
     !isBrand &&
     (deal.status === 'IN_PROGRESS' || deal.status === 'REVISION_REQUESTED')
   const canReview = isBrand && deal.status === 'DELIVERED'
-  const canCancel =
-    deal.status === 'IN_PROGRESS' || deal.status === 'REVISION_REQUESTED'
+  const contentPublished =
+    Boolean(deal.contentUrl) ||
+    Boolean(deal.submittedAt) ||
+    deal.status === 'DELIVERED' ||
+    deal.status === 'REVISION_REQUESTED'
+  const canCancel = isBrand
+    ? deal.status === 'IN_PROGRESS' && !contentPublished
+    : deal.status === 'IN_PROGRESS' || deal.status === 'REVISION_REQUESTED'
 
   return (
     <div>
@@ -181,7 +167,8 @@ export function DealDetailPage() {
             label="شهر"
             value={formatLocation(deal.campaign.city, deal.campaign.province) || '—'}
           />
-          {deal.contentUrl ? (
+          {deal.contentUrl &&
+          (deal.contentKind ?? 'LINK') === 'LINK' ? (
             <DetailRow label="لینک محتوا" value={deal.contentUrl} dir="ltr" />
           ) : null}
           {deal.note ? <DetailRow label="یادداشت تحویل" value={deal.note} /> : null}
@@ -190,6 +177,18 @@ export function DealDetailPage() {
           ) : null}
         </dl>
       </section>
+
+      {deal.contentUrl &&
+      ((deal.contentKind ?? 'LINK') === 'IMAGE' ||
+        (deal.contentKind ?? 'LINK') === 'VIDEO') ? (
+        <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-surface-elevated p-3">
+          <MediaPreview
+            kind={deal.contentKind ?? 'LINK'}
+            url={deal.contentUrl}
+            alt="محتوای تحویل"
+          />
+        </div>
+      ) : null}
 
       {deal.proofUrl ? (
         <img
@@ -211,7 +210,11 @@ export function DealDetailPage() {
       {canSubmit ? (
         <form
           className="card-elevated mb-4 space-y-4 rounded-2xl px-5 py-6 sm:px-7"
-          onSubmit={handleSubmit(() => setConfirm('submit'))}
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (kind === 'LINK' ? !contentUrl.trim() : !contentFile) return
+            setConfirm('submit')
+          }}
         >
           <h2 className="text-base font-extrabold text-navy">تحویل محتوا</h2>
           {deal.status === 'REVISION_REQUESTED' && deal.brandFeedback ? (
@@ -219,39 +222,60 @@ export function DealDetailPage() {
               اصلاح درخواستی: {deal.brandFeedback}
             </p>
           ) : null}
-          <Input
-            label="لینک اینستاگرام"
-            placeholder="https://www.instagram.com/..."
-            dir="ltr"
-            error={errors.contentUrl?.message}
-            {...register('contentUrl')}
-          />
+          <div className="grid grid-cols-3 gap-1 rounded-xl bg-surface p-1">
+            {(
+              [
+                ['LINK', 'لینک'],
+                ['IMAGE', 'تصویر'],
+                ['VIDEO', 'ویدیو'],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => {
+                  setKind(value)
+                  setContentFile(null)
+                }}
+                className={`rounded-lg px-2 py-2 text-sm font-bold ${
+                  kind === value
+                    ? 'bg-surface-elevated text-purple shadow-sm'
+                    : 'text-muted'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {kind === 'LINK' ? (
+            <Input
+              label="لینک محتوا"
+              placeholder="https://www.instagram.com/..."
+              dir="ltr"
+              value={contentUrl}
+              onChange={(e) => setContentUrl(e.target.value)}
+            />
+          ) : (
+            <MediaPicker
+              key={kind}
+              kind={kind}
+              file={contentFile}
+              onChange={setContentFile}
+            />
+          )}
           <Textarea
             label="یادداشت (اختیاری)"
             rows={3}
-            error={errors.note?.message}
-            {...register('note')}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
           />
-          <div>
-            <p className="mb-2 text-sm font-semibold text-navy">
-              اسکرین‌شات (اختیاری)
-            </p>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={(e) => setProof(e.target.files?.[0] ?? null)}
-            />
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-navy hover:bg-surface"
-            >
-              {proof ? proof.name : 'انتخاب تصویر'}
-            </button>
-          </div>
-          <Button type="submit" disabled={submit.isPending}>
+          <Button
+            type="submit"
+            disabled={
+              submit.isPending ||
+              (kind === 'LINK' ? !contentUrl.trim() : !contentFile)
+            }
+          >
             ارسال تحویل
           </Button>
         </form>
@@ -301,7 +325,7 @@ export function DealDetailPage() {
       <ConfirmModal
         open={confirm === 'submit'}
         title="ثبت تحویل؟"
-        description="لینک محتوا برای برند ارسال می‌شود تا بررسی کند."
+        description="محتوا برای برند ارسال می‌شود تا بررسی کند."
         confirmLabel="ارسال تحویل"
         loading={submit.isPending}
         error={
@@ -310,14 +334,26 @@ export function DealDetailPage() {
             : null
         }
         onConfirm={() => {
-          const values = getValues()
+          const caption = note.trim() || undefined
           submit.mutate(
+            kind === 'LINK'
+              ? {
+                  kind: 'LINK',
+                  contentUrl: contentUrl.trim(),
+                  note: caption,
+                }
+              : {
+                  kind,
+                  file: contentFile ?? undefined,
+                  note: caption,
+                },
             {
-              contentUrl: values.contentUrl,
-              note: values.note || undefined,
-              proof: proof ?? undefined,
+              onSuccess: () => {
+                setConfirm(null)
+                setNote('')
+                setContentFile(null)
+              },
             },
-            { onSuccess: () => setConfirm(null) },
           )
         }}
         onClose={() => {

@@ -522,7 +522,9 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <div
       className={`flex bg-surface ${
-        isMessagesRoute ? 'h-dvh overflow-hidden' : 'min-h-dvh'
+        isMessagesRoute
+          ? 'h-dvh overflow-hidden'
+          : 'min-h-dvh max-lg:h-dvh max-lg:overflow-hidden'
       }`}
     >
       <aside
@@ -569,7 +571,7 @@ export function AppShell({ children }: AppShellProps) {
               ? 'overflow-hidden p-0'
               : isMessagesRoute
                 ? 'overflow-hidden p-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] lg:pb-0'
-                : 'px-4 py-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-8 lg:px-8 lg:pb-8'
+                : 'max-lg:overflow-y-auto max-lg:overscroll-contain px-4 py-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:px-6 sm:py-8 lg:px-8 lg:pb-8'
           }`}
         >
           {children}

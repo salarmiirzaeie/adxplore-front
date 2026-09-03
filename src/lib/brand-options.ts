@@ -66,6 +66,7 @@ export const CAMPAIGN_STATUSES: Array<{
   label: string
 }> = [
   { value: 'DRAFT', label: 'پیش‌نویس' },
+  { value: 'PENDING_REVIEW', label: 'فعال' },
   { value: 'OPEN', label: 'فعال' },
   { value: 'CLOSED', label: 'بسته' },
 ]
@@ -168,6 +169,13 @@ export function normalizeDeliverables(
 export function campaignStatusLabel(value: CampaignStatus | null | undefined) {
   if (!value) return null
   return CAMPAIGN_STATUSES.find((s) => s.value === value)?.label ?? value
+}
+
+/** Brand can invite; Explore and invite delivery wait for admin OPEN. */
+export function isCampaignAcceptingInvites(
+  status: CampaignStatus | null | undefined,
+) {
+  return status === 'OPEN' || status === 'PENDING_REVIEW'
 }
 
 export function offerStatusLabel(value: OfferStatus | null | undefined) {

@@ -9,6 +9,7 @@ import {
   updateCampaign,
   uploadCampaignImages,
 } from '../api/campaigns'
+import { isCampaignAcceptingInvites } from '../lib/brand-options'
 import { getAccessToken } from '../lib/auth-storage'
 import type {
   BrowseCampaignsParams,
@@ -75,7 +76,9 @@ export function useCreateCampaign() {
     onSuccess: (campaign) => {
       queryClient.invalidateQueries({ queryKey: campaignsQueryKey })
       queryClient.setQueryData(campaignQueryKey(campaign.id), campaign)
-      const invite = campaign.status === 'OPEN' ? '?invite=1' : ''
+      const invite = isCampaignAcceptingInvites(campaign.status)
+        ? '?invite=1'
+        : ''
       navigate(`/app/campaigns/${campaign.id}${invite}`, { replace: true })
     },
   })

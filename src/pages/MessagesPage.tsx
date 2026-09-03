@@ -5,6 +5,7 @@ import { Avatar } from '../components/ui/Avatar'
 import { useMe } from '../hooks/useAuth'
 import { useConversations } from '../hooks/useChat'
 import { useOffers } from '../hooks/useOffers'
+import { messageSnippet } from '../components/MediaPreview'
 import { offerPipelineLabel } from '../lib/brand-options'
 import type { Conversation, Offer } from '../types/api'
 
@@ -38,7 +39,12 @@ function ConversationRow({
   onSelect: () => void
 }) {
   const snippet =
-    conversation.lastMessage?.body ||
+    (conversation.lastMessage
+      ? messageSnippet(
+          conversation.lastMessage.kind,
+          conversation.lastMessage.body,
+        )
+      : null) ||
     (offer
       ? `پیشنهاد ${offer.fee.toLocaleString('fa-IR')} تومان`
       : 'گفتگوی پیشنهاد')

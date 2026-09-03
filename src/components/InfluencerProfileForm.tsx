@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { getApiErrorMessage } from '../api/client'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
+import { Textarea } from './ui/Textarea'
 import { OptionGrid } from './ui/OptionGrid'
 import { IranCitySelect } from './IranCitySelect'
 import {
@@ -62,6 +63,7 @@ export const influencerProfileSchema = z
       .trim()
       .min(2, 'آیدی اینستاگرام را وارد کنید')
       .max(200, 'آدرس حداکثر ۲۰۰ کاراکتر باشد'),
+    bio: z.string().max(1000, 'معرفی حداکثر ۱۰۰۰ کاراکتر باشد'),
     categories: z
       .array(categoryEnum, { error: 'حداقل یک دسته انتخاب کنید' })
       .min(1, 'حداقل یک دسته انتخاب کنید'),
@@ -80,12 +82,13 @@ export type InfluencerProfileFormValues = z.infer<typeof influencerProfileSchema
 export function toInfluencerProfileFormValues(
   user: Pick<
     UserProfile,
-    'name' | 'website' | 'category' | 'categories' | 'city' | 'province' | 'followerRange'
+    'name' | 'website' | 'bio' | 'category' | 'categories' | 'city' | 'province' | 'followerRange'
   >,
 ): InfluencerProfileFormValues {
   return {
     name: user.name ?? '',
     website: user.website ?? '',
+    bio: user.bio ?? '',
     categories: normalizeCategories(user.categories, user.category),
     province: user.province ?? '',
     city: user.city ?? '',
@@ -99,6 +102,7 @@ export function influencerFormToUpdateBody(
   return {
     name: values.name.trim(),
     website: values.website.trim(),
+    bio: values.bio.trim() ? values.bio.trim() : null,
     categories: values.categories,
     category: values.categories[0] as BrandCategory,
     city: values.city.trim(),
@@ -159,6 +163,14 @@ export function InfluencerProfileForm({
           className="text-left"
           error={errors.website?.message}
           {...register('website')}
+        />
+        <Textarea
+          label="درباره شما"
+          placeholder="چند خط درباره خودتان، سبک محتوا و مخاطب‌تان بنویسید."
+          hint="اختیاری — در پروفایل عمومی نمایش داده می‌شود"
+          maxLength={1000}
+          error={errors.bio?.message}
+          {...register('bio')}
         />
       </section>
 

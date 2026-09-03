@@ -6,6 +6,7 @@ import {
   markConversationRead,
   sendMessage,
 } from '../api/chat'
+import type { SendChatMessageBody } from '../types/api'
 import { getAccessToken } from '../lib/auth-storage'
 
 export const conversationsKey = ['conversations'] as const
@@ -48,7 +49,8 @@ export function useMessages(conversationId: string | undefined) {
 export function useSendMessage(conversationId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (body: string) => sendMessage(conversationId, { body }),
+    mutationFn: (payload: SendChatMessageBody) =>
+      sendMessage(conversationId, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: messagesKey(conversationId) })
       qc.invalidateQueries({ queryKey: conversationsKey })
