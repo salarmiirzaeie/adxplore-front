@@ -298,6 +298,7 @@ export type NotificationType =
   | 'REVISION_REQUESTED'
   | 'DEAL_COMPLETED'
   | 'DEAL_CANCELLED'
+  | 'DEAL_REACTIVATED'
   | 'CHAT_MESSAGE'
   | 'INFLUENCER_APPROVED'
   | 'INFLUENCER_REJECTED'
@@ -323,6 +324,7 @@ export interface ChatMessageMetadata {
   previousFee?: number
   previousMessage?: string | null
   previousDeadline?: string | null
+  cancelledById?: string
 }
 
 export interface ChatMessage {
@@ -392,6 +394,8 @@ export interface Deal {
   influencerId: string
   fee: number
   status: DealStatus
+  cancelledById?: string | null
+  canReactivate?: boolean
   contentKind: DealContentKind | null
   contentUrl: string | null
   note: string | null
@@ -509,7 +513,7 @@ export interface SubmitDeliverableBody {
 }
 
 export interface UpdateDealStatusBody {
-  status: 'COMPLETED' | 'REVISION_REQUESTED' | 'CANCELLED'
+  status: 'COMPLETED' | 'REVISION_REQUESTED' | 'CANCELLED' | 'IN_PROGRESS'
   brandFeedback?: string
 }
 

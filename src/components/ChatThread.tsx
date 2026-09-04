@@ -122,6 +122,21 @@ export function ChatThread({ offerId }: ChatThreadProps) {
         qc.invalidateQueries({ queryKey: offersQueryKey })
         qc.invalidateQueries({ queryKey: ['conversations'] })
       }
+      if (
+        event === 'DEAL_CANCELLED' ||
+        event === 'DEAL_REACTIVATED' ||
+        event === 'DEAL_STARTED' ||
+        event === 'DEAL_COMPLETED' ||
+        event === 'DELIVERABLE_SUBMITTED' ||
+        event === 'REVISION_REQUESTED' ||
+        event === 'PAYMENT_HELD' ||
+        event === 'PAYMENT_REQUIRED' ||
+        event === 'PAYMENT_RELEASED' ||
+        event === 'PAYMENT_FAILED'
+      ) {
+        qc.invalidateQueries({ queryKey: ['deals'] })
+        qc.invalidateQueries({ queryKey: ['conversations'] })
+      }
     }
 
     socket.on('message:new', onNew)

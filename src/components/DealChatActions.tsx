@@ -31,7 +31,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
   const [showSubmit, setShowSubmit] = useState(false)
   const [showRevision, setShowRevision] = useState(false)
   const [confirm, setConfirm] = useState<
-    'pay' | 'submit' | 'complete' | 'revision' | 'cancel' | null
+    'pay' | 'submit' | 'complete' | 'revision' | 'cancel' | 'reactivate' | null
   >(null)
 
   const needsPayment = deal.status === 'PENDING_PAYMENT'
@@ -50,14 +50,77 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
     : deal.status === 'PENDING_PAYMENT' ||
       deal.status === 'IN_PROGRESS' ||
       deal.status === 'REVISION_REQUESTED'
+  const canReactivate = Boolean(deal.canReactivate)
   const busy = submit.isPending || update.isPending || pay.isPending
 
-  if (deal.status === 'COMPLETED' || deal.status === 'CANCELLED') {
+  if (deal.status === 'COMPLETED') {
     return (
       <div className="border-t border-border bg-surface/80 px-4 py-3 text-center">
         <p className="text-xs font-bold text-muted">
           {dealStatusLabel(deal.status)}
         </p>
+      </div>
+    )
+  }
+
+  if (deal.status === 'CANCELLED') {
+    return (
+      <div className="shrink-0 border-t border-border bg-surface/60 px-3 py-3 sm:px-4">
+        <p className="text-center text-xs font-bold text-muted">
+          {dealStatusLabel(deal.status)}
+        </p>
+        {canReactivate ? (
+          <>
+            <p className="mt-2 text-center text-xs leading-6 text-muted">
+              شما این همکاری را لغو کرده‌اید. می‌توانید دوباره فعال کنید.
+            </p>
+            <Button
+              type="button"
+              fullWidth={false}
+              className="mt-2 w-full"
+              disabled={busy}
+              onClick={() => setConfirm('reactivate')}
+            >
+              فعال‌سازی مجدد همکاری
+            </Button>
+            {update.isError ? (
+              <p className="mt-2 text-center text-xs text-red-600">
+                {getApiErrorMessage(update.error, 'عملیات ناموفق بود')}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <p className="mt-2 text-center text-xs leading-6 text-muted">
+            این همکاری لغو شده و فقط کسی که آن را لغو کرده می‌تواند دوباره فعال
+            کند.
+          </p>
+        )}
+        <ConfirmModal
+          open={confirm === 'reactivate'}
+          title="فعال‌سازی مجدد همکاری؟"
+          description="همکاری به وضعیت قبلی برمی‌گردد. اگر قبلاً پرداخت شده باشد، مبلغ دوباره در حساب امانی قفل می‌شود."
+          confirmLabel="فعال کردن همکاری"
+          loading={update.isPending}
+          error={
+            update.isError
+              ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+              : null
+          }
+          onConfirm={() =>
+            update.mutate(
+              { status: 'IN_PROGRESS' },
+              {
+                onSuccess: () => {
+                  setConfirm(null)
+                  onUpdated?.()
+                },
+              },
+            )
+          }
+          onClose={() => {
+            if (!update.isPending) setConfirm(null)
+          }}
+        />
       </div>
     )
   }

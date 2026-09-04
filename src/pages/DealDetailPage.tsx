@@ -65,7 +65,7 @@ export function DealDetailPage() {
   const [contentFile, setContentFile] = useState<File | null>(null)
   const [feedback, setFeedback] = useState('')
   const [confirm, setConfirm] = useState<
-    'submit' | 'complete' | 'revision' | 'cancel' | null
+    'submit' | 'complete' | 'revision' | 'cancel' | 'reactivate' | null
   >(null)
 
   if (!user) return null
@@ -105,8 +105,12 @@ export function DealDetailPage() {
     deal.status === 'DELIVERED' ||
     deal.status === 'REVISION_REQUESTED'
   const canCancel = isBrand
-    ? deal.status === 'IN_PROGRESS' && !contentPublished
-    : deal.status === 'IN_PROGRESS' || deal.status === 'REVISION_REQUESTED'
+    ? (deal.status === 'PENDING_PAYMENT' || deal.status === 'IN_PROGRESS') &&
+      !contentPublished
+    : deal.status === 'PENDING_PAYMENT' ||
+      deal.status === 'IN_PROGRESS' ||
+      deal.status === 'REVISION_REQUESTED'
+  const canReactivate = Boolean(deal.canReactivate)
 
   return (
     <div>
@@ -316,6 +320,26 @@ export function DealDetailPage() {
         </Button>
       ) : null}
 
+      {canReactivate ? (
+        <div className="mb-4 space-y-3">
+          <p className="rounded-xl border border-border bg-surface px-4 py-3 text-sm text-muted">
+            شما این همکاری را لغو کرده‌اید. می‌توانید دوباره فعال کنید.
+          </p>
+          <Button
+            disabled={update.isPending}
+            onClick={() => setConfirm('reactivate')}
+          >
+            فعال‌سازی مجدد همکاری
+          </Button>
+        </div>
+      ) : null}
+
+      {deal.status === 'CANCELLED' && !canReactivate ? (
+        <p className="rounded-xl border border-border bg-surface px-4 py-3 text-sm font-semibold text-muted">
+          این همکاری لغو شده و فقط کسی که آن را لغو کرده می‌تواند دوباره فعال کند.
+        </p>
+      ) : null}
+
       {deal.status === 'COMPLETED' ? (
         <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
           این پیشنهاد با موفقیت تکمیل شد.
@@ -420,6 +444,27 @@ export function DealDetailPage() {
         onConfirm={() =>
           update.mutate(
             { status: 'CANCELLED' },
+            { onSuccess: () => setConfirm(null) },
+          )
+        }
+        onClose={() => {
+          if (!update.isPending) setConfirm(null)
+        }}
+      />
+      <ConfirmModal
+        open={confirm === 'reactivate'}
+        title="فعال‌سازی مجدد همکاری؟"
+        description="همکاری به وضعیت قبلی برمی‌گردد. اگر قبلاً پرداخت شده باشد، مبلغ دوباره در حساب امانی قفل می‌شود."
+        confirmLabel="فعال کردن همکاری"
+        loading={update.isPending}
+        error={
+          update.isError
+            ? getApiErrorMessage(update.error, 'عملیات ناموفق بود')
+            : null
+        }
+        onConfirm={() =>
+          update.mutate(
+            { status: 'IN_PROGRESS' },
             { onSuccess: () => setConfirm(null) },
           )
         }

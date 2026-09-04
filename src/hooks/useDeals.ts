@@ -56,6 +56,8 @@ export function useUpdateDealStatus(id: string) {
       queryClient.invalidateQueries({ queryKey: dealsQueryKey })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
       queryClient.invalidateQueries({ queryKey: ['offers'] })
+      queryClient.invalidateQueries({ queryKey: ['wallet'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
   })
 }

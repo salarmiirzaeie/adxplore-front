@@ -7,6 +7,7 @@ const EVENT_LABELS: Record<string, string> = {
   DEAL_COMPLETED: 'تأیید تحویل',
   REVISION_REQUESTED: 'درخواست اصلاح',
   DEAL_CANCELLED: 'لغو همکاری',
+  DEAL_REACTIVATED: 'همکاری ازسر گرفته شد',
   OFFER_ACCEPTED: 'پیشنهاد پذیرفته شد',
   OFFER_REJECTED: 'پیشنهاد رد شد',
   OFFER_CANCELLED: 'پیشنهاد لغو شد',
@@ -75,6 +76,19 @@ function paymentLetter(
           description:
             'پرداخت انجام نشد و همکاری هنوز شروع نشده. منتظر پرداخت مجدد برند بمانید.',
         }
+  }
+  if (event === 'DEAL_CANCELLED') {
+    return {
+      title: 'همکاری لغو شد',
+      description:
+        'فقط کسی که همکاری را لغو کرده می‌تواند آن را دوباره فعال کند.',
+    }
+  }
+  if (event === 'DEAL_REACTIVATED') {
+    return {
+      title: 'همکاری ازسر گرفته شد',
+      description: 'همکاری دوباره فعال شد و می‌توانید کار را ادامه دهید.',
+    }
   }
   return null
 }
