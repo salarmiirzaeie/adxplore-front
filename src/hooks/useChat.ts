@@ -64,7 +64,7 @@ export function useMarkConversationRead(conversationId: string | undefined) {
     mutationFn: () => markConversationRead(conversationId!),
     onSuccess: () => {
       if (conversationId) {
-        qc.invalidateQueries({ queryKey: conversationByOfferKey })
+        qc.invalidateQueries({ queryKey: ['conversations', 'by-offer'] })
         qc.invalidateQueries({ queryKey: conversationsKey })
       }
     },

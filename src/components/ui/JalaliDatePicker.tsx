@@ -4,7 +4,8 @@ import persianImport from 'react-date-object/calendars/persian'
 import persianFaImport from 'react-date-object/locales/persian_fa'
 import ToolbarImport from 'react-multi-date-picker/plugins/toolbar'
 import 'react-multi-date-picker/styles/colors/purple.css'
-import type { Calendar, DateObject as DateObjectType, Locale } from 'react-date-object'
+import type DateObjectType from 'react-date-object'
+import type { Calendar, Locale } from 'react-date-object'
 
 function unwrap<T>(mod: T | { default: T }): T {
   if (mod && typeof mod === 'object' && 'default' in (mod as object)) {
