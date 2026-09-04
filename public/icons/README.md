@@ -1,3 +1,6 @@
-# AdXplore icons (PWA phase 2)
-# Replace these placeholders with real PNG assets before enabling install prompts.
-# Expected sizes: 192x192 and 512x512.
+# PWA icons — regenerate from the logo mark:
+
+#   npm i -D @resvg/resvg-js
+#   npm run icons
+
+# Expected files: icon-192.png, icon-512.png, icon-512-maskable.png
