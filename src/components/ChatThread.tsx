@@ -21,6 +21,7 @@ import {
 import { useOffer, useUpdateOfferStatus, offerQueryKey, offersQueryKey } from '../hooks/useOffers'
 import { dealStatusLabel } from '../lib/brand-options'
 import { connectChatSocket } from '../lib/chat-socket'
+import { invalidateWalletQueries } from '../hooks/useWallets'
 import type { ChatMessage } from '../types/api'
 
 interface ChatThreadProps {
@@ -76,7 +77,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
   const [attach, setAttach] = useState<File | null>(null)
   const attachRef = useRef<HTMLInputElement>(null)
   const [offerConfirm, setOfferConfirm] = useState<
-    'accept' | 'reject' | 'cancel' | null
+    'accept' | 'reject' | 'cancel' | 'undoReject' | null
   >(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const markedRef = useRef<string | null>(null)
@@ -84,6 +85,10 @@ export function ChatThread({ offerId }: ChatThreadProps) {
   const isBrand = me?.role === 'BRAND'
   const peer = offer ? (isBrand ? offer.influencer : offer.brand) : null
   const pending = offer?.status === 'PENDING'
+  const canUndoReject =
+    Boolean(isBrand) &&
+    offer?.status === 'REJECTED' &&
+    (offer.canUndoReject ?? true)
 
   useEffect(() => {
     const el = scrollRef.current
@@ -116,7 +121,8 @@ export function ChatThread({ offerId }: ChatThreadProps) {
         event === 'OFFER_UPDATED' ||
         event === 'OFFER_REJECTED' ||
         event === 'OFFER_CANCELLED' ||
-        event === 'OFFER_ACCEPTED'
+        event === 'OFFER_ACCEPTED' ||
+        event === 'OFFER_REOPENED'
       ) {
         qc.invalidateQueries({ queryKey: offerQueryKey(offerId) })
         qc.invalidateQueries({ queryKey: offersQueryKey })
@@ -136,6 +142,15 @@ export function ChatThread({ offerId }: ChatThreadProps) {
       ) {
         qc.invalidateQueries({ queryKey: ['deals'] })
         qc.invalidateQueries({ queryKey: ['conversations'] })
+        if (
+          event === 'DEAL_CANCELLED' ||
+          event === 'DEAL_REACTIVATED' ||
+          event === 'DEAL_COMPLETED' ||
+          event === 'PAYMENT_HELD' ||
+          event === 'PAYMENT_RELEASED'
+        ) {
+          invalidateWalletQueries(qc)
+        }
       }
     }
 
@@ -174,6 +189,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
   const refreshTimeline = () => {
     qc.invalidateQueries({ queryKey: ['deals'] })
     qc.invalidateQueries({ queryKey: ['offers'] })
+    invalidateWalletQueries(qc)
     if (conversation?.id) {
       qc.invalidateQueries({ queryKey: messagesKey(conversation.id) })
     }
@@ -220,7 +236,16 @@ export function ChatThread({ offerId }: ChatThreadProps) {
               tone: 'danger' as const,
               status: 'CANCELLED' as const,
             }
-          : null
+          : offerConfirm === 'undoReject'
+            ? {
+                title: 'لغو رد پیشنهاد؟',
+                description:
+                  'پیشنهاد دوباره در انتظار بررسی قرار می‌گیرد و می‌توانید آن را قبول کنید.',
+                confirmLabel: 'لغو رد',
+                tone: 'primary' as const,
+                status: 'PENDING' as const,
+              }
+            : null
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-surface-elevated">
@@ -402,6 +427,35 @@ export function ChatThread({ offerId }: ChatThreadProps) {
                 لغو پیشنهاد
               </Button>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {canUndoReject ? (
+        <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-3 sm:px-4">
+          <p className="min-w-0 flex-1 text-xs leading-6 text-muted">
+            این پیشنهاد رد شده است. می‌توانید رد را لغو کنید یا آن را قبول کنید.
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <Button
+              type="button"
+              fullWidth={false}
+              className="px-3 py-2 text-xs"
+              loading={update.isPending}
+              onClick={() => setOfferConfirm('accept')}
+            >
+              قبول
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              fullWidth={false}
+              className="px-3 py-2 text-xs"
+              loading={update.isPending}
+              onClick={() => setOfferConfirm('undoReject')}
+            >
+              لغو رد
+            </Button>
           </div>
         </div>
       ) : null}

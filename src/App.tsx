@@ -27,6 +27,7 @@ import { OffersPage } from './pages/OffersPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { InstagramApprovalPage } from './pages/InstagramApprovalPage'
 import { OtpPage } from './pages/OtpPage'
+import { TermsPage } from './pages/TermsPage'
 import { PaymentResultPage } from './pages/PaymentResultPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { PublicProfilePage } from './pages/PublicProfilePage'
@@ -41,6 +42,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomeRedirect />} />
+      <Route path="/terms" element={<TermsPage />} />
 
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<LoginPage />} />

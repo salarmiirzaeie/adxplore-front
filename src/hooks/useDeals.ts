@@ -7,6 +7,7 @@ import {
 } from '../api/deals'
 import { getAccessToken } from '../lib/auth-storage'
 import type { SubmitDeliverableBody, UpdateDealStatusBody } from '../types/api'
+import { invalidateWalletQueries } from './useWallets'
 
 export const dealsQueryKey = ['deals'] as const
 
@@ -51,13 +52,19 @@ export function useUpdateDealStatus(id: string) {
 
   return useMutation({
     mutationFn: (body: UpdateDealStatusBody) => updateDealStatus(id, body),
-    onSuccess: (deal) => {
+    onSuccess: (deal, body) => {
       queryClient.setQueryData(dealQueryKey(id), deal)
       queryClient.invalidateQueries({ queryKey: dealsQueryKey })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
       queryClient.invalidateQueries({ queryKey: ['offers'] })
-      queryClient.invalidateQueries({ queryKey: ['wallet'] })
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      if (
+        body.status === 'CANCELLED' ||
+        body.status === 'COMPLETED' ||
+        body.status === 'IN_PROGRESS'
+      ) {
+        invalidateWalletQueries(queryClient)
+      }
     },
   })
 }

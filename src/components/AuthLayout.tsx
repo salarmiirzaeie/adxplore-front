@@ -66,7 +66,16 @@ export function AuthLayout({
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          با ورود، شرایط استفاده ادکسپلور را می‌پذیرید
+          با ورود،{' '}
+          <Link
+            to="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-slate-200 underline decoration-slate-500 underline-offset-4 transition hover:text-white hover:decoration-white"
+          >
+            شرایط استفاده ادکسپلور
+          </Link>{' '}
+          را می‌پذیرید
         </p>
       </div>
     </div>

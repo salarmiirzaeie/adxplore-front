@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { useQueryClient } from '@tanstack/react-query'
+import { invalidateWalletQueries } from '../hooks/useWallets'
 
 export function PaymentResultPage() {
   const [params] = useSearchParams()
@@ -34,6 +35,8 @@ export function PaymentResultPage() {
     qc.invalidateQueries({ queryKey: ['payments'] })
     qc.invalidateQueries({ queryKey: ['conversations'] })
     qc.invalidateQueries({ queryKey: ['offers'] })
+    invalidateWalletQueries(qc)
+    qc.invalidateQueries({ queryKey: ['notifications'] })
   }, [qc])
 
   return (

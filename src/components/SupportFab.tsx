@@ -1,71 +1,45 @@
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useId, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { getApiErrorMessage } from '../api/client'
-import { useCreateSupportTicket } from '../hooks/useSupport'
-import { useMe } from '../hooks/useAuth'
-import { isValidIranMobile, normalizeIranPhone } from '../lib/phone'
-import { Button } from './ui/Button'
-import { Input } from './ui/Input'
-import { Textarea } from './ui/Textarea'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { getApiErrorMessage } from "../api/client";
+import { useCreateSupportTicket } from "../hooks/useSupport";
+import { useMe } from "../hooks/useAuth";
+import { isValidIranMobile, normalizeIranPhone } from "../lib/phone";
+import { Button } from "./ui/Button";
+import { Input } from "./ui/Input";
+import { Textarea } from "./ui/Textarea";
 
 const schema = z.object({
   phone: z
     .string()
-    .min(1, 'شماره موبایل را وارد کنید')
-    .refine((v) => isValidIranMobile(v), 'شماره موبایل معتبر نیست'),
-  subject: z
-    .string()
-    .trim()
-    .min(3, 'موضوع را وارد کنید')
-    .max(120, 'موضوع حداکثر ۱۲۰ کاراکتر باشد'),
-  message: z
-    .string()
-    .trim()
-    .min(10, 'پیام حداقل ۱۰ کاراکتر باشد')
-    .max(2000, 'پیام حداکثر ۲۰۰۰ کاراکتر باشد'),
-})
+    .min(1, "شماره موبایل را وارد کنید")
+    .refine((v) => isValidIranMobile(v), "شماره موبایل معتبر نیست"),
+  subject: z.string().trim().min(3, "موضوع را وارد کنید").max(120, "موضوع حداکثر ۱۲۰ کاراکتر باشد"),
+  message: z.string().trim().min(10, "پیام حداقل ۱۰ کاراکتر باشد").max(2000, "پیام حداکثر ۲۰۰۰ کاراکتر باشد"),
+});
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<typeof schema>;
 
 const headsetIcon = (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-    <path
-      d="M5 12a7 7 0 0 1 14 0"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-    />
+    <path d="M5 12a7 7 0 0 1 14 0" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     <path
       d="M5 12v4.5A2.5 2.5 0 0 0 7.5 19H9v-7H5zM19 12v4.5A2.5 2.5 0 0 1 16.5 19H15v-7h4z"
       stroke="currentColor"
       strokeWidth="1.75"
       strokeLinejoin="round"
     />
-    <path
-      d="M12 19v1.5a2 2 0 0 0 2 2h1"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-    />
+    <path d="M12 19v1.5a2 2 0 0 0 2 2h1" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
   </svg>
-)
+);
 
-function SupportModal({
-  open,
-  onClose,
-  defaultPhone,
-}: {
-  open: boolean
-  onClose: () => void
-  defaultPhone: string
-}) {
-  const titleId = useId()
-  const create = useCreateSupportTicket()
-  const resetMutation = create.reset
-  const [sent, setSent] = useState(false)
+function SupportModal({ open, onClose, defaultPhone }: { open: boolean; onClose: () => void; defaultPhone: string }) {
+  const titleId = useId();
+  const create = useCreateSupportTicket();
+  const resetMutation = create.reset;
+  const [sent, setSent] = useState(false);
   const {
     register,
     handleSubmit,
@@ -73,35 +47,35 @@ function SupportModal({
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { phone: defaultPhone, subject: '', message: '' },
-  })
+    defaultValues: { phone: defaultPhone, subject: "", message: "" },
+  });
 
   useEffect(() => {
-    if (!open) return
-    setSent(false)
-    resetMutation()
-    reset({ phone: defaultPhone, subject: '', message: '' })
-  }, [open, defaultPhone, reset, resetMutation])
+    if (!open) return;
+    setSent(false);
+    resetMutation();
+    reset({ phone: defaultPhone, subject: "", message: "" });
+  }, [open, defaultPhone, reset, resetMutation]);
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      e.stopImmediatePropagation()
-      if (!create.isPending) onClose()
-    }
+      if (e.key !== "Escape") return;
+      e.stopImmediatePropagation();
+      if (!create.isPending) onClose();
+    };
 
-    window.addEventListener('keydown', onKey, true)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    window.addEventListener("keydown", onKey, true);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
-      window.removeEventListener('keydown', onKey, true)
-      document.body.style.overflow = prev
-    }
-  }, [open, create.isPending, onClose])
+      window.removeEventListener("keydown", onKey, true);
+      document.body.style.overflow = prev;
+    };
+  }, [open, create.isPending, onClose]);
 
-  if (!open) return null
+  if (!open) return null;
 
   return createPortal(
     <div
@@ -116,7 +90,7 @@ function SupportModal({
         disabled={create.isPending}
         className="absolute inset-0 bg-ink/50 backdrop-blur-[2px] disabled:cursor-not-allowed"
         onClick={() => {
-          if (!create.isPending) onClose()
+          if (!create.isPending) onClose();
         }}
       />
       <div className="relative z-10 max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-3xl border border-border bg-surface-elevated p-5 shadow-2xl animate-fade-slide-in sm:rounded-3xl sm:p-6">
@@ -148,7 +122,7 @@ function SupportModal({
                   message: values.message.trim(),
                 },
                 { onSuccess: () => setSent(true) },
-              )
+              );
             })}
           >
             <Input
@@ -158,25 +132,14 @@ function SupportModal({
               dir="ltr"
               autoComplete="tel"
               error={errors.phone?.message}
-              {...register('phone')}
+              {...register("phone")}
             />
-            <Input
-              label="موضوع"
-              maxLength={120}
-              error={errors.subject?.message}
-              {...register('subject')}
-            />
-            <Textarea
-              label="پیام"
-              rows={5}
-              maxLength={2000}
-              error={errors.message?.message}
-              {...register('message')}
-            />
+            <Input label="موضوع" maxLength={120} error={errors.subject?.message} {...register("subject")} />
+            <Textarea label="پیام" rows={5} maxLength={2000} error={errors.message?.message} {...register("message")} />
 
             {create.isError ? (
               <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
-                {getApiErrorMessage(create.error, 'ارسال پیام ناموفق بود')}
+                {getApiErrorMessage(create.error, "ارسال پیام ناموفق بود")}
               </p>
             ) : null}
 
@@ -184,12 +147,7 @@ function SupportModal({
               <Button type="submit" loading={create.isPending}>
                 ارسال
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={create.isPending}
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" disabled={create.isPending} onClick={onClose}>
                 انصراف
               </Button>
             </div>
@@ -198,14 +156,14 @@ function SupportModal({
       </div>
     </div>,
     document.body,
-  )
+  );
 }
 
 export function SupportFab({ hidden }: { hidden?: boolean }) {
-  const { data: user } = useMe()
-  const [open, setOpen] = useState(false)
+  const { data: user } = useMe();
+  const [open, setOpen] = useState(false);
 
-  if (hidden) return null
+  if (hidden) return null;
 
   return (
     <>
@@ -216,13 +174,9 @@ export function SupportFab({ hidden }: { hidden?: boolean }) {
         aria-label="پشتیبانی"
       >
         {headsetIcon}
-        <span>پشتیبانی</span>
+        {/* <span>پشتیبانی</span> */}
       </button>
-      <SupportModal
-        open={open}
-        onClose={() => setOpen(false)}
-        defaultPhone={user?.phone ?? ''}
-      />
+      <SupportModal open={open} onClose={() => setOpen(false)} defaultPhone={user?.phone ?? ""} />
     </>
-  )
+  );
 }

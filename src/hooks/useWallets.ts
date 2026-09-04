@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import {
   getMyWallet,
   getMyWalletTransactions,
@@ -10,6 +10,11 @@ import type { UpsertBankCardBody } from '../types/api'
 
 export const walletQueryKey = ['wallet', 'me'] as const
 export const walletTxQueryKey = ['wallet', 'transactions'] as const
+
+export function invalidateWalletQueries(qc: QueryClient) {
+  void qc.invalidateQueries({ queryKey: walletQueryKey })
+  void qc.invalidateQueries({ queryKey: walletTxQueryKey })
+}
 
 export function useMyWallet(enabled = true) {
   return useQuery({
@@ -44,8 +49,7 @@ export function useRequestWithdraw() {
   return useMutation({
     mutationFn: (amountToman: number) => requestWalletWithdraw(amountToman),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: walletQueryKey })
-      qc.invalidateQueries({ queryKey: walletTxQueryKey })
+      invalidateWalletQueries(qc)
     },
   })
 }

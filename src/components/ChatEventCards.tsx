@@ -11,6 +11,7 @@ const EVENT_LABELS: Record<string, string> = {
   OFFER_ACCEPTED: 'پیشنهاد پذیرفته شد',
   OFFER_REJECTED: 'پیشنهاد رد شد',
   OFFER_CANCELLED: 'پیشنهاد لغو شد',
+  OFFER_REOPENED: 'رد پیشنهاد لغو شد',
   OFFER_AFTER_INVITATION: 'پاسخ به دعوت',
   OFFER_UPDATED: 'پیشنهاد ویرایش شد',
 }
@@ -89,6 +90,17 @@ function paymentLetter(
       title: 'همکاری ازسر گرفته شد',
       description: 'همکاری دوباره فعال شد و می‌توانید کار را ادامه دهید.',
     }
+  }
+  if (event === 'OFFER_REOPENED') {
+    return isBrand
+      ? {
+          title: 'رد پیشنهاد لغو شد',
+          description: 'پیشنهاد دوباره در انتظار است و می‌توانید آن را قبول کنید.',
+        }
+      : {
+          title: 'برند رد پیشنهاد را لغو کرد',
+          description: 'پیشنهاد دوباره در انتظار بررسی برند است.',
+        }
   }
   return null
 }

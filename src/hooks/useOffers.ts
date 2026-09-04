@@ -64,6 +64,7 @@ export function useUpdateOfferStatus(id: string) {
       queryClient.invalidateQueries({ queryKey: offersQueryKey })
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
       queryClient.invalidateQueries({ queryKey: ['conversations', 'messages'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
       if (body.status === 'ACCEPTED') {
         queryClient.invalidateQueries({ queryKey: ['deals'] })
       }

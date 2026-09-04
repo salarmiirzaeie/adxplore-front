@@ -293,6 +293,7 @@ export type NotificationType =
   | 'OFFER_ACCEPTED'
   | 'OFFER_REJECTED'
   | 'OFFER_CANCELLED'
+  | 'OFFER_REOPENED'
   | 'DEAL_STARTED'
   | 'DELIVERABLE_SUBMITTED'
   | 'REVISION_REQUESTED'
@@ -363,6 +364,7 @@ export interface ConversationOffer {
   deadline: string | null
   status: OfferStatus
   canEdit: boolean
+  canUndoReject?: boolean
   updatedAt: string
 }
 
@@ -605,6 +607,7 @@ export interface Offer {
   deadline: string | null
   status: OfferStatus
   canEdit?: boolean
+  canUndoReject?: boolean
   campaign: OfferCampaign
   brand: OfferParty
   influencer: OfferParty
@@ -620,7 +623,7 @@ export interface CreateOfferBody {
 }
 
 export interface UpdateOfferStatusBody {
-  status: 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
+  status: 'ACCEPTED' | 'REJECTED' | 'CANCELLED' | 'PENDING'
 }
 
 export interface UpdateOfferTermsBody {

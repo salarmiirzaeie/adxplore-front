@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { getApiErrorMessage } from '../api/client'
 import { useUpsertBankCard } from '../hooks/useWallets'
@@ -13,6 +13,7 @@ import {
   normalizeSheba,
 } from '../lib/bank-card'
 import type { BankCard } from '../types/api'
+import { CardNumberInput } from './CardNumberInput'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
 
@@ -43,6 +44,7 @@ export function BankCardSection({ card }: { card: BankCard | null }) {
   const save = useUpsertBankCard()
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
@@ -110,13 +112,17 @@ export function BankCardSection({ card }: { card: BankCard | null }) {
             error={errors.holderName?.message}
             {...register('holderName')}
           />
-          <Input
-            label="شماره کارت"
-            inputMode="numeric"
-            dir="ltr"
-            placeholder="6037-9981-8181-8187"
-            error={errors.cardNumber?.message}
-            {...register('cardNumber')}
+          <Controller
+            name="cardNumber"
+            control={control}
+            render={({ field }) => (
+              <CardNumberInput
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={errors.cardNumber?.message}
+              />
+            )}
           />
           <Input
             label="شماره شبا"
