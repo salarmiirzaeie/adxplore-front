@@ -13,6 +13,13 @@ export default defineConfig({
       '@': path.resolve(rootDir, './src'),
     },
   },
+  preview: {
+    host: '0.0.0.0',
+    port: 4173,
+  },
+  build: {
+    outDir: 'build',
+  },
   server: {
     port: 5173,
     proxy: {
