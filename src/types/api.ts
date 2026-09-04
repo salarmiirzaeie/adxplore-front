@@ -645,6 +645,27 @@ export interface UnreadCountResponse {
   count: number
 }
 
+export interface CreateSupportTicketBody {
+  phone: string
+  subject: string
+  message: string
+}
+
+export type SupportTicketStatus = 'NEW' | 'READ' | 'RESOLVED'
+
+export interface SupportTicket {
+  id: string
+  userId: string
+  phone: string
+  subject: string
+  message: string
+  status: SupportTicketStatus
+  readAt: string | null
+  resolvedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export interface HealthResponse {
   status: string
   service: string

@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Logo } from './brand/Logo'
 import { LogoutButton } from './LogoutButton'
+import { SupportFab } from './SupportFab'
 import { Avatar } from './ui/Avatar'
 import { useMe } from '../hooks/useAuth'
 import { useUnreadCount } from '../hooks/useNotifications'
@@ -579,6 +580,7 @@ export function AppShell({ children }: AppShellProps) {
       </div>
 
       {!isChatThreadRoute ? <MobileTabBar /> : null}
+      <SupportFab hidden={isChatThreadRoute} />
     </div>
   )
 }
