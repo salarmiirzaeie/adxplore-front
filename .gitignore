@@ -15,6 +15,7 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+!.env.production
 
 # Git metadata and Runflare deploy cache
 .git
@@ -30,3 +31,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+/.cloud/
+.cloud/
+/.cloud
