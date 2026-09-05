@@ -1,8 +1,15 @@
-export function registerServiceWorker() {
-  if (!import.meta.env.PROD) return
-  if (!('serviceWorker' in navigator)) return
+let registrationPromise: Promise<ServiceWorkerRegistration | undefined> | undefined
 
-  window.addEventListener('load', () => {
-    void navigator.serviceWorker.register('/sw.js')
-  })
+export function registerServiceWorker() {
+  if (!import.meta.env.PROD) return Promise.resolve(undefined)
+  if (!('serviceWorker' in navigator)) return Promise.resolve(undefined)
+
+  if (!registrationPromise) {
+    registrationPromise = navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => registration)
+      .catch(() => undefined)
+  }
+
+  return registrationPromise
 }

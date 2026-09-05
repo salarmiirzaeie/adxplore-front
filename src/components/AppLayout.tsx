@@ -2,12 +2,14 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { AppShell } from './AppShell'
 import { PageContainer } from './ui/PageContainer'
 import { useMe } from '../hooks/useAuth'
+import { usePushNotifications } from '../hooks/usePushNotifications'
 import { isProfileComplete, postAuthPath } from '../lib/auth-storage'
 
 export function AppLayout() {
   const { data: user, isLoading, isError } = useMe()
   const { pathname } = useLocation()
   const isMessagesRoute = pathname.startsWith('/app/messages')
+  usePushNotifications(Boolean(user))
 
   if (isError) {
     return <Navigate to="/login" replace />

@@ -1,4 +1,52 @@
-const CACHE = 'adxplore-shell-v1'
+importScripts('https://www.gstatic.com/firebasejs/12.18.0/firebase-app-compat.js')
+importScripts('https://www.gstatic.com/firebasejs/12.18.0/firebase-messaging-compat.js')
+
+firebase.initializeApp({
+  apiKey: 'AIzaSyD9K3i0epqijMTUhEJj51Xbv08O2LTSxX0',
+  authDomain: 'adxplore.firebaseapp.com',
+  projectId: 'adxplore',
+  storageBucket: 'adxplore.firebasestorage.app',
+  messagingSenderId: '910368391580',
+  appId: '1:910368391580:web:243a5a0f4eb9a2d17c0859',
+})
+
+const messaging = firebase.messaging()
+
+messaging.onBackgroundMessage((payload) => {
+  if (payload.notification) return
+
+  const title = payload.data?.title || 'ادکسپلور'
+  const body = payload.data?.body || ''
+  const url = payload.data?.url || '/app/notifications'
+
+  return self.registration.showNotification(title, {
+    body,
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    data: { url },
+  })
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const target = event.notification.data?.url || '/app/notifications'
+  const origin = self.location.origin
+  const href = target.startsWith('http') ? target : `${origin}${target}`
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client) {
+          void client.navigate(href)
+          return client.focus()
+        }
+      }
+      return self.clients.openWindow(href)
+    }),
+  )
+})
+
+const CACHE = 'adxplore-shell-v2'
 
 const PRECACHE = [
   '/',

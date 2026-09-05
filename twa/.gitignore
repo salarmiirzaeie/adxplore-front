@@ -11,3 +11,4 @@ captures/
 *.jks
 *.keystore
 !debug.keystore
+*firebase-adminsdk*.json
