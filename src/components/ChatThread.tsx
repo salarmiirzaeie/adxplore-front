@@ -223,7 +223,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
       : offerConfirm === 'reject'
         ? {
             title: 'رد پیشنهاد؟',
-            description: 'این پیشنهاد رد می‌شود و اینفلوئنسر مطلع خواهد شد.',
+            description: 'این پیشنهاد رد می‌شود و بلاگر مطلع خواهد شد.',
             confirmLabel: 'رد پیشنهاد',
             tone: 'danger' as const,
             status: 'REJECTED' as const,
@@ -231,7 +231,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
         : offerConfirm === 'cancel'
           ? {
               title: 'لغو پیشنهاد؟',
-              description: 'پیشنهاد شما لغو می‌شود و برند دیگر آن را نمی‌بیند.',
+              description: 'پیشنهاد شما لغو می‌شود و صاحب کسب و کار دیگر آن را نمی‌بیند.',
               confirmLabel: 'لغو پیشنهاد',
               tone: 'danger' as const,
               status: 'CANCELLED' as const,
@@ -390,7 +390,7 @@ export function ChatThread({ offerId }: ChatThreadProps) {
           <p className="min-w-0 flex-1 text-xs leading-6 text-muted">
             {isBrand
               ? 'برای شروع همکاری، این پیشنهاد را قبول یا رد کنید.'
-              : 'در انتظار پاسخ برند هستید؛ می‌توانید پیشنهاد را ویرایش یا لغو کنید.'}
+              : 'در انتظار پاسخ صاحب کسب و کار هستید؛ می‌توانید پیشنهاد را ویرایش یا لغو کنید.'}
           </p>
           <div className="flex shrink-0 gap-2">
             {isBrand ? (

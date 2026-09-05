@@ -45,8 +45,8 @@ export const brandProfileSchema = z
     name: z
       .string()
       .trim()
-      .min(2, 'نام برند حداقل ۲ کاراکتر باشد')
-      .max(80, 'نام برند حداکثر ۸۰ کاراکتر باشد'),
+      .min(2, 'نام صاحب کسب و کار حداقل ۲ کاراکتر باشد')
+      .max(80, 'نام صاحب کسب و کار حداکثر ۸۰ کاراکتر باشد'),
     website: z.string().trim().max(200, 'آدرس حداکثر ۲۰۰ کاراکتر باشد'),
     bio: z.string().max(1000, 'معرفی حداکثر ۱۰۰۰ کاراکتر باشد'),
     categories: z
@@ -157,9 +157,9 @@ export function BrandProfileForm({
       onSubmit={handleSubmit((values) => onSubmit(brandFormToUpdateBody(values)))}
     >
       <section className="flex flex-col gap-4">
-        <h2 className="text-sm font-extrabold text-navy">اطلاعات برند</h2>
+        <h2 className="text-sm font-extrabold text-navy">اطلاعات صاحب کسب و کار</h2>
         <Input
-          label="نام برند"
+          label="نام صاحب کسب و کار"
           error={errors.name?.message}
           {...register('name')}
         />
@@ -173,8 +173,8 @@ export function BrandProfileForm({
           {...register('website')}
         />
         <Textarea
-          label="درباره برند"
-          placeholder="چند خط درباره برند، محصولات و مخاطب‌تان بنویسید."
+          label="درباره صاحب کسب و کار"
+          placeholder="چند خط درباره صاحب کسب و کار، محصولات و مخاطب‌تان بنویسید."
           hint="اختیاری — در پروفایل عمومی نمایش داده می‌شود"
           maxLength={1000}
           error={errors.bio?.message}

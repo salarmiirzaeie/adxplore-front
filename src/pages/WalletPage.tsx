@@ -114,7 +114,7 @@ export function WalletPage() {
         <div className="rounded-2xl border border-border bg-surface-elevated p-4 text-sm leading-7 text-muted">
           وقتی پیشنهاد را می‌پذیرید و از زرین‌پال پرداخت می‌کنید، مبلغ در بخش
           <span className="font-bold text-navy"> «در امانت» </span>
-          قفل می‌شود. بعد از تأیید تحویل، از امانت خارج و به کیف پول اینفلوئنسر
+          قفل می‌شود. بعد از تأیید تحویل، از امانت خارج و به کیف پول بلاگر
           واریز می‌شود. اگر همکاری لغو شود، مبلغ به
           <span className="font-bold text-navy"> قابل استفاده </span>
           برمی‌گردد.

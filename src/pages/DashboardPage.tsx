@@ -99,7 +99,7 @@ function BrandDashboard() {
       <section className="card-elevated rounded-2xl px-5 py-6 sm:px-7">
         <h2 className="text-lg font-extrabold text-navy">اقدام سریع</h2>
         <p className="mt-1 text-sm leading-7 text-muted">
-          کمپین بسازید، اینفلوئنسر پیدا کنید و در پیام‌ها پیشنهادها را پیگیری کنید.
+          کمپین بسازید، بلاگر پیدا کنید و در پیام‌ها پیشنهادها را پیگیری کنید.
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
@@ -112,7 +112,7 @@ function BrandDashboard() {
             to="/app/influencers"
             className="inline-flex justify-center rounded-xl border border-border px-5 py-3 text-sm font-semibold text-navy transition hover:bg-surface"
           >
-            کشف اینفلوئنسر
+            کشف بلاگر
           </Link>
           <Link
             to="/app/messages"
@@ -152,7 +152,7 @@ function InfluencerDashboard() {
         label: 'دعوت فعال',
         count: pendingInvites,
         to: '/app/invitations',
-        hint: 'برندهایی که شما را دعوت کرده‌اند',
+        hint: 'صاحبان کسب و کاری که شما را دعوت کرده‌اند',
       },
       {
         label: 'در انتظار پاسخ',
@@ -232,7 +232,7 @@ export function DashboardPage() {
             {formatPhoneDisplay(user.phone)}
           </span>
           <span className="mx-2 text-border">·</span>
-          <span>{isBrand ? 'برند' : 'اینفلوئنسر'}</span>
+          <span>{isBrand ? 'صاحب کسب و کار' : 'بلاگر'}</span>
         </p>
       </section>
 

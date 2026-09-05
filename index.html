@@ -1,23 +1,23 @@
 <!doctype html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" class="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/logo.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b1120" />
-    <meta name="description" content="ادکسپلور — پنل بازار اینفلوئنسر اینستاگرام" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="ادکسپلور — پنل بازار بلاگر اینستاگرام" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <title>ادکسپلور | پنل</title>
     <script>
       (function () {
         try {
-          var theme = localStorage.getItem('adxplore-theme')
-          if (theme === 'light') {
-            document.documentElement.classList.add('light')
+          var theme = localStorage.getItem('adxplore-theme-v2')
+          if (theme === 'dark') {
+            document.documentElement.classList.remove('light')
             var meta = document.querySelector('meta[name="theme-color"]')
-            if (meta) meta.setAttribute('content', '#ffffff')
+            if (meta) meta.setAttribute('content', '#0b1120')
           }
         } catch (e) {}
       })()

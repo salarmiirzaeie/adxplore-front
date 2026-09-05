@@ -75,7 +75,7 @@ export function CreateInvitationPage() {
   if (!influencer) {
     return (
       <div className="py-16 text-center">
-        <p className="text-sm text-red-600">اینفلوئنسر پیدا نشد.</p>
+        <p className="text-sm text-red-600">بلاگر پیدا نشد.</p>
         <Link
           to="/app/influencers"
           className="mt-4 inline-block text-sm font-semibold text-purple"
@@ -113,7 +113,7 @@ export function CreateInvitationPage() {
         <section className="card-elevated rounded-2xl px-6 py-10 text-center">
           <h2 className="text-lg font-extrabold text-navy">کمپین فعالی ندارید</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
-            ابتدا یک کمپین بسازید و آن را فعال کنید، بعد اینفلوئنسر را دعوت کنید.
+            ابتدا یک کمپین بسازید و آن را فعال کنید، بعد بلاگر را دعوت کنید.
           </p>
           <Link
             to="/app/campaigns/new"
@@ -166,7 +166,7 @@ export function CreateInvitationPage() {
         <ConfirmModal
           open={confirmOpen}
           title="ارسال دعوت؟"
-          description={`${influencer.name ?? 'اینفلوئنسر'} به کمپین دعوت می‌شود.`}
+          description={`${influencer.name ?? 'بلاگر'} به کمپین دعوت می‌شود.`}
           confirmLabel="ارسال دعوت"
           loading={create.isPending}
           error={

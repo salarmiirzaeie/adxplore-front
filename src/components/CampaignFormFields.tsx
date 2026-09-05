@@ -40,7 +40,7 @@ export function CampaignFormFields({
 
       <Textarea
         label="بریف / توضیح"
-        placeholder="هدف کمپین، پیام کلیدی و انتظارات از اینفلوئنسر را بنویسید."
+        placeholder="هدف کمپین، پیام کلیدی و انتظارات از بلاگر را بنویسید."
         error={errors.brief?.message}
         {...register('brief')}
       />

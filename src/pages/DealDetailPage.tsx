@@ -134,7 +134,7 @@ export function DealDetailPage() {
           <div>
             <p className="text-sm font-bold text-navy">{party.name ?? '—'}</p>
             <p className="text-xs font-semibold text-muted">
-              {isBrand ? 'اینفلوئنسر' : 'برند'}
+              {isBrand ? 'بلاگر' : 'صاحب کسب و کار'}
               {party.category
                 ? ` · ${brandCategoriesLabel(party.categories, party.category)}`
                 : ''}
@@ -177,7 +177,7 @@ export function DealDetailPage() {
           ) : null}
           {deal.note ? <DetailRow label="یادداشت تحویل" value={deal.note} /> : null}
           {deal.brandFeedback ? (
-            <DetailRow label="بازخورد برند" value={deal.brandFeedback} />
+            <DetailRow label="بازخورد صاحب کسب و کار" value={deal.brandFeedback} />
           ) : null}
         </dl>
       </section>
@@ -349,7 +349,7 @@ export function DealDetailPage() {
       <ConfirmModal
         open={confirm === 'submit'}
         title="ثبت تحویل؟"
-        description="محتوا برای برند ارسال می‌شود تا بررسی کند."
+        description="محتوا برای صاحب کسب و کار ارسال می‌شود تا بررسی کند."
         confirmLabel="ارسال تحویل"
         loading={submit.isPending}
         error={
@@ -387,7 +387,7 @@ export function DealDetailPage() {
       <ConfirmModal
         open={confirm === 'complete'}
         title="تأیید تحویل؟"
-        description="با تأیید، مبلغ از امانت آزاد و به اینفلوئنسر واریز می‌شود. این کار قابل برگشت نیست."
+        description="با تأیید، مبلغ از امانت آزاد و به بلاگر واریز می‌شود. این کار قابل برگشت نیست."
         confirmLabel="تأیید و تکمیل"
         loading={update.isPending}
         error={
@@ -408,7 +408,7 @@ export function DealDetailPage() {
       <ConfirmModal
         open={confirm === 'revision'}
         title="ارسال درخواست اصلاح؟"
-        description="اینفلوئنسر باید محتوا را بر اساس بازخورد شما دوباره ارسال کند."
+        description="بلاگر باید محتوا را بر اساس بازخورد شما دوباره ارسال کند."
         confirmLabel="ارسال درخواست"
         loading={update.isPending}
         error={
@@ -432,7 +432,7 @@ export function DealDetailPage() {
       <ConfirmModal
         open={confirm === 'cancel'}
         title="لغو همکاری؟"
-        description="همکاری لغو می‌شود و در صورت پرداخت، مبلغ به کیف پول برند برمی‌گردد."
+        description="همکاری لغو می‌شود و در صورت پرداخت، مبلغ به کیف پول صاحب کسب و کار برمی‌گردد."
         confirmLabel="لغو همکاری"
         tone="danger"
         loading={update.isPending}

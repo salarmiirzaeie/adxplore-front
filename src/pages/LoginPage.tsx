@@ -28,13 +28,13 @@ const roles: Array<{
 }> = [
   {
     value: 'INFLUENCER',
-    title: 'اینفلوئنسر',
+    title: 'بلاگر',
     description: 'ورود برای همکاری در کمپین‌ها و دریافت پیشنهاد',
   },
   {
     value: 'BRAND',
-    title: 'برند',
-    description: 'ورود برای ساخت کمپین و پیدا کردن اینفلوئنسر',
+    title: 'صاحب کسب و کار',
+    description: 'ورود برای ساخت کمپین و پیدا کردن بلاگر',
   },
 ]
 

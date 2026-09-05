@@ -131,7 +131,7 @@ export function CampaignOffersPage() {
         <section className="card-elevated rounded-2xl px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">هنوز پیشنهادی نیست</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
-            بعد از دعوت اینفلوئنسرها، پیشنهادهای آن‌ها اینجا دیده می‌شود.
+            بعد از دعوت بلاگرها، پیشنهادهای آن‌ها اینجا دیده می‌شود.
           </p>
           <Link
             to={`/app/campaigns/${campaign.id}/invitations`}

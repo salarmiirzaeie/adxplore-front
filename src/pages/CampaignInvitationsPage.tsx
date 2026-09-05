@@ -43,7 +43,7 @@ function CancelInvitationButton({ invitationId }: { invitationId: string }) {
       <ConfirmModal
         open={confirmOpen}
         title="لغو دعوت؟"
-        description="این دعوت لغو می‌شود و اینفلوئنسر دیگر آن را نمی‌بیند."
+        description="این دعوت لغو می‌شود و بلاگر دیگر آن را نمی‌بیند."
         confirmLabel="لغو دعوت"
         tone="danger"
         loading={update.isPending}
@@ -177,7 +177,7 @@ export function CampaignInvitationsPage() {
         <section className="card-elevated rounded-2xl px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">هنوز دعوتی نیست</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
-            اینفلوئنسرهای مناسب را دعوت کنید تا پیشنهاد قیمت بفرستند.
+            بلاگرهای مناسب را دعوت کنید تا پیشنهاد قیمت بفرستند.
           </p>
           {isCampaignAcceptingInvites(campaign.status) ? (
             <button
@@ -185,7 +185,7 @@ export function CampaignInvitationsPage() {
               onClick={() => setInviteOpen(true)}
               className="btn-primary mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold"
             >
-              دعوت اینفلوئنسر
+              دعوت بلاگر
             </button>
           ) : null}
         </section>

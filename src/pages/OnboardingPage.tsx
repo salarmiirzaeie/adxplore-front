@@ -98,7 +98,7 @@ function InfluencerOnboarding({
     },
     {
       title: 'نیچ و شهر',
-      subtitle: 'برندها بر اساس دسته و شهر شما را پیدا می‌کنند.',
+      subtitle: 'صاحبان کسب و کار بر اساس دسته و شهر شما را پیدا می‌کنند.',
     },
     {
       title: 'بازه فالوور',
@@ -306,10 +306,10 @@ function BrandOnboarding({
 
   const titles = [
     {
-      title: 'معرفی برند',
-      subtitle: 'نام برند، لینک و چند خط درباره برند را وارد کنید.',
+      title: 'معرفی صاحب کسب و کار',
+      subtitle: 'نام صاحب کسب و کار، لینک و چند خط درباره صاحب کسب و کار را وارد کنید.',
     },
-    { title: 'دسته و شهر', subtitle: 'برای پیشنهاد اینفلوئنسرهای مرتبط، دسته و شهر را مشخص کنید.' },
+    { title: 'دسته و شهر', subtitle: 'برای پیشنهاد بلاگرهای مرتبط، دسته و شهر را مشخص کنید.' },
     { title: 'هدف کمپین', subtitle: 'اختیاری — می‌توانید بعداً هم تکمیل کنید.' },
   ]
 
@@ -329,7 +329,7 @@ function BrandOnboarding({
               compact
             />
             <Input
-              label="نام برند"
+              label="نام صاحب کسب و کار"
               autoComplete="organization"
               placeholder="مثلاً کافه نوآ"
               error={errors.name?.message}
@@ -345,8 +345,8 @@ function BrandOnboarding({
               {...register('website')}
             />
             <Textarea
-              label="درباره برند"
-              placeholder="چند خط درباره برند، محصولات و مخاطب‌تان بنویسید."
+              label="درباره صاحب کسب و کار"
+              placeholder="چند خط درباره صاحب کسب و کار، محصولات و مخاطب‌تان بنویسید."
               hint="اختیاری — در پروفایل عمومی نمایش داده می‌شود"
               maxLength={1000}
               error={errors.bio?.message}

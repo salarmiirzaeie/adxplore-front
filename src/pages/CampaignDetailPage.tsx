@@ -243,7 +243,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
         ) : null}
         {isCampaignAcceptingInvites(campaign.status) ? (
           <>
-            <Button onClick={() => setInviteOpen(true)}>دعوت اینفلوئنسر</Button>
+            <Button onClick={() => setInviteOpen(true)}>دعوت بلاگر</Button>
             <Button
               variant="outline"
               disabled={update.isPending}
@@ -273,7 +273,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
       <ConfirmModal
         open={confirm === 'open'}
         title="فعال‌سازی کمپین؟"
-        description="کمپین برای اینفلوئنسرها قابل مشاهده می‌شود و می‌توانید دعوت بفرستید."
+        description="کمپین برای بلاگرها قابل مشاهده می‌شود و می‌توانید دعوت بفرستید."
         confirmLabel="فعال کن"
         loading={update.isPending}
         error={
@@ -321,7 +321,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
       <ConfirmModal
         open={confirm === 'reopen'}
         title="بازگشایی کمپین؟"
-        description="کمپین دوباره برای اینفلوئنسرها باز می‌شود."
+        description="کمپین دوباره برای بلاگرها باز می‌شود."
         confirmLabel="بازگشایی"
         loading={update.isPending}
         error={
@@ -412,7 +412,7 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
             />
             <div>
               <p className="text-sm font-bold text-navy">
-                {campaign.brand?.name ?? 'برند'}
+                {campaign.brand?.name ?? 'صاحب کسب و کار'}
               </p>
               <p className="text-xs text-muted">
                 {brandCategoriesLabel(campaign.categories, campaign.category)} ·{' '}

@@ -43,7 +43,7 @@ export function InfluencerDetailPage() {
   if (isError || !influencer) {
     return (
       <div className="py-16 text-center">
-        <p className="text-sm text-red-600">اینفلوئنسر پیدا نشد.</p>
+        <p className="text-sm text-red-600">بلاگر پیدا نشد.</p>
         <Link
           to="/app/influencers"
           className="mt-4 inline-block text-sm font-semibold text-purple"
@@ -60,7 +60,7 @@ export function InfluencerDetailPage() {
         to="/app/influencers"
         className="mb-4 inline-block text-sm font-medium text-muted transition hover:text-purple"
       >
-        ← بازگشت به اینفلوئنسرها
+        ← بازگشت به بلاگرها
       </Link>
 
       <section className="mb-6 rounded-2xl border border-border bg-surface-elevated p-6 sm:p-8">
@@ -109,7 +109,7 @@ export function InfluencerDetailPage() {
         <section className="rounded-2xl border border-border bg-surface-elevated p-6 lg:sticky lg:top-24 lg:self-start">
           <h2 className="text-base font-extrabold text-navy">دعوت به کمپین</h2>
           <p className="mt-2 text-sm leading-7 text-muted">
-            یک کمپین فعال انتخاب کنید و برای این اینفلوئنسر دعوت بفرستید.
+            یک کمپین فعال انتخاب کنید و برای این بلاگر دعوت بفرستید.
           </p>
           <Link
             to={`/app/invitations/new?influencerId=${influencer.id}`}

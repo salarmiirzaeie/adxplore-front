@@ -37,7 +37,7 @@ export function AuthLayout({
       >
         <div className="mb-8 flex flex-col items-center text-center">
           <Logo theme="light" />
-          <p className="mt-4 text-sm text-slate-300/80">پنل برند و اینفلوئنسر</p>
+          <p className="mt-4 text-sm text-slate-300/80">پنل صاحب کسب و کار و بلاگر</p>
         </div>
 
         <div className="card-glass rounded-2xl p-6 sm:p-8">

@@ -108,7 +108,7 @@ export function InviteInfluencersModal({
         <div className="border-b border-border px-5 py-4 sm:px-6">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-medium text-purple">دعوت اینفلوئنسر</p>
+              <p className="text-sm font-medium text-purple">دعوت بلاگر</p>
               <h2
                 id="invite-modal-title"
                 className="mt-1 text-lg font-extrabold text-navy"
@@ -175,11 +175,11 @@ export function InviteInfluencersModal({
             </div>
           ) : null}
           {isError ? (
-            <p className="text-sm text-red-600">بارگذاری اینفلوئنسرها ناموفق بود.</p>
+            <p className="text-sm text-red-600">بارگذاری بلاگرها ناموفق بود.</p>
           ) : null}
           {!isLoading && influencers?.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted">
-              اینفلوئنسری با این فیلتر پیدا نشد.
+              بلاگری با این فیلتر پیدا نشد.
             </p>
           ) : null}
           <div className="flex flex-col gap-2">
@@ -252,7 +252,7 @@ export function InviteInfluencersModal({
       <ConfirmModal
         open={confirmOpen}
         title="ارسال دعوت؟"
-        description={`${selected.size.toLocaleString('fa-IR')} اینفلوئنسر به این کمپین دعوت می‌شوند.`}
+        description={`${selected.size.toLocaleString('fa-IR')} بلاگر به این کمپین دعوت می‌شوند.`}
         confirmLabel="ارسال دعوت"
         loading={bulk.isPending}
         error={

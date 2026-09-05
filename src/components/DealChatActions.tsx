@@ -207,7 +207,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
             </>
           ) : (
             <p className="text-xs leading-6 text-muted">
-              در انتظار پرداخت برند برای شروع همکاری…
+              در انتظار پرداخت صاحب کسب و کار برای شروع همکاری…
             </p>
           )}
         </div>
@@ -396,7 +396,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
       <ConfirmModal
         open={confirm === 'submit'}
         title="ثبت تحویل؟"
-        description="محتوا برای برند ارسال می‌شود تا بررسی کند."
+        description="محتوا برای صاحب کسب و کار ارسال می‌شود تا بررسی کند."
         confirmLabel="ثبت تحویل"
         loading={submit.isPending}
         error={
@@ -412,7 +412,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
       <ConfirmModal
         open={confirm === 'complete'}
         title="تأیید تحویل؟"
-        description="با تأیید، مبلغ از امانت آزاد و به اینفلوئنسر واریز می‌شود. این کار قابل برگشت نیست."
+        description="با تأیید، مبلغ از امانت آزاد و به بلاگر واریز می‌شود. این کار قابل برگشت نیست."
         confirmLabel="تأیید و تکمیل"
         loading={update.isPending}
         error={
@@ -438,7 +438,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
       <ConfirmModal
         open={confirm === 'revision'}
         title="ارسال درخواست اصلاح؟"
-        description="اینفلوئنسر باید محتوا را بر اساس بازخورد شما دوباره ارسال کند."
+        description="بلاگر باید محتوا را بر اساس بازخورد شما دوباره ارسال کند."
         confirmLabel="ارسال درخواست"
         loading={update.isPending}
         error={
@@ -469,7 +469,7 @@ export function DealChatActions({ deal, isBrand, onUpdated }: DealChatActionsPro
       <ConfirmModal
         open={confirm === 'cancel'}
         title="لغو همکاری؟"
-        description="همکاری لغو می‌شود و در صورت پرداخت، مبلغ به کیف پول برند برمی‌گردد."
+        description="همکاری لغو می‌شود و در صورت پرداخت، مبلغ به کیف پول صاحب کسب و کار برمی‌گردد."
         confirmLabel="لغو همکاری"
         tone="danger"
         loading={update.isPending}

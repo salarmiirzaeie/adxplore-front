@@ -39,7 +39,7 @@ function ProfileBody({ profile }: { profile: PublicProfile }) {
   return (
     <dl>
       <Field
-        label={isBrand ? 'نام برند' : 'نام نمایشی'}
+        label={isBrand ? 'نام صاحب کسب و کار' : 'نام نمایشی'}
         value={profile.name}
       />
       <Field
@@ -48,7 +48,7 @@ function ProfileBody({ profile }: { profile: PublicProfile }) {
         dir="ltr"
       />
       <Field
-        label={isBrand ? 'درباره برند' : 'درباره اینفلوئنسر'}
+        label={isBrand ? 'درباره صاحب کسب و کار' : 'درباره بلاگر'}
         value={profile.bio}
       />
       <Field
@@ -119,10 +119,10 @@ export function PublicProfilePage() {
           <Avatar src={profile.photoUrl} name={profile.name} size="lg" />
           <div>
             <p className="mb-1 text-sm font-medium text-purple">
-              {isBrand ? 'پروفایل برند' : 'پروفایل اینفلوئنسر'}
+              {isBrand ? 'پروفایل صاحب کسب و کار' : 'پروفایل بلاگر'}
             </p>
             <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
-              {profile.name ?? (isBrand ? 'برند' : 'اینفلوئنسر')}
+              {profile.name ?? (isBrand ? 'صاحب کسب و کار' : 'بلاگر')}
             </h1>
             {profile.website ? (
               <p className="mt-2 text-sm font-semibold text-muted" dir="ltr">

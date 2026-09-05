@@ -37,13 +37,13 @@ function ProfileField({
 function BrandProfileView({ user }: { user: UserProfile }) {
   return (
     <dl>
-      <ProfileField label="نام برند" value={user.name} />
+      <ProfileField label="نام صاحب کسب و کار" value={user.name} />
       <ProfileField
         label="اینستاگرام / وب‌سایت"
         value={user.website}
         dir="ltr"
       />
-      <ProfileField label="درباره برند" value={user.bio} />
+      <ProfileField label="درباره صاحب کسب و کار" value={user.bio} />
       <ProfileField
         label="دسته فعالیت"
         value={brandCategoriesLabel(user.categories, user.category)}
@@ -108,11 +108,11 @@ export function ProfilePage() {
           <div>
             <p className="mb-1 text-sm font-medium text-purple">پروفایل</p>
             <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
-              {isBrand ? 'پروفایل برند' : 'پروفایل اینفلوئنسر'}
+              {isBrand ? 'پروفایل صاحب کسب و کار' : 'پروفایل بلاگر'}
             </h1>
             <p className="mt-2 text-sm text-muted">
               {isBrand
-                ? 'اطلاعات برند شما برای پیشنهاد اینفلوئنسرها استفاده می‌شود.'
+                ? 'اطلاعات صاحب کسب و کار شما برای پیشنهاد بلاگرها استفاده می‌شود.'
                 : 'این اطلاعات برای پیشنهاد کمپین‌های مرتبط استفاده می‌شود.'}
             </p>
           </div>

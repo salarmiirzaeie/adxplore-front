@@ -1,15 +1,15 @@
 export type Theme = 'dark' | 'light'
 
-export const THEME_KEY = 'adxplore-theme'
+export const THEME_KEY = 'adxplore-theme-v2'
 
 const LIGHT_THEME_COLOR = '#ffffff'
 const DARK_THEME_COLOR = '#0b1120'
 
 export function getStoredTheme(): Theme {
   try {
-    return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'
+    return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'
   } catch {
-    return 'dark'
+    return 'light'
   }
 }
 

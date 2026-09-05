@@ -117,7 +117,7 @@ function MarketplaceCampaignCard({ campaign }: { campaign: Campaign }) {
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
             <p className="mt-0.5 text-xs font-semibold text-muted">
-              {campaign.brand?.name ?? 'برند'}
+              {campaign.brand?.name ?? 'صاحب کسب و کار'}
             </p>
           </div>
         </div>
@@ -155,7 +155,7 @@ function BrandCampaigns() {
             مدیریت کمپین‌ها
           </h1>
           <p className="mt-2 text-sm text-muted">
-            کمپین بسازید، اینفلوئنسر دعوت کنید و پیشنهادها را ببینید.
+            کمپین بسازید، بلاگر دعوت کنید و پیشنهادها را ببینید.
           </p>
         </div>
         <Link
@@ -182,7 +182,7 @@ function BrandCampaigns() {
         <section className="card-elevated rounded-2xl px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">هنوز کمپینی ندارید</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
-            اولین کمپین را بسازید و اینفلوئنسرهای مناسب را دعوت کنید.
+            اولین کمپین را بسازید و بلاگرهای مناسب را دعوت کنید.
           </p>
           <Link
             to="/app/campaigns/new"

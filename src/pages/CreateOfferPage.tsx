@@ -188,7 +188,7 @@ export function CreateOfferPage() {
       <ConfirmModal
         open={confirmOpen}
         title="ارسال پیشنهاد؟"
-        description="پیشنهاد قیمت برای برند ارسال می‌شود و گفتگو باز می‌شود."
+        description="پیشنهاد قیمت برای صاحب کسب و کار ارسال می‌شود و گفتگو باز می‌شود."
         confirmLabel="ارسال پیشنهاد"
         loading={create.isPending}
         error={

@@ -31,8 +31,8 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 const roleLabel: Record<UserRole, string> = {
-  INFLUENCER: 'اینفلوئنسر',
-  BRAND: 'برند',
+  INFLUENCER: 'بلاگر',
+  BRAND: 'صاحب کسب و کار',
 }
 
 export function OtpPage() {

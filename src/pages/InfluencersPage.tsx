@@ -92,7 +92,7 @@ export function InfluencersPage() {
       <section className="mb-6 sm:mb-8">
         <p className="mb-1 text-sm font-medium text-purple">کشف</p>
         <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
-          اینفلوئنسرها
+          بلاگرها
         </h1>
         <p className="mt-2 text-sm text-muted">
           بر اساس دسته، شهر و بازه فالوور فیلتر کنید و برای کمپین دعوت بفرستید.
@@ -172,7 +172,7 @@ export function InfluencersPage() {
 
       {isError ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-          بارگذاری اینفلوئنسرها ناموفق بود.
+          بارگذاری بلاگرها ناموفق بود.
         </p>
       ) : null}
 
@@ -182,7 +182,7 @@ export function InfluencersPage() {
           <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
             {hasFilters
               ? 'فیلترها را تغییر دهید یا پاک کنید.'
-              : 'هنوز اینفلوئنسر تکمیل‌پروفایلی ثبت نشده است.'}
+              : 'هنوز بلاگر تکمیل‌پروفایلی ثبت نشده است.'}
           </p>
         </section>
       ) : null}
@@ -190,7 +190,7 @@ export function InfluencersPage() {
       {influencers && influencers.length > 0 ? (
         <div className={isFetching ? 'opacity-70' : ''}>
           <p className="mb-3 text-xs font-semibold text-muted">
-            {influencers.length.toLocaleString('fa-IR')} اینفلوئنسر
+            {influencers.length.toLocaleString('fa-IR')} بلاگر
           </p>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {influencers.map((influencer) => (

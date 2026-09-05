@@ -82,7 +82,7 @@ export function InvitationsPage() {
           دعوت‌های دریافتی
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
-          برندهایی که شما را به کمپین دعوت کرده‌اند — روی هر مورد بزنید، کمپین را
+          صاحبان کسب و کاری که شما را به کمپین دعوت کرده‌اند — روی هر مورد بزنید، کمپین را
           ببینید و پیشنهاد بفرستید.
         </p>
       </section>
@@ -103,7 +103,7 @@ export function InvitationsPage() {
         <section className="rounded-2xl border border-border bg-surface-elevated px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">هنوز دعوتی نیست</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
-            وقتی برندی شما را دعوت کند اینجا می‌آید. می‌توانید از کمپین‌های باز هم
+            وقتی صاحب کسب و کاری شما را دعوت کند اینجا می‌آید. می‌توانید از کمپین‌های باز هم
             پیشنهاد بفرستید.
           </p>
           <Link
