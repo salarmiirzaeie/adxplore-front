@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Logo } from './brand/Logo'
+import { EnamadSeal } from './EnamadSeal'
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -77,6 +78,12 @@ export function AuthLayout({
           </Link>{' '}
           را می‌پذیرید
         </p>
+
+        <div className="mt-5 flex justify-center">
+          <div className="rounded-xl bg-white p-1.5 shadow-sm">
+            <EnamadSeal />
+          </div>
+        </div>
       </div>
     </div>
   )
