@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ir.adxplore.app",
+      "sha256_cert_fingerprints": [
+        "7C:E6:9E:43:37:D6:01:76:CE:A0:93:41:D5:41:D0:9C:01:2D:2D:16:0C:29:56:92:2E:D5:AF:D8:52:FA:13:75"
+      ]
+    }
+  }
+]
