@@ -1,6 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Logo } from '../components/brand/Logo'
-import { EnamadSeal } from '../components/EnamadSeal'
 
 const SECTIONS: Array<{
   id: string
@@ -199,12 +198,6 @@ export function TermsPage() {
                 ) : null}
               </section>
             ))}
-          </div>
-        </div>
-
-        <div className="mt-8 flex justify-center">
-          <div className="rounded-xl bg-white p-1.5 shadow-sm">
-            <EnamadSeal />
           </div>
         </div>
       </div>
