@@ -11,6 +11,7 @@ import {
 import { formatLocation } from '../lib/iran-locations'
 import { formatPhoneDisplay } from '../lib/phone'
 import type { UserProfile } from '../types/api'
+import { AudienceProofGallery } from '../components/AudienceProofGallery'
 
 function ProfileField({
   label,
@@ -132,6 +133,12 @@ export function ProfilePage() {
           <InfluencerProfileView user={user} />
         )}
       </section>
+
+      {!isBrand && user.audienceProofs?.length ? (
+        <section className="mt-6">
+          <AudienceProofGallery proofs={user.audienceProofs} />
+        </section>
+      ) : null}
 
       <section className="mt-6 lg:hidden">
         <LogoutButton />

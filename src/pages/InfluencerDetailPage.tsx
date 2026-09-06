@@ -7,6 +7,7 @@ import {
   followerRangeLabel,
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
+import { AudienceProofGallery } from '../components/AudienceProofGallery'
 
 function StatCard({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
   return (
@@ -88,6 +89,12 @@ export function InfluencerDetailPage() {
           </span>
         </div>
       </section>
+
+      {influencer.audienceProofs?.length ? (
+        <div className="mb-6">
+          <AudienceProofGallery proofs={influencer.audienceProofs} />
+        </div>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="grid gap-3 sm:grid-cols-3">

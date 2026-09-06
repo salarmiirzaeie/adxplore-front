@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { requestOtp, verifyOtp } from '../api/auth'
-import { deleteMyPhoto, getMe, getPublicProfile, updateMe, uploadMyPhoto } from '../api/users'
+import { deleteMyPhoto, getMe, getPublicProfile, updateMe, uploadAudienceProofs, deleteAudienceProof, uploadMyPhoto } from '../api/users'
 import {
   clearAccessToken,
   clearLoginPhone,
@@ -97,6 +97,7 @@ export function useVerifyOtp() {
         goal: data.user.goal,
         businessSize: data.user.businessSize,
         followerRange: data.user.followerRange,
+        audienceProofs: data.user.audienceProofs ?? [],
         approvalStatus: data.user.approvalStatus ?? null,
         canAccessPanel: data.user.canAccessPanel,
         canSendOffers: data.user.canSendOffers,
@@ -147,6 +148,28 @@ export function useDeletePhoto() {
 
   return useMutation({
     mutationFn: () => deleteMyPhoto(),
+    onSuccess: (user) => {
+      queryClient.setQueryData(meQueryKey, user)
+    },
+  })
+}
+
+export function useUploadAudienceProofs() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (files: File[]) => uploadAudienceProofs(files),
+    onSuccess: (user) => {
+      queryClient.setQueryData(meQueryKey, user)
+    },
+  })
+}
+
+export function useDeleteAudienceProof() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (proofId: string) => deleteAudienceProof(proofId),
     onSuccess: (user) => {
       queryClient.setQueryData(meQueryKey, user)
     },

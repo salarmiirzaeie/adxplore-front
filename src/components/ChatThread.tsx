@@ -6,6 +6,7 @@ import { ChatDeliverableCard, ChatSystemMessage } from './ChatEventCards'
 import { MediaPreview } from './MediaPreview'
 import { DealChatActions } from './DealChatActions'
 import { OfferProposalCard } from './OfferProposalCard'
+import { AudienceProofGallery } from './AudienceProofGallery'
 import { Avatar } from './ui/Avatar'
 import { Button } from './ui/Button'
 import { ConfirmModal } from './ui/ConfirmModal'
@@ -294,6 +295,22 @@ export function ChatThread({ offerId }: ChatThreadProps) {
           }
           onUpdated={refreshTimeline}
         />
+
+        {isBrand && (peer?.bio || peer?.audienceProofs?.length) ? (
+          <section className="mx-auto mt-3 w-full max-w-md rounded-2xl border border-border bg-surface-elevated p-3 sm:p-4">
+            <p className="text-[11px] font-bold text-purple">درباره بلاگر</p>
+            {peer?.bio ? (
+              <p className="mt-2 text-sm leading-7 text-navy whitespace-pre-wrap">
+                {peer.bio}
+              </p>
+            ) : null}
+            {peer?.audienceProofs?.length ? (
+              <div className="mt-3">
+                <AudienceProofGallery proofs={peer.audienceProofs} compact />
+              </div>
+            ) : null}
+          </section>
+        ) : null}
 
         <div className="mt-3 space-y-3">
         {loadingMsgs ? (

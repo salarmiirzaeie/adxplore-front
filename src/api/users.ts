@@ -35,6 +35,24 @@ export async function deleteMyPhoto(): Promise<UserProfile> {
   return data
 }
 
+export async function uploadAudienceProofs(files: File[]): Promise<UserProfile> {
+  const form = new FormData()
+  for (const file of files) form.append('files', file)
+  const { data } = await api.post<UserProfile>(
+    '/v1/users/me/audience-proofs',
+    form,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  )
+  return data
+}
+
+export async function deleteAudienceProof(proofId: string): Promise<UserProfile> {
+  const { data } = await api.delete<UserProfile>(
+    `/v1/users/me/audience-proofs/${proofId}`,
+  )
+  return data
+}
+
 export async function getInstagramApproval(): Promise<InstagramApprovalResponse> {
   const { data } = await api.get<InstagramApprovalResponse>(
     '/v1/users/me/instagram-approval',

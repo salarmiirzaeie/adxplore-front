@@ -9,6 +9,7 @@ import {
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
 import type { PublicProfile } from '../types/api'
+import { AudienceProofGallery } from '../components/AudienceProofGallery'
 
 function Field({
   label,
@@ -144,6 +145,12 @@ export function PublicProfilePage() {
       <section className="card-elevated rounded-2xl px-5 py-2 sm:px-7">
         <ProfileBody profile={profile} />
       </section>
+
+      {!isBrand && profile.audienceProofs?.length ? (
+        <section className="mt-6">
+          <AudienceProofGallery proofs={profile.audienceProofs} />
+        </section>
+      ) : null}
     </div>
   )
 }

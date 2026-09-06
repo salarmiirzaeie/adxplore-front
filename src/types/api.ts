@@ -68,6 +68,7 @@ export interface AuthUser {
   goal: BrandGoal | null
   businessSize: BusinessSize | null
   followerRange: FollowerRange | null
+  audienceProofs?: AudienceProof[]
   approvalStatus?: InfluencerApprovalStatus | null
   canAccessPanel?: boolean
   canSendOffers?: boolean
@@ -80,6 +81,12 @@ export interface VerifyOtpResponse {
   expiresIn: string
   isNewUser: boolean
   user: AuthUser
+}
+
+export interface AudienceProof {
+  id: string
+  url: string
+  sortOrder: number
 }
 
 export interface UserProfile {
@@ -97,6 +104,7 @@ export interface UserProfile {
   goal: BrandGoal | null
   businessSize: BusinessSize | null
   followerRange: FollowerRange | null
+  audienceProofs?: AudienceProof[]
   approvalStatus?: InfluencerApprovalStatus | null
   canAccessPanel?: boolean
   canSendOffers?: boolean
@@ -119,6 +127,7 @@ export interface PublicProfile {
   goal: BrandGoal | null
   businessSize: BusinessSize | null
   followerRange: FollowerRange | null
+  audienceProofs?: AudienceProof[]
 }
 
 export interface UpdateProfileBody {
@@ -273,6 +282,7 @@ export interface InfluencerCard {
   province: string | null
   followerRange: FollowerRange
   bio: string | null
+  audienceProofs?: AudienceProof[]
 }
 
 export interface ListInfluencersParams {
@@ -530,6 +540,7 @@ export interface OfferParty {
   province: string | null
   followerRange: FollowerRange | null
   bio: string | null
+  audienceProofs?: AudienceProof[]
 }
 
 export interface InvitationCampaign {

@@ -63,7 +63,11 @@ export const influencerProfileSchema = z
       .trim()
       .min(2, 'آیدی اینستاگرام را وارد کنید')
       .max(200, 'آدرس حداکثر ۲۰۰ کاراکتر باشد'),
-    bio: z.string().max(1000, 'معرفی حداکثر ۱۰۰۰ کاراکتر باشد'),
+    bio: z
+      .string()
+      .trim()
+      .min(20, 'حداقل ۲۰ کاراکتر درباره خودتان بنویسید')
+      .max(1000, 'معرفی حداکثر ۱۰۰۰ کاراکتر باشد'),
     categories: z
       .array(categoryEnum, { error: 'حداقل یک دسته انتخاب کنید' })
       .min(1, 'حداقل یک دسته انتخاب کنید'),
@@ -166,8 +170,8 @@ export function InfluencerProfileForm({
         />
         <Textarea
           label="درباره شما"
-          placeholder="چند خط درباره خودتان، سبک محتوا و مخاطب‌تان بنویسید."
-          hint="اختیاری — در پروفایل عمومی نمایش داده می‌شود"
+          placeholder="سبک محتوا، مخاطب پیج و چرا یک برند باید با شما کار کند."
+          hint="برای صاحب کسب‌وکار نمایش داده می‌شود"
           maxLength={1000}
           error={errors.bio?.message}
           {...register('bio')}

@@ -52,6 +52,11 @@ function InfluencerCardView({ influencer }: { influencer: InfluencerCard }) {
         <span className="rounded-lg bg-surface px-2.5 py-1">
           {formatLocation(influencer.city, influencer.province)}
         </span>
+        {influencer.audienceProofs?.length ? (
+          <span className="rounded-lg bg-purple-soft/60 px-2.5 py-1 text-purple-deep">
+            آنالیتیکس پیج
+          </span>
+        ) : null}
       </div>
       <p className="mt-4 text-xs font-bold text-purple">مشاهده پروفایل و دعوت</p>
     </Link>
