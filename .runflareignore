@@ -40,7 +40,7 @@ pnpm-debug.log*
 *.tsbuildinfo
 
 # Android TWA is built in Android Studio — never upload it with the web app
-twa/
+twa
 
 # Firebase Admin private keys — never ship in the APK or git
 *firebase-adminsdk*.json
