@@ -1,31 +1,26 @@
-import { useMemo, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
-import { Avatar } from '../components/ui/Avatar'
-import { IranCitySelect } from '../components/IranCitySelect'
-import { useMe } from '../hooks/useAuth'
-import { useBrowseCampaigns, useCampaigns } from '../hooks/useCampaigns'
+import { useMemo, useState } from "react";
+import { Link, Navigate } from "react-router-dom";
+import { Avatar } from "../components/ui/Avatar";
+import { IranCitySelect } from "../components/IranCitySelect";
+import { useMe } from "../hooks/useAuth";
+import { useBrowseCampaigns, useCampaigns } from "../hooks/useCampaigns";
 import {
   BRAND_CATEGORIES,
   brandCategoriesLabel,
   campaignStatusLabel,
   deliverablesLabel,
   formatBudgetRange,
-} from '../lib/brand-options'
-import { formatLocation } from '../lib/iran-locations'
-import { ApprovalWaitBanner } from '../components/ApprovalWaitBanner'
-import type {
-  BrandCategory,
-  BrowseCampaignsParams,
-  Campaign,
-  CampaignStatus,
-} from '../types/api'
+} from "../lib/brand-options";
+import { formatLocation } from "../lib/iran-locations";
+import { ApprovalWaitBanner } from "../components/ApprovalWaitBanner";
+import type { BrandCategory, BrowseCampaignsParams, Campaign, CampaignStatus } from "../types/api";
 
 function statusClass(status: CampaignStatus) {
-  if (status === 'OPEN' || status === 'PENDING_REVIEW') {
-    return 'bg-emerald-50 text-emerald-700'
+  if (status === "OPEN" || status === "PENDING_REVIEW") {
+    return "bg-emerald-50 text-emerald-700";
   }
-  if (status === 'CLOSED') return 'bg-slate-100 text-slate-600'
-  return 'bg-amber-50 text-amber-700'
+  if (status === "CLOSED") return "bg-slate-100 text-slate-600";
+  return "bg-amber-50 text-amber-700";
 }
 
 function PencilIcon({ className }: { className?: string }) {
@@ -43,39 +38,31 @@ function PencilIcon({ className }: { className?: string }) {
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
     </svg>
-  )
+  );
 }
 
 function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
-  const cover = campaign.images?.[0]?.url
+  const cover = campaign.images?.[0]?.url;
   return (
     <article className="card-elevated overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md">
       <Link to={`/app/campaigns/${campaign.id}`} className="block">
-        {cover ? (
-          <img src={cover} alt="" className="h-36 w-full object-cover" />
-        ) : null}
+        {cover ? <img src={cover} alt="" className="h-36 w-full object-cover" /> : null}
         <div className="px-5 pt-5">
           <div className="mb-3 flex items-start justify-between gap-3">
             <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
-            <span
-              className={`shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold ${statusClass(campaign.status)}`}
-            >
+            <span className={`shrink-0 rounded-lg px-2 py-1 text-[11px] font-bold ${statusClass(campaign.status)}`}>
               {campaignStatusLabel(campaign.status)}
             </span>
           </div>
           <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
           {campaign.rejectionReason ? (
-            <p className="mt-2 line-clamp-2 text-xs leading-5 text-red-600">
-              {campaign.rejectionReason}
-            </p>
+            <p className="mt-2 line-clamp-2 text-xs leading-5 text-red-600">{campaign.rejectionReason}</p>
           ) : null}
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
             <span className="rounded-lg bg-surface px-2 py-1">
               {brandCategoriesLabel(campaign.categories, campaign.category)}
             </span>
-            <span className="rounded-lg bg-surface px-2 py-1">
-              {formatLocation(campaign.city, campaign.province)}
-            </span>
+            <span className="rounded-lg bg-surface px-2 py-1">{formatLocation(campaign.city, campaign.province)}</span>
             <span className="rounded-lg bg-surface px-2 py-1">
               {deliverablesLabel(campaign.deliverables, campaign.deliverable)}
             </span>
@@ -92,33 +79,25 @@ function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
         </Link>
       </div>
     </article>
-  )
+  );
 }
 
 function MarketplaceCampaignCard({ campaign }: { campaign: Campaign }) {
-  const cover = campaign.images?.[0]?.url
-  const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax)
+  const cover = campaign.images?.[0]?.url;
+  const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax);
 
   return (
     <Link
       to={`/app/campaigns/${campaign.id}`}
       className="card-elevated block overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md"
     >
-      {cover ? (
-        <img src={cover} alt="" className="h-36 w-full object-cover" />
-      ) : null}
+      {cover ? <img src={cover} alt="" className="h-36 w-full object-cover" /> : null}
       <div className="px-5 py-5">
         <div className="mb-3 flex items-start gap-3">
-          <Avatar
-            src={campaign.brand?.photoUrl}
-            name={campaign.brand?.name}
-            size="sm"
-          />
+          <Avatar src={campaign.brand?.photoUrl} name={campaign.brand?.name} size="sm" />
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
-            <p className="mt-0.5 text-xs font-semibold text-muted">
-              {campaign.brand?.name ?? 'صاحب کسب و کار'}
-            </p>
+            <p className="mt-0.5 text-xs font-semibold text-muted">{campaign.brand?.name ?? "صاحب کسب و کار"}</p>
           </div>
         </div>
         <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
@@ -126,9 +105,7 @@ function MarketplaceCampaignCard({ campaign }: { campaign: Campaign }) {
           <span className="rounded-lg bg-surface px-2 py-1">
             {brandCategoriesLabel(campaign.categories, campaign.category)}
           </span>
-          <span className="rounded-lg bg-surface px-2 py-1">
-            {formatLocation(campaign.city, campaign.province)}
-          </span>
+          <span className="rounded-lg bg-surface px-2 py-1">{formatLocation(campaign.city, campaign.province)}</span>
           <span className="rounded-lg bg-surface px-2 py-1">
             {deliverablesLabel(campaign.deliverables, campaign.deliverable)}
           </span>
@@ -140,23 +117,19 @@ function MarketplaceCampaignCard({ campaign }: { campaign: Campaign }) {
         </div>
       </div>
     </Link>
-  )
+  );
 }
 
 function BrandCampaigns() {
-  const { data: campaigns, isLoading, isError } = useCampaigns(true)
+  const { data: campaigns, isLoading, isError } = useCampaigns(true);
 
   return (
     <div>
       <section className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-sm font-medium text-purple">کمپین‌های من</p>
-          <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
-            مدیریت کمپین‌ها
-          </h1>
-          <p className="mt-2 text-sm text-muted">
-            کمپین بسازید، بلاگر دعوت کنید و پیشنهادها را ببینید.
-          </p>
+          <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">مدیریت کمپین‌ها</h1>
+          <p className="mt-2 text-sm text-muted">کمپین بسازید، بلاگر دعوت کنید و پیشنهادها را ببینید.</p>
         </div>
         <Link
           to="/app/campaigns/new"
@@ -184,10 +157,7 @@ function BrandCampaigns() {
           <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
             اولین کمپین را بسازید و بلاگرهای مناسب را دعوت کنید.
           </p>
-          <Link
-            to="/app/campaigns/new"
-            className="btn-primary mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold"
-          >
+          <Link to="/app/campaigns/new" className="btn-primary mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold">
             ساخت کمپین
           </Link>
         </section>
@@ -201,59 +171,52 @@ function BrandCampaigns() {
         </div>
       ) : null}
     </div>
-  )
+  );
 }
 
 function InfluencerCampaigns() {
-  const { data: user } = useMe()
-  const [category, setCategory] = useState<BrandCategory | ''>('')
-  const [province, setProvince] = useState('')
-  const [city, setCity] = useState('')
-  const [q, setQ] = useState('')
-  const [searchInput, setSearchInput] = useState('')
-  const [forMe, setForMe] = useState(false)
-  const [invited, setInvited] = useState(false)
+  const { data: user } = useMe();
+  const [category, setCategory] = useState<BrandCategory | "">("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  const [q, setQ] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [forMe, setForMe] = useState(false);
+  const [invited, setInvited] = useState(false);
 
   const params = useMemo<BrowseCampaignsParams>(() => {
-    const next: BrowseCampaignsParams = {}
-    if (category) next.category = category
-    if (city) next.city = city
-    if (province) next.province = province
-    if (q.trim()) next.q = q.trim()
-    if (forMe) next.forMe = true
-    if (invited) next.invited = true
-    return next
-  }, [category, city, province, q, forMe, invited])
+    const next: BrowseCampaignsParams = {};
+    if (category) next.category = category;
+    if (city) next.city = city;
+    if (province) next.province = province;
+    if (q.trim()) next.q = q.trim();
+    if (forMe) next.forMe = true;
+    if (invited) next.invited = true;
+    return next;
+  }, [category, city, province, q, forMe, invited]);
 
-  const { data: campaigns, isLoading, isError, isFetching } = useBrowseCampaigns(
-    params,
-    true,
-  )
+  const { data: campaigns, isLoading, isError, isFetching } = useBrowseCampaigns(params, true);
 
   return (
     <div>
       <ApprovalWaitBanner />
       <section className="mb-6 sm:mb-8">
         <p className="mb-1 text-sm font-medium text-purple">کمپین‌ها</p>
-        <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
-          کمپین‌های باز
-        </h1>
-        <p className="mt-2 text-sm text-muted">
-          جستجو و فیلتر کنید، سپس پیشنهاد قیمت بفرستید.
-        </p>
+        <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">کمپین‌های باز</h1>
+        <p className="mt-2 text-sm text-muted">جستجو و فیلتر کنید، سپس پیشنهاد قیمت بفرستید.</p>
       </section>
 
       <section className="card-elevated mb-5 rounded-2xl px-4 py-4 sm:px-5">
         <form
           className="mb-3"
           onSubmit={(e) => {
-            e.preventDefault()
-            setQ(searchInput)
+            e.preventDefault();
+            setQ(searchInput);
           }}
         >
           <input
             className="input-brand w-full py-2.5 text-sm"
-            placeholder="جستجو در عنوان یا بریف…"
+            placeholder="جستجو در عنوان یا توضیحات کمپین…"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -262,7 +225,7 @@ function InfluencerCampaigns() {
           <select
             className="input-brand py-2.5 text-sm"
             value={category}
-            onChange={(e) => setCategory(e.target.value as BrandCategory | '')}
+            onChange={(e) => setCategory(e.target.value as BrandCategory | "")}
           >
             <option value="">همه دسته‌ها</option>
             {BRAND_CATEGORIES.map((c) => (
@@ -278,8 +241,8 @@ function InfluencerCampaigns() {
             province={province}
             city={city}
             onChange={({ province: nextProvince, city: nextCity }) => {
-              setProvince(nextProvince)
-              setCity(nextCity)
+              setProvince(nextProvince);
+              setCity(nextCity);
             }}
           />
         </div>
@@ -288,21 +251,17 @@ function InfluencerCampaigns() {
             type="button"
             onClick={() => setForMe((v) => !v)}
             className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
-              forMe
-                ? 'bg-purple text-white'
-                : 'bg-surface text-navy-muted hover:bg-purple-soft/50'
+              forMe ? "bg-purple text-white" : "bg-surface text-navy-muted hover:bg-purple-soft/50"
             }`}
           >
             مناسب من
-            {user?.category || user?.city ? '' : ' (پروفایل ناقص)'}
+            {user?.category || user?.city ? "" : " (پروفایل ناقص)"}
           </button>
           <button
             type="button"
             onClick={() => setInvited((v) => !v)}
             className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
-              invited
-                ? 'bg-purple text-white'
-                : 'bg-surface text-navy-muted hover:bg-purple-soft/50'
+              invited ? "bg-purple text-white" : "bg-surface text-navy-muted hover:bg-purple-soft/50"
             }`}
           >
             دعوت‌شده به من
@@ -342,13 +301,13 @@ function InfluencerCampaigns() {
         </div>
       ) : null}
     </div>
-  )
+  );
 }
 
 export function CampaignsPage() {
-  const { data: user } = useMe()
-  if (!user) return null
-  if (user.role === 'BRAND') return <BrandCampaigns />
-  if (user.role === 'INFLUENCER') return <InfluencerCampaigns />
-  return <Navigate to="/app" replace />
+  const { data: user } = useMe();
+  if (!user) return null;
+  if (user.role === "BRAND") return <BrandCampaigns />;
+  if (user.role === "INFLUENCER") return <InfluencerCampaigns />;
+  return <Navigate to="/app" replace />;
 }

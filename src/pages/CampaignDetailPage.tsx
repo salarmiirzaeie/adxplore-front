@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react'
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
-import { getApiErrorMessage } from '../api/client'
-import { CampaignImageGallery } from '../components/CampaignImageGallery'
-import { InviteInfluencersModal } from '../components/InviteInfluencersModal'
-import { Avatar } from '../components/ui/Avatar'
-import { Button } from '../components/ui/Button'
-import { ConfirmModal } from '../components/ui/ConfirmModal'
-import { useMe } from '../hooks/useAuth'
-import { useCampaign, useUpdateCampaign } from '../hooks/useCampaigns'
-import { useDeals } from '../hooks/useDeals'
-import { useInvitations } from '../hooks/useInvitations'
-import { useOffers } from '../hooks/useOffers'
+import { useEffect, useState } from "react";
+import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
+import { getApiErrorMessage } from "../api/client";
+import { CampaignImageGallery } from "../components/CampaignImageGallery";
+import { InviteInfluencersModal } from "../components/InviteInfluencersModal";
+import { Avatar } from "../components/ui/Avatar";
+import { Button } from "../components/ui/Button";
+import { ConfirmModal } from "../components/ui/ConfirmModal";
+import { useMe } from "../hooks/useAuth";
+import { useCampaign, useUpdateCampaign } from "../hooks/useCampaigns";
+import { useDeals } from "../hooks/useDeals";
+import { useInvitations } from "../hooks/useInvitations";
+import { useOffers } from "../hooks/useOffers";
 import {
   brandCategoriesLabel,
   campaignStatusLabel,
@@ -18,11 +18,11 @@ import {
   formatBudgetRange,
   isCampaignAcceptingInvites,
   offerPipelineLabel,
-} from '../lib/brand-options'
-import { formatLocation } from '../lib/iran-locations'
-import { canSendOffers } from '../lib/auth-storage'
+} from "../lib/brand-options";
+import { formatLocation } from "../lib/iran-locations";
+import { canSendOffers } from "../lib/auth-storage";
 
-function DetailRow({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
+function DetailRow({ label, value, dir }: { label: string; value: string; dir?: "ltr" }) {
   return (
     <div className="border-b border-border py-4 last:border-b-0">
       <dt className="text-xs font-semibold text-muted">{label}</dt>
@@ -30,10 +30,10 @@ function DetailRow({ label, value, dir }: { label: string; value: string; dir?: 
         {value}
       </dd>
     </div>
-  )
+  );
 }
 
-function MetaChip({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
+function MetaChip({ label, value, dir }: { label: string; value: string; dir?: "ltr" }) {
   return (
     <div className="rounded-xl border border-border bg-surface-elevated px-4 py-3">
       <p className="text-[11px] font-semibold text-muted">{label}</p>
@@ -41,7 +41,7 @@ function MetaChip({ label, value, dir }: { label: string; value: string; dir?: '
         {value}
       </p>
     </div>
-  )
+  );
 }
 
 function ChevronIcon() {
@@ -58,75 +58,54 @@ function ChevronIcon() {
     >
       <path d="M15 18l-6-6 6-6" />
     </svg>
-  )
+  );
 }
 
-function CampaignNavCard({
-  to,
-  count,
-  label,
-  hint,
-}: {
-  to: string
-  count: number
-  label: string
-  hint: string
-}) {
-  const hasItems = count > 0
+function CampaignNavCard({ to, count, label, hint }: { to: string; count: number; label: string; hint: string }) {
+  const hasItems = count > 0;
   return (
     <Link
       to={to}
       className={`flex items-center gap-3 rounded-2xl border px-4 py-4 transition hover:border-purple/30 ${
-        hasItems
-          ? 'border-purple/20 bg-purple-soft/25'
-          : 'border-border bg-surface-elevated hover:bg-surface'
+        hasItems ? "border-purple/20 bg-purple-soft/25" : "border-border bg-surface-elevated hover:bg-surface"
       }`}
     >
       <div className="min-w-0 flex-1">
-        <p
-          className={`text-2xl font-extrabold tabular-nums ${
-            hasItems ? 'text-purple-deep' : 'text-navy'
-          }`}
-        >
-          {count.toLocaleString('fa-IR')}
+        <p className={`text-2xl font-extrabold tabular-nums ${hasItems ? "text-purple-deep" : "text-navy"}`}>
+          {count.toLocaleString("fa-IR")}
         </p>
         <p className="mt-0.5 text-sm font-extrabold text-navy">{label}</p>
         <p className="mt-1 text-xs text-muted">{hint}</p>
       </div>
       <ChevronIcon />
     </Link>
-  )
+  );
 }
 
 function BrandCampaignDetail({ id }: { id: string }) {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [inviteOpen, setInviteOpen] = useState(false)
-  const [confirm, setConfirm] = useState<'open' | 'close' | 'reopen' | null>(
-    null,
-  )
-  const { data: campaign, isLoading, isError } = useCampaign(id, true)
-  const update = useUpdateCampaign(id)
-  const { data: invitations } = useInvitations(id, true)
-  const { data: offers } = useOffers(id, true)
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [confirm, setConfirm] = useState<"open" | "close" | "reopen" | null>(null);
+  const { data: campaign, isLoading, isError } = useCampaign(id, true);
+  const update = useUpdateCampaign(id);
+  const { data: invitations } = useInvitations(id, true);
+  const { data: offers } = useOffers(id, true);
 
   useEffect(() => {
-    if (
-      searchParams.get('invite') === '1' &&
-      isCampaignAcceptingInvites(campaign?.status)
-    ) {
-      setInviteOpen(true)
-      const next = new URLSearchParams(searchParams)
-      next.delete('invite')
-      setSearchParams(next, { replace: true })
+    if (searchParams.get("invite") === "1" && isCampaignAcceptingInvites(campaign?.status)) {
+      setInviteOpen(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete("invite");
+      setSearchParams(next, { replace: true });
     }
-  }, [campaign?.status, searchParams, setSearchParams])
+  }, [campaign?.status, searchParams, setSearchParams]);
 
   if (isLoading) {
     return (
       <div className="flex justify-center py-24">
         <span className="size-8 animate-spin rounded-full border-2 border-purple border-t-transparent" />
       </div>
-    )
+    );
   }
 
   if (isError || !campaign) {
@@ -137,11 +116,11 @@ function BrandCampaignDetail({ id }: { id: string }) {
           بازگشت به کمپین‌ها
         </Link>
       </div>
-    )
+    );
   }
 
-  const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ?? '—'
-  const images = campaign.images ?? []
+  const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ?? "—";
+  const images = campaign.images ?? [];
 
   return (
     <div>
@@ -154,12 +133,8 @@ function BrandCampaignDetail({ id }: { id: string }) {
         </Link>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="mb-1 text-sm font-medium text-purple">
-              {campaignStatusLabel(campaign.status)}
-            </p>
-            <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">
-              {campaign.title}
-            </h1>
+            <p className="mb-1 text-sm font-medium text-purple">{campaignStatusLabel(campaign.status)}</p>
+            <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">{campaign.title}</h1>
           </div>
           <Link
             to={`/app/campaigns/${campaign.id}/edit`}
@@ -178,30 +153,14 @@ function BrandCampaignDetail({ id }: { id: string }) {
 
       <section className="mb-4">
         <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <MetaChip
-            label="دسته"
-            value={
-              brandCategoriesLabel(campaign.categories, campaign.category) ?? '—'
-            }
-          />
-          <MetaChip
-            label="شهر"
-            value={formatLocation(campaign.city, campaign.province) ?? '—'}
-          />
-          <MetaChip
-            label="نوع محتوا"
-            value={
-              deliverablesLabel(campaign.deliverables, campaign.deliverable) ??
-              '—'
-            }
-          />
+          <MetaChip label="دسته" value={brandCategoriesLabel(campaign.categories, campaign.category) ?? "—"} />
+          <MetaChip label="شهر" value={formatLocation(campaign.city, campaign.province) ?? "—"} />
+          <MetaChip label="نوع محتوا" value={deliverablesLabel(campaign.deliverables, campaign.deliverable) ?? "—"} />
           <MetaChip label="بودجه" value={budget} dir="ltr" />
         </div>
         <div className="card-elevated rounded-2xl px-5 py-5 sm:px-7">
-          <p className="text-xs font-semibold text-muted">بریف</p>
-          <p className="mt-2 text-sm leading-7 text-navy whitespace-pre-wrap">
-            {campaign.brief}
-          </p>
+          <p className="text-xs font-semibold text-muted">توضیحات کمپین</p>
+          <p className="mt-2 text-sm leading-7 text-navy whitespace-pre-wrap">{campaign.brief}</p>
         </div>
       </section>
 
@@ -213,7 +172,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
 
       {update.isError ? (
         <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-600">
-          {getApiErrorMessage(update.error, 'به‌روزرسانی کمپین ناموفق بود')}
+          {getApiErrorMessage(update.error, "به‌روزرسانی کمپین ناموفق بود")}
         </p>
       ) : null}
 
@@ -233,32 +192,21 @@ function BrandCampaignDetail({ id }: { id: string }) {
       </div>
 
       <div className="mb-8 flex flex-col gap-3 sm:flex-row">
-        {campaign.status === 'DRAFT' ? (
-          <Button
-            disabled={update.isPending}
-            onClick={() => setConfirm('open')}
-          >
+        {campaign.status === "DRAFT" ? (
+          <Button disabled={update.isPending} onClick={() => setConfirm("open")}>
             فعال‌سازی و دعوت
           </Button>
         ) : null}
         {isCampaignAcceptingInvites(campaign.status) ? (
           <>
             <Button onClick={() => setInviteOpen(true)}>دعوت بلاگر</Button>
-            <Button
-              variant="outline"
-              disabled={update.isPending}
-              onClick={() => setConfirm('close')}
-            >
+            <Button variant="outline" disabled={update.isPending} onClick={() => setConfirm("close")}>
               بستن کمپین
             </Button>
           </>
         ) : null}
-        {campaign.status === 'CLOSED' ? (
-          <Button
-            variant="outline"
-            disabled={update.isPending}
-            onClick={() => setConfirm('reopen')}
-          >
+        {campaign.status === "CLOSED" ? (
+          <Button variant="outline" disabled={update.isPending} onClick={() => setConfirm("reopen")}>
             بازگشایی کمپین
           </Button>
         ) : null}
@@ -271,91 +219,69 @@ function BrandCampaignDetail({ id }: { id: string }) {
         onClose={() => setInviteOpen(false)}
       />
       <ConfirmModal
-        open={confirm === 'open'}
+        open={confirm === "open"}
         title="فعال‌سازی کمپین؟"
         description="کمپین برای بلاگرها قابل مشاهده می‌شود و می‌توانید دعوت بفرستید."
         confirmLabel="فعال کن"
         loading={update.isPending}
-        error={
-          update.isError
-            ? getApiErrorMessage(update.error, 'به‌روزرسانی کمپین ناموفق بود')
-            : null
-        }
+        error={update.isError ? getApiErrorMessage(update.error, "به‌روزرسانی کمپین ناموفق بود") : null}
         onConfirm={() =>
           update.mutate(
-            { status: 'OPEN' },
+            { status: "OPEN" },
             {
               onSuccess: () => {
-                setConfirm(null)
-                setInviteOpen(true)
+                setConfirm(null);
+                setInviteOpen(true);
               },
             },
           )
         }
         onClose={() => {
-          if (!update.isPending) setConfirm(null)
+          if (!update.isPending) setConfirm(null);
         }}
       />
       <ConfirmModal
-        open={confirm === 'close'}
+        open={confirm === "close"}
         title="بستن کمپین؟"
         description="کمپین از لیست کمپین‌های باز حذف می‌شود و پیشنهاد جدید نمی‌پذیرد."
         confirmLabel="بستن کمپین"
         tone="danger"
         loading={update.isPending}
-        error={
-          update.isError
-            ? getApiErrorMessage(update.error, 'به‌روزرسانی کمپین ناموفق بود')
-            : null
-        }
-        onConfirm={() =>
-          update.mutate(
-            { status: 'CLOSED' },
-            { onSuccess: () => setConfirm(null) },
-          )
-        }
+        error={update.isError ? getApiErrorMessage(update.error, "به‌روزرسانی کمپین ناموفق بود") : null}
+        onConfirm={() => update.mutate({ status: "CLOSED" }, { onSuccess: () => setConfirm(null) })}
         onClose={() => {
-          if (!update.isPending) setConfirm(null)
+          if (!update.isPending) setConfirm(null);
         }}
       />
       <ConfirmModal
-        open={confirm === 'reopen'}
+        open={confirm === "reopen"}
         title="بازگشایی کمپین؟"
         description="کمپین دوباره برای بلاگرها باز می‌شود."
         confirmLabel="بازگشایی"
         loading={update.isPending}
-        error={
-          update.isError
-            ? getApiErrorMessage(update.error, 'به‌روزرسانی کمپین ناموفق بود')
-            : null
-        }
-        onConfirm={() =>
-          update.mutate(
-            { status: 'OPEN' },
-            { onSuccess: () => setConfirm(null) },
-          )
-        }
+        error={update.isError ? getApiErrorMessage(update.error, "به‌روزرسانی کمپین ناموفق بود") : null}
+        onConfirm={() => update.mutate({ status: "OPEN" }, { onSuccess: () => setConfirm(null) })}
         onClose={() => {
-          if (!update.isPending) setConfirm(null)
+          if (!update.isPending) setConfirm(null);
         }}
       />
     </div>
-  )
+  );
 }
 
 function InfluencerCampaignDetail({ id }: { id: string }) {
-  const { data: user } = useMe()
-  const { data: campaign, isLoading, isError } = useCampaign(id, true)
-  const { data: invitations } = useInvitations(undefined, true)
-  const { data: offers, isLoading: offersLoading } = useOffers(id, true)
-  const { data: deals } = useDeals(undefined, true)
+  const { data: user } = useMe();
+  const { data: campaign, isLoading, isError } = useCampaign(id, true);
+  const { data: invitations } = useInvitations(undefined, true);
+  const { data: offers, isLoading: offersLoading } = useOffers(id, true);
+  const { data: deals } = useDeals(undefined, true);
 
   if (isLoading || offersLoading) {
     return (
       <div className="flex justify-center py-24">
         <span className="size-8 animate-spin rounded-full border-2 border-purple border-t-transparent" />
       </div>
-    )
+    );
   }
 
   if (isError || !campaign) {
@@ -366,33 +292,28 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
           بازگشت به کمپین‌ها
         </Link>
       </div>
-    )
+    );
   }
 
-  const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ?? '—'
-  const cover = campaign.images?.[0]?.url
-  const invite = invitations?.find(
-    (i) => i.campaignId === id && i.status === 'PENDING',
-  )
-  const existingOffer = offers?.[0]
-  const relatedDeal = existingOffer
-    ? deals?.find((d) => d.offerId === existingOffer.id)
-    : undefined
-  const offerHref = existingOffer ? `/app/messages/${existingOffer.id}` : null
+  const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ?? "—";
+  const cover = campaign.images?.[0]?.url;
+  const invite = invitations?.find((i) => i.campaignId === id && i.status === "PENDING");
+  const existingOffer = offers?.[0];
+  const relatedDeal = existingOffer ? deals?.find((d) => d.offerId === existingOffer.id) : undefined;
+  const offerHref = existingOffer ? `/app/messages/${existingOffer.id}` : null;
 
   return (
     <div>
       <section className="mb-6 sm:mb-8">
         <Link
-          to={invite ? '/app/invitations' : '/app/campaigns'}
+          to={invite ? "/app/invitations" : "/app/campaigns"}
           className="mb-3 inline-block text-sm font-medium text-muted transition hover:text-purple"
         >
-          ← {invite ? 'بازگشت به دعوت‌ها' : 'بازگشت به کمپین‌ها'}
+          ← {invite ? "بازگشت به دعوت‌ها" : "بازگشت به کمپین‌ها"}
         </Link>
         {existingOffer ? (
           <span className="mb-2 inline-block rounded-lg bg-purple-soft/60 px-2 py-1 text-[11px] font-bold text-purple-deep">
-            پیشنهاد ارسال شده ·{' '}
-            {offerPipelineLabel(existingOffer.status, relatedDeal?.status)}
+            پیشنهاد ارسال شده · {offerPipelineLabel(existingOffer.status, relatedDeal?.status)}
           </span>
         ) : invite ? (
           <span className="mb-2 inline-block rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-700">
@@ -405,17 +326,11 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
             to={`/app/profiles/${campaign.brandId}`}
             className="flex min-w-0 items-center gap-3 rounded-xl transition hover:opacity-80"
           >
-            <Avatar
-              src={campaign.brand?.photoUrl}
-              name={campaign.brand?.name}
-              size="md"
-            />
+            <Avatar src={campaign.brand?.photoUrl} name={campaign.brand?.name} size="md" />
             <div>
-              <p className="text-sm font-bold text-navy">
-                {campaign.brand?.name ?? 'صاحب کسب و کار'}
-              </p>
+              <p className="text-sm font-bold text-navy">{campaign.brand?.name ?? "صاحب کسب و کار"}</p>
               <p className="text-xs text-muted">
-                {brandCategoriesLabel(campaign.categories, campaign.category)} ·{' '}
+                {brandCategoriesLabel(campaign.categories, campaign.category)} ·{" "}
                 {formatLocation(campaign.city, campaign.province)}
               </p>
             </div>
@@ -423,28 +338,14 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
         </div>
       </section>
 
-      {cover ? (
-        <img
-          src={cover}
-          alt=""
-          className="mb-4 h-48 w-full rounded-2xl object-cover"
-        />
-      ) : null}
+      {cover ? <img src={cover} alt="" className="mb-4 h-48 w-full rounded-2xl object-cover" /> : null}
 
       <section className="card-elevated mb-5 rounded-2xl px-5 py-2 sm:px-7">
         <dl>
-          <DetailRow label="بریف" value={campaign.brief} />
-          <DetailRow
-            label="نوع محتوا"
-            value={
-              deliverablesLabel(campaign.deliverables, campaign.deliverable) ??
-              '—'
-            }
-          />
+          <DetailRow label="توضیحات کمپین" value={campaign.brief} />
+          <DetailRow label="نوع محتوا" value={deliverablesLabel(campaign.deliverables, campaign.deliverable) ?? "—"} />
           <DetailRow label="بودجه" value={budget} dir="ltr" />
-          {invite?.message ? (
-            <DetailRow label="پیام دعوت" value={invite.message} />
-          ) : null}
+          {invite?.message ? <DetailRow label="پیام دعوت" value={invite.message} /> : null}
         </dl>
       </section>
 
@@ -455,12 +356,11 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
         >
           باز کردن گفتگو و پیشنهاد
         </Link>
-      ) : campaign.status === 'OPEN' && user && !canSendOffers(user) ? (
+      ) : campaign.status === "OPEN" && user && !canSendOffers(user) ? (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm leading-7 text-amber-800">
-          منتظر تأیید ادمین بمانید. پس از بررسی فالو و دایرکت می‌توانید پیشنهاد
-          بفرستید.
+          منتظر تأیید ادمین بمانید. پس از بررسی فالو و دایرکت می‌توانید پیشنهاد بفرستید.
         </p>
-      ) : campaign.status === 'OPEN' ? (
+      ) : campaign.status === "OPEN" ? (
         <Link
           to={`/app/offers/new?campaignId=${campaign.id}`}
           className="btn-primary inline-flex w-full items-center justify-center rounded-xl px-4 py-3.5 text-sm font-bold"
@@ -468,20 +368,18 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
           ارسال پیشنهاد قیمت
         </Link>
       ) : (
-        <p className="rounded-xl bg-surface px-4 py-3 text-center text-sm text-muted">
-          این کمپین دیگر باز نیست.
-        </p>
+        <p className="rounded-xl bg-surface px-4 py-3 text-center text-sm text-muted">این کمپین دیگر باز نیست.</p>
       )}
     </div>
-  )
+  );
 }
 
 export function CampaignDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const { data: user } = useMe()
+  const { id } = useParams<{ id: string }>();
+  const { data: user } = useMe();
 
-  if (!user || !id) return null
-  if (user.role === 'BRAND') return <BrandCampaignDetail id={id} />
-  if (user.role === 'INFLUENCER') return <InfluencerCampaignDetail id={id} />
-  return <Navigate to="/app" replace />
+  if (!user || !id) return null;
+  if (user.role === "BRAND") return <BrandCampaignDetail id={id} />;
+  if (user.role === "INFLUENCER") return <InfluencerCampaignDetail id={id} />;
+  return <Navigate to="/app" replace />;
 }

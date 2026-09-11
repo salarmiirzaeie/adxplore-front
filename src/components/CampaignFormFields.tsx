@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode } from "react";
 import {
   Controller,
   type Control,
@@ -6,13 +6,13 @@ import {
   type UseFormRegister,
   type UseFormSetValue,
   type UseFormWatch,
-} from 'react-hook-form'
-import { IranCitySelect } from './IranCitySelect'
-import { Input } from './ui/Input'
-import { OptionGrid } from './ui/OptionGrid'
-import { Textarea } from './ui/Textarea'
-import { BRAND_CATEGORIES, DELIVERABLE_TYPES } from '../lib/brand-options'
-import type { CampaignFormValues } from '../lib/campaign-form'
+} from "react-hook-form";
+import { IranCitySelect } from "./IranCitySelect";
+import { Input } from "./ui/Input";
+import { OptionGrid } from "./ui/OptionGrid";
+import { Textarea } from "./ui/Textarea";
+import { BRAND_CATEGORIES, DELIVERABLE_TYPES } from "../lib/brand-options";
+import type { CampaignFormValues } from "../lib/campaign-form";
 
 export function CampaignFormFields({
   register,
@@ -22,12 +22,12 @@ export function CampaignFormFields({
   setValue,
   afterBrief,
 }: {
-  register: UseFormRegister<CampaignFormValues>
-  control: Control<CampaignFormValues>
-  errors: FieldErrors<CampaignFormValues>
-  watch: UseFormWatch<CampaignFormValues>
-  setValue: UseFormSetValue<CampaignFormValues>
-  afterBrief?: ReactNode
+  register: UseFormRegister<CampaignFormValues>;
+  control: Control<CampaignFormValues>;
+  errors: FieldErrors<CampaignFormValues>;
+  watch: UseFormWatch<CampaignFormValues>;
+  setValue: UseFormSetValue<CampaignFormValues>;
+  afterBrief?: ReactNode;
 }) {
   return (
     <>
@@ -35,14 +35,14 @@ export function CampaignFormFields({
         label="عنوان کمپین"
         placeholder="مثلاً لانچ محصول تابستانی"
         error={errors.title?.message}
-        {...register('title')}
+        {...register("title")}
       />
 
       <Textarea
-        label="بریف / توضیح"
+        label="توضیحات کمپین"
         placeholder="هدف کمپین، پیام کلیدی و انتظارات از بلاگر را بنویسید."
         error={errors.brief?.message}
-        {...register('brief')}
+        {...register("brief")}
       />
 
       {afterBrief}
@@ -55,9 +55,7 @@ export function CampaignFormFields({
             label="دسته"
             options={BRAND_CATEGORIES}
             value={field.value}
-            onChange={(v) =>
-              field.onChange(Array.isArray(v) ? v : v ? [v] : [])
-            }
+            onChange={(v) => field.onChange(Array.isArray(v) ? v : v ? [v] : [])}
             error={errors.categories?.message}
             multiple
           />
@@ -66,13 +64,13 @@ export function CampaignFormFields({
 
       <IranCitySelect
         allowNationwide
-        province={watch('province')}
-        city={watch('city')}
+        province={watch("province")}
+        city={watch("city")}
         provinceError={errors.province?.message}
         cityError={errors.city?.message}
         onChange={({ province, city }) => {
-          setValue('province', province, { shouldValidate: true })
-          setValue('city', city, { shouldValidate: true })
+          setValue("province", province, { shouldValidate: true });
+          setValue("city", city, { shouldValidate: true });
         }}
       />
 
@@ -84,9 +82,7 @@ export function CampaignFormFields({
             label="نوع محتوا"
             options={DELIVERABLE_TYPES}
             value={field.value}
-            onChange={(v) =>
-              field.onChange(Array.isArray(v) ? v : v ? [v] : [])
-            }
+            onChange={(v) => field.onChange(Array.isArray(v) ? v : v ? [v] : [])}
             error={errors.deliverables?.message}
             multiple
           />
@@ -102,7 +98,7 @@ export function CampaignFormFields({
           placeholder="اختیاری"
           hint="اختیاری"
           error={errors.budgetMin?.message}
-          {...register('budgetMin')}
+          {...register("budgetMin")}
         />
         <Input
           label="حداکثر بودجه (تومان)"
@@ -112,9 +108,9 @@ export function CampaignFormFields({
           placeholder="اختیاری"
           hint="اختیاری"
           error={errors.budgetMax?.message}
-          {...register('budgetMax')}
+          {...register("budgetMax")}
         />
       </div>
     </>
-  )
+  );
 }
