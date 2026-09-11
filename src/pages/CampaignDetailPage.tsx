@@ -296,7 +296,7 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
   }
 
   const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax) ?? "—";
-  const cover = campaign.images?.[0]?.url;
+  const images = campaign.images ?? [];
   const invite = invitations?.find((i) => i.campaignId === id && i.status === "PENDING");
   const existingOffer = offers?.[0];
   const relatedDeal = existingOffer ? deals?.find((d) => d.offerId === existingOffer.id) : undefined;
@@ -338,7 +338,11 @@ function InfluencerCampaignDetail({ id }: { id: string }) {
         </div>
       </section>
 
-      {cover ? <img src={cover} alt="" className="mb-4 h-48 w-full rounded-2xl object-cover" /> : null}
+      {images.length > 0 ? (
+        <div className="mb-4">
+          <CampaignImageGallery images={images} />
+        </div>
+      ) : null}
 
       <section className="card-elevated mb-5 rounded-2xl px-5 py-2 sm:px-7">
         <dl>

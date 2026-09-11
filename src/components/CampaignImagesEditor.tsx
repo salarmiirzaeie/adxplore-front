@@ -1,11 +1,14 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { getApiErrorMessage } from '../api/client'
 import {
   useDeleteCampaignImage,
+  useReorderCampaignImages,
   useUploadCampaignImages,
 } from '../hooks/useCampaigns'
 import type { CampaignImage } from '../types/api'
 import { ConfirmModal } from './ui/ConfirmModal'
+import { FullscreenButton, ImageLightbox } from './ImageLightbox'
+import { SortableImageGrid } from './SortableImageGrid'
 
 const MAX_IMAGES = 8
 
@@ -21,9 +24,15 @@ export function CampaignImagesEditor({
   const inputRef = useRef<HTMLInputElement>(null)
   const upload = useUploadCampaignImages(campaignId)
   const remove = useDeleteCampaignImage(campaignId)
+  const reorder = useReorderCampaignImages(campaignId)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
-  const remaining = MAX_IMAGES - images.length
-  const busy = upload.isPending || remove.isPending
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const sorted = useMemo(
+    () => [...images].sort((a, b) => a.sortOrder - b.sortOrder),
+    [images],
+  )
+  const remaining = MAX_IMAGES - sorted.length
+  const busy = upload.isPending || remove.isPending || reorder.isPending
 
   return (
     <section className="card-elevated rounded-2xl px-5 py-5 sm:px-7">
@@ -32,6 +41,7 @@ export function CampaignImagesEditor({
           <h2 className="text-sm font-extrabold text-navy">تصاویر کمپین</h2>
           <p className="mt-1 text-xs text-muted">
             تا {MAX_IMAGES} تصویر · JPEG، PNG یا WebP
+            {sorted.length > 1 ? ' · برای تغییر ترتیب بکشید؛ در موبایل کمی نگه دارید' : ''}
           </p>
         </div>
         {remaining > 0 ? (
@@ -46,19 +56,26 @@ export function CampaignImagesEditor({
         ) : null}
       </div>
 
-      {images.length === 0 ? (
+      {sorted.length === 0 ? (
         <p className="py-6 text-center text-sm text-muted">هنوز تصویری اضافه نشده است.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {images.map((img) => (
-            <div
-              key={img.id}
-              className="group relative overflow-hidden rounded-xl border border-border bg-surface"
-            >
+        <SortableImageGrid
+          items={sorted}
+          getId={(img) => img.id}
+          getUrl={(img) => img.url}
+          disabled={busy}
+          onReorder={(next) => reorder.mutate(next.map((img) => img.id))}
+          renderItem={(img, index) => (
+            <>
               <img
                 src={img.url}
                 alt=""
+                draggable={false}
                 className="aspect-square w-full object-cover"
+              />
+              <FullscreenButton
+                className="right-2 top-2"
+                onClick={() => setLightboxIndex(index)}
               />
               <button
                 type="button"
@@ -68,14 +85,22 @@ export function CampaignImagesEditor({
               >
                 حذف
               </button>
-            </div>
-          ))}
-        </div>
+              {index === 0 ? (
+                <span className="absolute bottom-2 right-2 rounded-lg bg-ink/70 px-2 py-1 text-[10px] font-bold text-white">
+                  کاور
+                </span>
+              ) : null}
+            </>
+          )}
+        />
       )}
 
-      {upload.isError || remove.isError ? (
+      {upload.isError || remove.isError || reorder.isError ? (
         <p className="mt-3 text-xs text-red-500">
-          {getApiErrorMessage(upload.error ?? remove.error, 'عملیات ناموفق بود')}
+          {getApiErrorMessage(
+            upload.error ?? remove.error ?? reorder.error,
+            'عملیات ناموفق بود',
+          )}
         </p>
       ) : null}
 
@@ -90,6 +115,14 @@ export function CampaignImagesEditor({
           e.target.value = ''
           if (files.length) upload.mutate(files)
         }}
+      />
+
+      <ImageLightbox
+        urls={sorted.map((img) => img.url)}
+        index={lightboxIndex ?? 0}
+        open={lightboxIndex != null}
+        onClose={() => setLightboxIndex(null)}
+        onIndexChange={setLightboxIndex}
       />
 
       <ConfirmModal

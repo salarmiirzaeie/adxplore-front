@@ -6,6 +6,7 @@ import {
   deleteCampaignImage,
   getCampaign,
   listCampaigns,
+  reorderCampaignImages,
   updateCampaign,
   uploadCampaignImages,
 } from '../api/campaigns'
@@ -13,6 +14,7 @@ import { isCampaignAcceptingInvites } from '../lib/brand-options'
 import { getAccessToken } from '../lib/auth-storage'
 import type {
   BrowseCampaignsParams,
+  Campaign,
   CreateCampaignBody,
   UpdateCampaignBody,
 } from '../types/api'
@@ -113,6 +115,44 @@ export function useDeleteCampaignImage(campaignId: string) {
 
   return useMutation({
     mutationFn: (imageId: string) => deleteCampaignImage(campaignId, imageId),
+    onSuccess: (campaign) => {
+      queryClient.setQueryData(campaignQueryKey(campaignId), campaign)
+      queryClient.invalidateQueries({ queryKey: campaignsQueryKey })
+    },
+  })
+}
+
+export function useReorderCampaignImages(campaignId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (imageIds: string[]) =>
+      reorderCampaignImages(campaignId, imageIds),
+    onMutate: async (imageIds) => {
+      await queryClient.cancelQueries({ queryKey: campaignQueryKey(campaignId) })
+      const previous = queryClient.getQueryData<Campaign>(
+        campaignQueryKey(campaignId),
+      )
+      if (previous) {
+        const byId = new Map(previous.images.map((img) => [img.id, img]))
+        queryClient.setQueryData<Campaign>(campaignQueryKey(campaignId), {
+          ...previous,
+          images: imageIds.flatMap((id, sortOrder) => {
+            const img = byId.get(id)
+            return img ? [{ ...img, sortOrder }] : []
+          }),
+        })
+      }
+      return { previous }
+    },
+    onError: (_error, _imageIds, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(
+          campaignQueryKey(campaignId),
+          context.previous,
+        )
+      }
+    },
     onSuccess: (campaign) => {
       queryClient.setQueryData(campaignQueryKey(campaignId), campaign)
       queryClient.invalidateQueries({ queryKey: campaignsQueryKey })

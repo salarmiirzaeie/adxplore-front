@@ -63,3 +63,14 @@ export async function deleteCampaignImage(
   )
   return data
 }
+
+export async function reorderCampaignImages(
+  campaignId: string,
+  imageIds: string[],
+): Promise<Campaign> {
+  const { data } = await api.patch<Campaign>(
+    `/v1/campaigns/${campaignId}/images/order`,
+    { imageIds },
+  )
+  return data
+}

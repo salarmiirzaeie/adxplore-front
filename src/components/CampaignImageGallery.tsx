@@ -1,20 +1,26 @@
 import { useState } from 'react'
 import type { CampaignImage } from '../types/api'
+import { FullscreenButton, ImageLightbox } from './ImageLightbox'
 
 export function CampaignImageGallery({ images }: { images: CampaignImage[] }) {
   const sorted = [...images].sort((a, b) => a.sortOrder - b.sortOrder)
   const [active, setActive] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   if (sorted.length === 0) return null
 
   const current = sorted[active] ?? sorted[0]
+  const urls = sorted.map((img) => img.url)
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-surface-elevated">
-      <img
-        src={current.url}
-        alt=""
-        className="h-52 w-full object-cover sm:h-64"
-      />
+      <div className="relative">
+        <img
+          src={current.url}
+          alt=""
+          className="h-52 w-full object-cover sm:h-64"
+        />
+        <FullscreenButton onClick={() => setLightboxOpen(true)} />
+      </div>
       {sorted.length > 1 ? (
         <div className="flex gap-2 overflow-x-auto p-3">
           {sorted.map((img, index) => {
@@ -36,6 +42,13 @@ export function CampaignImageGallery({ images }: { images: CampaignImage[] }) {
           })}
         </div>
       ) : null}
+      <ImageLightbox
+        urls={urls}
+        index={active}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onIndexChange={setActive}
+      />
     </div>
   )
 }

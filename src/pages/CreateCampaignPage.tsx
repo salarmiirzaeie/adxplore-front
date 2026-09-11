@@ -1,11 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, Navigate } from 'react-router-dom'
 import { getApiErrorMessage } from '../api/client'
 import { CampaignFormFields } from '../components/CampaignFormFields'
 import { Button } from '../components/ui/Button'
 import { ConfirmModal } from '../components/ui/ConfirmModal'
+import { FullscreenButton, ImageLightbox } from '../components/ImageLightbox'
+import { SortableImageGrid } from '../components/SortableImageGrid'
 import { useMe } from '../hooks/useAuth'
 import { useCreateCampaign } from '../hooks/useCampaigns'
 import { normalizeCategories } from '../lib/brand-options'
@@ -18,22 +20,30 @@ import type { UserProfile } from '../types/api'
 
 const MAX_IMAGES = 8
 
+type StagedImage = { id: string; file: File; url: string }
+
+function stageFiles(files: File[]): StagedImage[] {
+  return files.map((file) => ({
+    id: crypto.randomUUID(),
+    file,
+    url: URL.createObjectURL(file),
+  }))
+}
+
 function CreateCampaignForm({ user }: { user: UserProfile }) {
   const create = useCreateCampaign()
   const inputRef = useRef<HTMLInputElement>(null)
-  const [files, setFiles] = useState<File[]>([])
+  const [images, setImages] = useState<StagedImage[]>([])
   const [confirmOpen, setConfirmOpen] = useState(false)
-
-  const previews = useMemo(
-    () => files.map((file) => ({ file, url: URL.createObjectURL(file) })),
-    [files],
-  )
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const imagesRef = useRef(images)
+  imagesRef.current = images
 
   useEffect(() => {
     return () => {
-      for (const preview of previews) URL.revokeObjectURL(preview.url)
+      for (const image of imagesRef.current) URL.revokeObjectURL(image.url)
     }
-  }, [previews])
+  }, [])
 
   const {
     register,
@@ -60,8 +70,17 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
 
   const onSubmit = handleSubmit(() => setConfirmOpen(true))
 
-  const remaining = MAX_IMAGES - files.length
+  const remaining = MAX_IMAGES - images.length
   const publish = watch('publish')
+
+  const removeImage = (id: string) => {
+    setImages((prev) => {
+      const next = prev.filter((image) => image.id !== id)
+      const removed = prev.find((image) => image.id === id)
+      if (removed) URL.revokeObjectURL(removed.url)
+      return next
+    })
+  }
 
   return (
     <div>
@@ -93,6 +112,7 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
                     <p className="text-sm font-semibold text-navy">تصاویر کمپین</p>
                     <p className="mt-1 text-xs text-muted">
                       اختیاری · تا {MAX_IMAGES} تصویر · JPEG، PNG یا WebP
+                      {images.length > 1 ? ' · برای تغییر ترتیب بکشید؛ در موبایل کمی نگه دارید' : ''}
                     </p>
                   </div>
                   {remaining > 0 ? (
@@ -106,7 +126,7 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
                   ) : null}
                 </div>
 
-                {previews.length === 0 ? (
+                {images.length === 0 ? (
                   <button
                     type="button"
                     onClick={() => inputRef.current?.click()}
@@ -115,25 +135,38 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
                     برای افزودن تصویر کلیک کنید
                   </button>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {previews.map(({ file, url }, index) => (
-                      <div
-                        key={`${file.name}-${index}`}
-                        className="group relative overflow-hidden rounded-xl border border-border bg-surface"
-                      >
-                        <img src={url} alt="" className="aspect-square w-full object-cover" />
+                  <SortableImageGrid
+                    items={images}
+                    getId={(image) => image.id}
+                    getUrl={(image) => image.url}
+                    onReorder={setImages}
+                    renderItem={(image, index) => (
+                      <>
+                        <img
+                          src={image.url}
+                          alt=""
+                          draggable={false}
+                          className="aspect-square w-full object-cover"
+                        />
+                        <FullscreenButton
+                          className="right-2 top-2"
+                          onClick={() => setLightboxIndex(index)}
+                        />
                         <button
                           type="button"
-                          onClick={() =>
-                            setFiles((prev) => prev.filter((_, i) => i !== index))
-                          }
+                          onClick={() => removeImage(image.id)}
                           className="absolute left-2 top-2 rounded-lg bg-ink/70 px-2 py-1 text-[10px] font-bold text-white"
                         >
                           حذف
                         </button>
-                      </div>
-                    ))}
-                  </div>
+                        {index === 0 ? (
+                          <span className="absolute bottom-2 right-2 rounded-lg bg-ink/70 px-2 py-1 text-[10px] font-bold text-white">
+                            کاور
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  />
                 )}
 
                 <input
@@ -146,7 +179,11 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
                     const next = Array.from(e.target.files ?? [])
                     e.target.value = ''
                     if (!next.length) return
-                    setFiles((prev) => [...prev, ...next].slice(0, MAX_IMAGES))
+                    setImages((prev) => {
+                      const room = MAX_IMAGES - prev.length
+                      if (room <= 0) return prev
+                      return [...prev, ...stageFiles(next.slice(0, room))]
+                    })
                   }}
                 />
               </div>
@@ -184,6 +221,14 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
         </form>
       </section>
 
+      <ImageLightbox
+        urls={images.map((image) => image.url)}
+        index={lightboxIndex ?? 0}
+        open={lightboxIndex != null}
+        onClose={() => setLightboxIndex(null)}
+        onIndexChange={setLightboxIndex}
+      />
+
       <ConfirmModal
         open={confirmOpen}
         title="ذخیره کمپین؟"
@@ -200,7 +245,10 @@ function CreateCampaignForm({ user }: { user: UserProfile }) {
             : null
         }
         onConfirm={() =>
-          create.mutate({ body: toCreateCampaignBody(getValues()), files })
+          create.mutate({
+            body: toCreateCampaignBody(getValues()),
+            files: images.map((image) => image.file),
+          })
         }
         onClose={() => {
           if (!create.isPending) setConfirmOpen(false)

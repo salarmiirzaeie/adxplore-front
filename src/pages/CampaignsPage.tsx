@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { ImageLightbox, FullscreenButton } from "../components/ImageLightbox";
 import { Avatar } from "../components/ui/Avatar";
 import { IranCitySelect } from "../components/IranCitySelect";
 import { useMe } from "../hooks/useAuth";
@@ -42,9 +43,10 @@ function PencilIcon({ className }: { className?: string }) {
 }
 
 function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const cover = campaign.images?.[0]?.url;
   return (
-    <article className="card-elevated overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md">
+    <article className="card-elevated relative overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md">
       <Link to={`/app/campaigns/${campaign.id}`} className="block">
         {cover ? <img src={cover} alt="" className="h-36 w-full object-cover" /> : null}
         <div className="px-5 pt-5">
@@ -69,6 +71,12 @@ function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
           </div>
         </div>
       </Link>
+      {cover ? (
+        <>
+          <FullscreenButton onClick={() => setLightboxOpen(true)} />
+          <ImageLightbox urls={[cover]} open={lightboxOpen} onClose={() => setLightboxOpen(false)} />
+        </>
+      ) : null}
       <div className="mt-4 flex justify-end border-t border-border px-4 py-2.5">
         <Link
           to={`/app/campaigns/${campaign.id}/edit`}
@@ -83,40 +91,46 @@ function BrandCampaignCard({ campaign }: { campaign: Campaign }) {
 }
 
 function MarketplaceCampaignCard({ campaign }: { campaign: Campaign }) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const cover = campaign.images?.[0]?.url;
   const budget = formatBudgetRange(campaign.budgetMin, campaign.budgetMax);
 
   return (
-    <Link
-      to={`/app/campaigns/${campaign.id}`}
-      className="card-elevated block overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md"
-    >
-      {cover ? <img src={cover} alt="" className="h-36 w-full object-cover" /> : null}
-      <div className="px-5 py-5">
-        <div className="mb-3 flex items-start gap-3">
-          <Avatar src={campaign.brand?.photoUrl} name={campaign.brand?.name} size="sm" />
-          <div className="min-w-0 flex-1">
-            <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
-            <p className="mt-0.5 text-xs font-semibold text-muted">{campaign.brand?.name ?? "صاحب کسب و کار"}</p>
+    <div className="card-elevated relative overflow-hidden rounded-2xl transition hover:border-purple/30 hover:shadow-md">
+      <Link to={`/app/campaigns/${campaign.id}`} className="block">
+        {cover ? <img src={cover} alt="" className="h-36 w-full object-cover" /> : null}
+        <div className="px-5 py-5">
+          <div className="mb-3 flex items-start gap-3">
+            <Avatar src={campaign.brand?.photoUrl} name={campaign.brand?.name} size="sm" />
+            <div className="min-w-0 flex-1">
+              <h2 className="text-base font-extrabold text-navy">{campaign.title}</h2>
+              <p className="mt-0.5 text-xs font-semibold text-muted">{campaign.brand?.name ?? "صاحب کسب و کار"}</p>
+            </div>
+          </div>
+          <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
+            <span className="rounded-lg bg-surface px-2 py-1">
+              {brandCategoriesLabel(campaign.categories, campaign.category)}
+            </span>
+            <span className="rounded-lg bg-surface px-2 py-1">{formatLocation(campaign.city, campaign.province)}</span>
+            <span className="rounded-lg bg-surface px-2 py-1">
+              {deliverablesLabel(campaign.deliverables, campaign.deliverable)}
+            </span>
+            {budget ? (
+              <span className="rounded-lg bg-surface px-2 py-1" dir="ltr">
+                {budget}
+              </span>
+            ) : null}
           </div>
         </div>
-        <p className="line-clamp-2 text-sm leading-6 text-muted">{campaign.brief}</p>
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-navy-muted">
-          <span className="rounded-lg bg-surface px-2 py-1">
-            {brandCategoriesLabel(campaign.categories, campaign.category)}
-          </span>
-          <span className="rounded-lg bg-surface px-2 py-1">{formatLocation(campaign.city, campaign.province)}</span>
-          <span className="rounded-lg bg-surface px-2 py-1">
-            {deliverablesLabel(campaign.deliverables, campaign.deliverable)}
-          </span>
-          {budget ? (
-            <span className="rounded-lg bg-surface px-2 py-1" dir="ltr">
-              {budget}
-            </span>
-          ) : null}
-        </div>
-      </div>
-    </Link>
+      </Link>
+      {cover ? (
+        <>
+          <FullscreenButton onClick={() => setLightboxOpen(true)} />
+          <ImageLightbox urls={[cover]} open={lightboxOpen} onClose={() => setLightboxOpen(false)} />
+        </>
+      ) : null}
+    </div>
   );
 }
 
