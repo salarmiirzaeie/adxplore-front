@@ -15,6 +15,7 @@ import {
   invitationStatusLabel,
   isCampaignAcceptingInvites,
 } from '../lib/brand-options'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 import { formatLocation } from '../lib/iran-locations'
 import type { Invitation, InvitationStatus } from '../types/api'
 
@@ -67,7 +68,11 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-elevated px-4 py-4 sm:px-5">
       <Link
-        to={`/app/influencers/${influencer.id}`}
+        to={
+          isBrandInfluencerDiscoveryEnabled()
+            ? `/app/influencers/${influencer.id}`
+            : `/app/profiles/${influencer.id}`
+        }
         className="flex min-w-0 flex-1 items-center gap-3"
       >
         <Avatar src={influencer.photoUrl} name={influencer.name} size="md" />
@@ -103,6 +108,7 @@ export function CampaignInvitationsPage() {
   const { id } = useParams<{ id: string }>()
   const { data: user } = useMe()
   const [inviteOpen, setInviteOpen] = useState(false)
+  const canInviteInfluencers = isBrandInfluencerDiscoveryEnabled()
   const { data: campaign, isLoading: campaignLoading, isError: campaignError } =
     useCampaign(id, Boolean(id) && user?.role === 'BRAND')
   const { data: invitations, isLoading, isError } = useInvitations(
@@ -155,7 +161,7 @@ export function CampaignInvitationsPage() {
             </h1>
             <p className="mt-2 truncate text-sm text-muted">{campaign.title}</p>
           </div>
-          {isCampaignAcceptingInvites(campaign.status) ? (
+          {canInviteInfluencers && isCampaignAcceptingInvites(campaign.status) ? (
             <button
               type="button"
               onClick={() => setInviteOpen(true)}
@@ -177,9 +183,11 @@ export function CampaignInvitationsPage() {
         <section className="card-elevated rounded-2xl px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">هنوز دعوتی نیست</h2>
           <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted">
-            بلاگرهای مناسب را دعوت کنید تا پیشنهاد قیمت بفرستند.
+            {canInviteInfluencers
+              ? 'بلاگرهای مناسب را دعوت کنید تا پیشنهاد قیمت بفرستند.'
+              : 'دعوت بلاگر فعلاً غیرفعال است. بلاگرها خودشان از کمپین‌های باز پیشنهاد می‌فرستند.'}
           </p>
-          {isCampaignAcceptingInvites(campaign.status) ? (
+          {canInviteInfluencers && isCampaignAcceptingInvites(campaign.status) ? (
             <button
               type="button"
               onClick={() => setInviteOpen(true)}
@@ -199,12 +207,14 @@ export function CampaignInvitationsPage() {
         </div>
       ) : null}
 
-      <InviteInfluencersModal
-        campaignId={campaign.id}
-        campaignTitle={campaign.title}
-        open={inviteOpen}
-        onClose={() => setInviteOpen(false)}
-      />
+      {canInviteInfluencers ? (
+        <InviteInfluencersModal
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+          open={inviteOpen}
+          onClose={() => setInviteOpen(false)}
+        />
+      ) : null}
     </div>
   )
 }

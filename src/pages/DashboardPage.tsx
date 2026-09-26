@@ -7,6 +7,7 @@ import { useInvitations } from '../hooks/useInvitations'
 import { useOffers } from '../hooks/useOffers'
 import { formatPhoneDisplay } from '../lib/phone'
 import { isCampaignAcceptingInvites } from '../lib/brand-options'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 import { ApprovalWaitBanner } from '../components/ApprovalWaitBanner'
 
 type PipelineItem = {
@@ -65,7 +66,9 @@ function BrandDashboard() {
         label: 'کمپین باز',
         count: openCampaigns,
         to: '/app/campaigns',
-        hint: 'کمپین‌های فعال برای دعوت و پیشنهاد',
+        hint: isBrandInfluencerDiscoveryEnabled()
+          ? 'کمپین‌های فعال برای دعوت و پیشنهاد'
+          : 'کمپین‌های فعال برای پیشنهاد بلاگرها',
       },
       {
         label: 'پیشنهاد در انتظار',
@@ -99,7 +102,9 @@ function BrandDashboard() {
       <section className="card-elevated rounded-2xl px-5 py-6 sm:px-7">
         <h2 className="text-lg font-extrabold text-navy">اقدام سریع</h2>
         <p className="mt-1 text-sm leading-7 text-muted">
-          کمپین بسازید، بلاگر پیدا کنید و در پیام‌ها پیشنهادها را پیگیری کنید.
+          {isBrandInfluencerDiscoveryEnabled()
+            ? 'کمپین بسازید، بلاگر پیدا کنید و در پیام‌ها پیشنهادها را پیگیری کنید.'
+            : 'کمپین بسازید و در پیام‌ها پیشنهادهای بلاگرها را پیگیری کنید.'}
         </p>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
@@ -108,12 +113,14 @@ function BrandDashboard() {
           >
             ساخت کمپین
           </Link>
-          <Link
-            to="/app/influencers"
-            className="inline-flex justify-center rounded-xl border border-border px-5 py-3 text-sm font-semibold text-navy transition hover:bg-surface"
-          >
-            کشف بلاگر
-          </Link>
+          {isBrandInfluencerDiscoveryEnabled() ? (
+            <Link
+              to="/app/influencers"
+              className="inline-flex justify-center rounded-xl border border-border px-5 py-3 text-sm font-semibold text-navy transition hover:bg-surface"
+            >
+              کشف بلاگر
+            </Link>
+          ) : null}
           <Link
             to="/app/messages"
             className="inline-flex justify-center rounded-xl border border-border px-5 py-3 text-sm font-semibold text-navy transition hover:bg-surface"

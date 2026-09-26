@@ -6,6 +6,7 @@ import { useCampaign } from '../hooks/useCampaigns'
 import { useDeals } from '../hooks/useDeals'
 import { useOffers } from '../hooks/useOffers'
 import { offerPipelineLabel } from '../lib/brand-options'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 import type { Deal, DealStatus, Offer, OfferStatus } from '../types/api'
 
 function pipelineStatusClass(
@@ -131,14 +132,18 @@ export function CampaignOffersPage() {
         <section className="card-elevated rounded-2xl px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">هنوز پیشنهادی نیست</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
-            بعد از دعوت بلاگرها، پیشنهادهای آن‌ها اینجا دیده می‌شود.
+            {isBrandInfluencerDiscoveryEnabled()
+              ? 'بعد از دعوت بلاگرها، پیشنهادهای آن‌ها اینجا دیده می‌شود.'
+              : 'وقتی بلاگرها برای این کمپین پیشنهاد بفرستند، اینجا دیده می‌شود.'}
           </p>
-          <Link
-            to={`/app/campaigns/${campaign.id}/invitations`}
-            className="btn-primary mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold"
-          >
-            مشاهده دعوت‌ها
-          </Link>
+          {isBrandInfluencerDiscoveryEnabled() ? (
+            <Link
+              to={`/app/campaigns/${campaign.id}/invitations`}
+              className="btn-primary mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold"
+            >
+              مشاهده دعوت‌ها
+            </Link>
+          ) : null}
         </section>
       ) : null}
 

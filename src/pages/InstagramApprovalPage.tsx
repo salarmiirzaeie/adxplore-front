@@ -6,7 +6,8 @@ import { confirmInstagramDmSent, getInstagramApproval } from "../api/users";
 import { AuthLayout } from "../components/AuthLayout";
 import { Button } from "../components/ui/Button";
 import { meQueryKey, useLogout, useMe } from "../hooks/useAuth";
-import { getAccessToken, postAuthPath } from "../lib/auth-storage";
+import { getAccessToken, isProfileComplete, postAuthPath } from "../lib/auth-storage";
+import { isInstagramVerificationEnabled } from "../lib/feature-flags";
 import { copyText } from "../lib/clipboard";
 import { openInstagram } from "../lib/open-instagram";
 
@@ -78,6 +79,14 @@ export function InstagramApprovalPage() {
   }
 
   if (!userLoading && user) {
+    if (!isInstagramVerificationEnabled()) {
+      return (
+        <Navigate
+          to={isProfileComplete(user) ? "/app" : "/onboarding"}
+          replace
+        />
+      );
+    }
     if (postAuthPath(user) === "/onboarding") {
       return <Navigate to="/onboarding" replace />;
     }

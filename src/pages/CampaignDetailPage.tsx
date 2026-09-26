@@ -21,6 +21,7 @@ import {
 } from "../lib/brand-options";
 import { formatLocation } from "../lib/iran-locations";
 import { canSendOffers } from "../lib/auth-storage";
+import { isBrandInfluencerDiscoveryEnabled } from "../lib/feature-flags";
 
 function DetailRow({ label, value, dir }: { label: string; value: string; dir?: "ltr" }) {
   return (
@@ -90,15 +91,20 @@ function BrandCampaignDetail({ id }: { id: string }) {
   const update = useUpdateCampaign(id);
   const { data: invitations } = useInvitations(id, true);
   const { data: offers } = useOffers(id, true);
+  const canInviteInfluencers = isBrandInfluencerDiscoveryEnabled();
 
   useEffect(() => {
-    if (searchParams.get("invite") === "1" && isCampaignAcceptingInvites(campaign?.status)) {
+    if (
+      canInviteInfluencers &&
+      searchParams.get("invite") === "1" &&
+      isCampaignAcceptingInvites(campaign?.status)
+    ) {
       setInviteOpen(true);
       const next = new URLSearchParams(searchParams);
       next.delete("invite");
       setSearchParams(next, { replace: true });
     }
-  }, [campaign?.status, searchParams, setSearchParams]);
+  }, [canInviteInfluencers, campaign?.status, searchParams, setSearchParams]);
 
   if (isLoading) {
     return (
@@ -194,12 +200,14 @@ function BrandCampaignDetail({ id }: { id: string }) {
       <div className="mb-8 flex flex-col gap-3 sm:flex-row">
         {campaign.status === "DRAFT" ? (
           <Button disabled={update.isPending} onClick={() => setConfirm("open")}>
-            فعال‌سازی و دعوت
+            {canInviteInfluencers ? "فعال‌سازی و دعوت" : "فعال‌سازی"}
           </Button>
         ) : null}
         {isCampaignAcceptingInvites(campaign.status) ? (
           <>
-            <Button onClick={() => setInviteOpen(true)}>دعوت بلاگر</Button>
+            {canInviteInfluencers ? (
+              <Button onClick={() => setInviteOpen(true)}>دعوت بلاگر</Button>
+            ) : null}
             <Button variant="outline" disabled={update.isPending} onClick={() => setConfirm("close")}>
               بستن کمپین
             </Button>
@@ -212,16 +220,22 @@ function BrandCampaignDetail({ id }: { id: string }) {
         ) : null}
       </div>
 
-      <InviteInfluencersModal
-        campaignId={campaign.id}
-        campaignTitle={campaign.title}
-        open={inviteOpen}
-        onClose={() => setInviteOpen(false)}
-      />
+      {canInviteInfluencers ? (
+        <InviteInfluencersModal
+          campaignId={campaign.id}
+          campaignTitle={campaign.title}
+          open={inviteOpen}
+          onClose={() => setInviteOpen(false)}
+        />
+      ) : null}
       <ConfirmModal
         open={confirm === "open"}
         title="فعال‌سازی کمپین؟"
-        description="کمپین برای بلاگرها قابل مشاهده می‌شود و می‌توانید دعوت بفرستید."
+        description={
+          canInviteInfluencers
+            ? "کمپین برای بلاگرها قابل مشاهده می‌شود و می‌توانید دعوت بفرستید."
+            : "کمپین برای بلاگرها قابل مشاهده می‌شود."
+        }
         confirmLabel="فعال کن"
         loading={update.isPending}
         error={update.isError ? getApiErrorMessage(update.error, "به‌روزرسانی کمپین ناموفق بود") : null}
@@ -231,7 +245,7 @@ function BrandCampaignDetail({ id }: { id: string }) {
             {
               onSuccess: () => {
                 setConfirm(null);
-                setInviteOpen(true);
+                if (canInviteInfluencers) setInviteOpen(true);
               },
             },
           )

@@ -8,6 +8,7 @@ import { useMe } from '../hooks/useAuth'
 import { useUnreadCount } from '../hooks/useNotifications'
 import { useTheme } from '../hooks/useTheme'
 import { useMyWallet } from '../hooks/useWallets'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 import { formatPhoneDisplay } from '../lib/phone'
 
 interface AppShellProps {
@@ -179,7 +180,11 @@ function useChatThreadRoute() {
 
 function useRoleNav() {
   const { data: user } = useMe()
-  return user?.role === 'INFLUENCER' ? influencerNav : brandNav
+  if (user?.role === 'INFLUENCER') return influencerNav
+  if (!isBrandInfluencerDiscoveryEnabled()) {
+    return brandNav.filter((item) => item.to !== '/app/influencers')
+  }
+  return brandNav
 }
 
 const SIDEBAR_COLLAPSED_KEY = 'adxplore-sidebar-collapsed'

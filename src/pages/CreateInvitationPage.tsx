@@ -14,6 +14,7 @@ import { useCampaigns } from '../hooks/useCampaigns'
 import { useInfluencer } from '../hooks/useInfluencers'
 import { useCreateInvitation } from '../hooks/useInvitations'
 import { deliverablesLabel, isCampaignAcceptingInvites } from '../lib/brand-options'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 
 const schema = z.object({
   campaignId: z.string().min(1, 'کمپین را انتخاب کنید'),
@@ -27,9 +28,10 @@ export function CreateInvitationPage() {
   const influencerId = params.get('influencerId') ?? ''
   const preselectedCampaignId = params.get('campaignId') ?? ''
   const { data: user } = useMe()
+  const discoveryEnabled = isBrandInfluencerDiscoveryEnabled()
   const { data: influencer, isLoading: loadingInfluencer } = useInfluencer(
     influencerId || undefined,
-    user?.role === 'BRAND' && Boolean(influencerId),
+    user?.role === 'BRAND' && Boolean(influencerId) && discoveryEnabled,
   )
   const { data: campaigns, isLoading: loadingCampaigns } = useCampaigns(
     user?.role === 'BRAND',
@@ -57,6 +59,9 @@ export function CreateInvitationPage() {
   })
 
   if (!user) return null
+  if (!discoveryEnabled) {
+    return <Navigate to="/app" replace />
+  }
   if (user.role !== 'BRAND') {
     return <Navigate to="/app/invitations" replace />
   }

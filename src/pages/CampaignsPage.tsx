@@ -12,6 +12,7 @@ import {
   deliverablesLabel,
   formatBudgetRange,
 } from "../lib/brand-options";
+import { isBrandInfluencerDiscoveryEnabled } from "../lib/feature-flags";
 import { formatLocation } from "../lib/iran-locations";
 import { ApprovalWaitBanner } from "../components/ApprovalWaitBanner";
 import type { BrandCategory, BrowseCampaignsParams, Campaign, CampaignStatus } from "../types/api";
@@ -143,7 +144,11 @@ function BrandCampaigns() {
         <div>
           <p className="mb-1 text-sm font-medium text-purple">کمپین‌های من</p>
           <h1 className="text-2xl font-extrabold text-navy sm:text-3xl">مدیریت کمپین‌ها</h1>
-          <p className="mt-2 text-sm text-muted">کمپین بسازید، بلاگر دعوت کنید و پیشنهادها را ببینید.</p>
+          <p className="mt-2 text-sm text-muted">
+            {isBrandInfluencerDiscoveryEnabled()
+              ? "کمپین بسازید، بلاگر دعوت کنید و پیشنهادها را ببینید."
+              : "کمپین بسازید و پیشنهادهای بلاگرها را ببینید."}
+          </p>
         </div>
         <Link
           to="/app/campaigns/new"
@@ -169,7 +174,9 @@ function BrandCampaigns() {
         <section className="card-elevated rounded-2xl px-6 py-14 text-center">
           <h2 className="text-lg font-extrabold text-navy">هنوز کمپینی ندارید</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
-            اولین کمپین را بسازید و بلاگرهای مناسب را دعوت کنید.
+            {isBrandInfluencerDiscoveryEnabled()
+              ? "اولین کمپین را بسازید و بلاگرهای مناسب را دعوت کنید."
+              : "اولین کمپین را بسازید تا بلاگرها آن را ببینند و پیشنهاد بفرستند."}
           </p>
           <Link to="/app/campaigns/new" className="btn-primary mt-6 inline-flex rounded-xl px-5 py-3 text-sm font-bold">
             ساخت کمپین

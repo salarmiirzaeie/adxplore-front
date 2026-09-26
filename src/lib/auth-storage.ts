@@ -1,4 +1,8 @@
 import type { UserRole } from '../types/api'
+import {
+  isInfluencerAdminApprovalRequired,
+  isInstagramVerificationEnabled,
+} from './feature-flags'
 
 const TOKEN_KEY = 'adxplore_access_token'
 const PHONE_KEY = 'adxplore_login_phone'
@@ -125,11 +129,20 @@ export function postAuthPath(user: {
   followerRange?: string | null
 }): string {
   if (user.nextScreen === 'ONBOARDING') return '/onboarding'
-  if (user.nextScreen === 'INSTAGRAM_APPROVAL') return '/instagram-approval'
+  if (
+    isInstagramVerificationEnabled() &&
+    user.nextScreen === 'INSTAGRAM_APPROVAL'
+  ) {
+    return '/instagram-approval'
+  }
   if (user.nextScreen === 'PANEL') return '/app'
 
   if (!isProfileComplete(user)) return '/onboarding'
-  if (user.role === 'INFLUENCER' && user.canAccessPanel === false) {
+  if (
+    isInstagramVerificationEnabled() &&
+    user.role === 'INFLUENCER' &&
+    user.canAccessPanel === false
+  ) {
     return '/instagram-approval'
   }
   return '/app'
@@ -142,5 +155,10 @@ export function canSendOffers(user: {
 }): boolean {
   if (user.role !== 'INFLUENCER') return true
   if (user.canSendOffers === true) return true
-  return user.approvalStatus === 'APPROVED'
+  if (user.approvalStatus === 'APPROVED') return true
+  if (!isInfluencerAdminApprovalRequired()) {
+    if (!isInstagramVerificationEnabled()) return true
+    if (user.canAccessPanel) return true
+  }
+  return false
 }

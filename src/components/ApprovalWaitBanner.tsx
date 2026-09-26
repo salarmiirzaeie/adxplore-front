@@ -1,10 +1,15 @@
 import { Link } from 'react-router-dom'
 import { useMe } from '../hooks/useAuth'
 import { canSendOffers } from '../lib/auth-storage'
+import {
+  isInfluencerAdminApprovalRequired,
+  isInstagramVerificationEnabled,
+} from '../lib/feature-flags'
 
 export function ApprovalWaitBanner() {
   const { data: user } = useMe()
   if (!user || user.role !== 'INFLUENCER') return null
+  if (!isInfluencerAdminApprovalRequired()) return null
   if (canSendOffers(user)) return null
 
   return (
@@ -13,12 +18,14 @@ export function ApprovalWaitBanner() {
       <p className="mt-1">
         کمپین‌ها را می‌بینید، اما تا تأیید حساب نمی‌توانید پیشنهاد بفرستید.
       </p>
-      <Link
-        to="/instagram-approval"
-        className="mt-1 inline-block font-bold text-amber-900 underline decoration-amber-400 underline-offset-4"
-      >
-        مشاهده کد دایرکت
-      </Link>
+      {isInstagramVerificationEnabled() ? (
+        <Link
+          to="/instagram-approval"
+          className="mt-1 inline-block font-bold text-amber-900 underline decoration-amber-400 underline-offset-4"
+        >
+          مشاهده کد دایرکت
+        </Link>
+      ) : null}
     </div>
   )
 }

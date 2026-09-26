@@ -8,6 +8,7 @@ import {
 } from '../lib/brand-options'
 import { formatLocation } from '../lib/iran-locations'
 import { AudienceProofGallery } from '../components/AudienceProofGallery'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 
 function StatCard({ label, value, dir }: { label: string; value: string; dir?: 'ltr' }) {
   return (
@@ -23,13 +24,14 @@ function StatCard({ label, value, dir }: { label: string; value: string; dir?: '
 export function InfluencerDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data: user } = useMe()
+  const discoveryEnabled = isBrandInfluencerDiscoveryEnabled()
   const { data: influencer, isLoading, isError } = useInfluencer(
     id,
-    user?.role === 'BRAND',
+    user?.role === 'BRAND' && discoveryEnabled,
   )
 
   if (!user) return null
-  if (user.role !== 'BRAND') {
+  if (user.role !== 'BRAND' || !discoveryEnabled) {
     return <Navigate to="/app" replace />
   }
 

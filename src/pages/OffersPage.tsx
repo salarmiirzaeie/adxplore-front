@@ -8,6 +8,7 @@ import {
   deliverablesLabel,
   offerPipelineLabel,
 } from '../lib/brand-options'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 import { formatLocation } from '../lib/iran-locations'
 import type { Deal, DealStatus, Offer, OfferStatus } from '../types/api'
 
@@ -175,7 +176,9 @@ export function OffersPage() {
           <h2 className="text-lg font-extrabold text-navy">هنوز پیشنهادی نیست</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-muted">
             {isBrand
-              ? 'پس از دعوت بلاگرها، پیشنهادهای آن‌ها اینجا دیده می‌شود.'
+              ? isBrandInfluencerDiscoveryEnabled()
+                ? 'پس از دعوت بلاگرها، پیشنهادهای آن‌ها اینجا دیده می‌شود.'
+                : 'وقتی بلاگرها برای کمپین‌های باز پیشنهاد بفرستند، اینجا دیده می‌شود.'
               : 'از دعوت‌های دریافتی، برای کمپین موردنظر پیشنهاد قیمت بفرستید.'}
           </p>
           <Link

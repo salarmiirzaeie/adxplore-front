@@ -7,6 +7,7 @@ import {
   businessSizeLabel,
   followerRangeLabel,
 } from '../lib/brand-options'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 import { formatLocation } from '../lib/iran-locations'
 import type { PublicProfile } from '../types/api'
 import { AudienceProofGallery } from '../components/AudienceProofGallery'
@@ -111,7 +112,10 @@ export function PublicProfilePage() {
   }
 
   const isBrand = profile.role === 'BRAND'
-  const canInvite = me.role === 'BRAND' && profile.role === 'INFLUENCER'
+  const canInvite =
+    isBrandInfluencerDiscoveryEnabled() &&
+    me.role === 'BRAND' &&
+    profile.role === 'INFLUENCER'
 
   return (
     <div>

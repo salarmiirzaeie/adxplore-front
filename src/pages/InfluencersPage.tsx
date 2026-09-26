@@ -10,6 +10,7 @@ import {
   brandCategoriesLabel,
   followerRangeLabel,
 } from '../lib/brand-options'
+import { isBrandInfluencerDiscoveryEnabled } from '../lib/feature-flags'
 import { formatLocation } from '../lib/iran-locations'
 import type {
   BrandCategory,
@@ -80,13 +81,14 @@ export function InfluencersPage() {
   }, [category, city, province, followerRange])
 
   const isBrand = user?.role === 'BRAND'
+  const discoveryEnabled = isBrandInfluencerDiscoveryEnabled()
   const { data: influencers, isLoading, isError, isFetching } = useInfluencers(
     params,
-    isBrand,
+    isBrand && discoveryEnabled,
   )
 
   if (!user) return null
-  if (!isBrand) {
+  if (!isBrand || !discoveryEnabled) {
     return <Navigate to="/app" replace />
   }
 
