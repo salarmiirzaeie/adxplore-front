@@ -151,6 +151,7 @@ export function postAuthPath(user: {
 export function canSendOffers(user: {
   role: UserRole
   canSendOffers?: boolean
+  canAccessPanel?: boolean
   approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED' | null
 }): boolean {
   if (user.role !== 'INFLUENCER') return true
